@@ -1,0 +1,200 @@
+#MenuTextStyling {
+    -fx-background-color: -fx-normal-background-color;
+    -fx-fill: -fx-normal-text-color;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-size: 22;
+    -fx-font-weight: bold;
+    -fx-text-align: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
+}
+
+#SpinnerStyling {
+    -fx-background-color: -fx-normal-background-color;
+    -fx-border-color: -fx-normal-border-color;
+    -fx-text-fill: -fx-normal-text-color;
+    -fx-border-radius: 5;
+    -fx-border-width: 2 2 2 2;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-size: 15;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
+    -fx-opacity: 1;
+}
+
+#ProgressBarStyling {
+    -fx-control-inner-background: rgb(18, 23, 29);
+    -fx-text-box-border: -fx-normal-text-color;
+    -fx-accent: -fx-normal-text-color;
+    -fx-padding: 8 0 7 15;
+    -fx-shadow-highlight-color: transparent;
+    -fx-background-radius: 5;
+}
+
+.spinner .increment-arrow-button, .spinner .increment-arrow, .spinner .decrement-arrow-button, .spinner .decrement-arrow {
+    -fx-background-color: -fx-normal-background-color;
+    -fx-border-color: -fx-normal-border-color;
+    -fx-text-fill: -fx-normal-text-color;
+    -fx-border-radius: 5;
+    -fx-border-width: 2 2 2 2;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
+    -fx-opacity: 100;
+}
+
+*.focus {
+    -fx-outline: none;
+}
+
+.text-area {
+    -fx-background-color: -fx-normal-background-color;
+    -fx-border-color: -fx-normal-border-color;
+    -fx-text-fill: -fx-normal-text-color;
+    -fx-border-radius: 5;
+    -fx-border-width: 2 2 2 2;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-size: 12;
+}
+
+.text-area .scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.text-area .scroll-pane .viewport{
+    -fx-background-color: transparent;
+}
+
+.text-area .scroll-pane .content{
+    -fx-background-color: transparent;
+}
+
+#TextFieldStyling {
+    -fx-background-color: -fx-normal-background-color;
+    -fx-border-color: -fx-normal-border-color;
+    -fx-text-fill: -fx-normal-text-color;
+    -fx-border-radius: 5;
+    -fx-border-width: 2 2 2 2;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-size: 15;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
+}
+
+#IconButton {
+    -fx-background-radius: 0px 0px 0px 5px;
+    -fx-border-radius: 0px 0px 0px 5px;
+    -fx-padding: 2 0 0 0;
+    -fx-background-color: -fx-normal-background-color;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10.0, 0.0, 1.0, 1.0);
+}
+
+#IconButtonSettings {
+    -fx-background-radius: 0px 0px 0px 5px;
+    -fx-border-radius: 0px 0px 0px 5px;
+    -fx-background-color: -fx-normal-background-color;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10.0, 0.0, 1.0, 1.0);
+}
+
+#VolProgressTxt {
+    -fx-background-color: transparent;
+    -fx-padding: 3 0 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10.0, 0.0, 1.0, 1.0);
+    -fx-font-weight: bold;
+    -fx-font-family: 'Segoe UI';
+    -fx-text-fill: -fx-normal-text-color;
+    -fx-font-size: 16;
+}
+
+#VolProgressButton {
+    -fx-text-fill: -fx-normal-text-color;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-weight: bold;
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10.0, 0.0, 1.0, 1.0);
+}
+
+#VolProgressButton:hover {
+    -fx-text-fill: -fx-hover-text-color;
+}
+
+#FunctionButton {
+    -fx-background-color: -fx-normal-background-color;
+    -fx-font-weight: bold;
+    -fx-font-size: 15;
+    -fx-font-family: 'Segoe UI';
+    -fx-border-color: -fx-normal-border-color;
+    -fx-text-fill: -fx-normal-text-color;
+    -fx-border-radius: 5;
+    -fx-border-width: 2 2 2 2;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
+}
+
+#FunctionButton:hover {
+    -fx-background-color: -fx-hover-background-color;
+    -fx-text-fill: -fx-hover-text-color;
+}
+
+#FunctionButton:selected {
+    -fx-background-color: -fx-hover-background-color;
+    -fx-text-fill: -fx-hover-text-color;
+}
+
+#BookTypeButton {
+    -fx-background-color: -fx-normal-background-color;
+    -fx-border-color: -fx-normal-border-color;
+    -fx-text-fill: -fx-normal-text-color;
+    -fx-border-radius: 5;
+    -fx-border-width: 2 2 2 2;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
+}
+
+#BookTypeButton:hover {
+    -fx-background-color: -fx-hover-background-color;
+    -fx-text-fill: -fx-hover-text-color;
+}
+
+#BookTypeButton:disabled {
+    -fx-opacity: 1;
+    -fx-background-color: -fx-hover-background-color;
+    -fx-text-fill: -fx-hover-text-color;
+}
+
+#ListDropDown {
+    -fx-background-color: -fx-normal-background-color;
+    -fx-border-color: -fx-normal-border-color;
+    -fx-text-fill: -fx-normal-text-color;
+    -fx-border-radius: 5;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
+}
+
+#ListDropDown:hover {
+    -fx-background-color: -fx-hover-background-color;
+    -fx-text-fill: -fx-hover-text-color;
+    -fx-border-color: -fx-hover-border-color;
+}
+
+.list-view, .list-cell {
+    -fx-background-color: -fx-normal-background-color;
+    -fx-border-color: -fx-normal-text-color;
+    -fx-text-fill: -fx-normal-text-color;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-font-size: 15;
+}
+combo-box .arrow, .arrow-button {
+    -fx-padding: 0 10 0 10;
+    -fx-background-color: -fx-normal-background-color;
+    -fx-border-color: -fx-normal-text-color;
+    -fx-text-fill: -fx-normal-text-color;
+    -fx-font-size: 18;
+}
+
+.list-view:hover, .list-cell:hover, .spinner .increment-arrow-button:hover, .spinner .decrement-arrow-button:hover{
+    -fx-background-color: -fx-hover-background-color;
+    -fx-text-fill: -fx-hover-text-color;
+}
