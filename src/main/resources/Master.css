@@ -1,13 +1,115 @@
+/*CSS Styling for the Top Menu Bar Component*/
+#MenuBar {
+    -fx-alignment: center;
+    -fx-background-color: -fx-menu-bg-color;
+    -fx-spacing: 30;
+    -fx-border-color: -fx-menu-bottom-border-color;
+    -fx-border-width: 0 0 2 0;
+}
+
 #MenuTextStyling {
-    -fx-background-color: -fx-normal-background-color;
-    -fx-fill: -fx-normal-text-color;
+    -fx-fill: -fx-menu-text-color;
     -fx-font-family: 'Segoe UI';
     -fx-font-size: 22;
     -fx-font-weight: bold;
-    -fx-text-align: center;
+    -fx-text-alignment: center;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
 }
 
+#MenuLabelStyling {
+    -fx-text-fill: -fx-menu-text-color;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-size: 22;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
+}
+
+#MenuButton {
+    -fx-background-color: -fx-normal-menu-button-bg-color;
+    -fx-background-radius: 7;
+    -fx-background-insets: 0;
+    -fx-font-weight: bold;
+    -fx-font-size: 15;
+    -fx-font-family: 'Segoe UI';
+    -fx-border-color: -fx-normal-menu-button-border-color;
+    -fx-text-fill: -fx-normal-menu-button-text-color;
+    -fx-border-radius: 5;
+    -fx-border-width: 2;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
+}
+
+#MenuButton:hover {
+    -fx-background-color: -fx-hover-menu-button-bg-color;
+    -fx-border-color: -fx-hover-menu-button-border-color;
+    -fx-text-fill: -fx-normal-menu-button-text-color;
+}
+
+#MenuButton:selected {
+    -fx-background-color: -fx-hover-menu-button-bg-color;
+    -fx-border-color: -fx-hover-menu-button-border-color;
+    -fx-text-fill: -fx-normal-menu-button-text-color;
+}
+
+#UserNameAndSettingsButtonLayout {
+    -fx-alignment: center;
+    -fx-spacing: 5;
+}
+
+#MenuTextField {
+    -fx-background-color: -fx-normal-menu-button-bg-color;
+    -fx-background-radius: 7;
+    -fx-background-insets: 0;
+    -fx-border-color: -fx-menu-text-color;
+    -fx-border-radius: 5;
+    -fx-border-width: 2 2 2 2;
+    -fx-font-size: 15;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
+    -fx-text-fill: -fx-menu-text-color;
+    -fx-font-family: 'Segoe UI';
+}
+
+.combo-box {
+    -fx-background-color: -fx-normal-menu-button-bg-color;
+    -fx-border-color: -fx-normal-menu-button-border-color;
+    -fx-text-fill: -fx-normal-menu-button-text-color;
+    -fx-border-radius: 5;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
+}
+
+combo-box .arrow, .combo-box .arrow-button {
+    -fx-padding: 0 10 0 10;
+    -fx-background-color: -fx-normal-menu-button-bg-color;
+    -fx-border-color: -fx-normal-menu-button-border-color;
+    -fx-font-size: 18;
+}
+
+.combo-box:hover {
+    -fx-background-color: -fx-hover-menu-button-bg-color;
+    -fx-text-fill: -fx-hover-menu-button-text-color;
+}
+
+.list-view, .list-cell {
+    -fx-background-color: -fx-normal-menu-button-bg-color;
+    -fx-border-color: -fx-normal-menu-button-border-color;
+    -fx-text-fill: -fx-normal-menu-button-text-color;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-font-size: 15;
+}
+
+
+.list-view:hover, .list-cell:hover{
+    -fx-background-color: -fx-hover-menu-button-bg-color;
+    -fx-text-fill: -fx-hover-menu-button-text-color;
+    -fx-border-color: -fx-hover-menu-button-border-color;
+}
+
+/*Collection Styling*/
 #SpinnerStyling {
     -fx-background-color: -fx-normal-background-color;
     -fx-border-color: -fx-normal-border-color;
@@ -118,27 +220,28 @@
     -fx-text-fill: -fx-hover-text-color;
 }
 
-#FunctionButton {
+.color-picker {
     -fx-background-color: -fx-normal-background-color;
-    -fx-font-weight: bold;
-    -fx-font-size: 15;
-    -fx-font-family: 'Segoe UI';
     -fx-border-color: -fx-normal-border-color;
-    -fx-text-fill: -fx-normal-text-color;
     -fx-border-radius: 5;
     -fx-border-width: 2 2 2 2;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
 }
 
-#FunctionButton:hover {
-    -fx-background-color: -fx-hover-background-color;
-    -fx-text-fill: -fx-hover-text-color;
+.color-picker .color-picker-label .text {
+    -fx-fill: -fx-normal-text-color;
+    -fx-font-weight: bold;
+    -fx-font-size: 15;
+    -fx-font-family: 'Segoe UI';
 }
 
-#FunctionButton:selected {
-    -fx-background-color: -fx-hover-background-color;
-    -fx-text-fill: -fx-hover-text-color;
+#SettingsTextStyling {
+    -fx-text-fill: -fx-normal-text-color;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-size: 15;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
 }
 
 #BookTypeButton {
@@ -158,43 +261,6 @@
 
 #BookTypeButton:disabled {
     -fx-opacity: 1;
-    -fx-background-color: -fx-hover-background-color;
-    -fx-text-fill: -fx-hover-text-color;
-}
-
-#ListDropDown {
-    -fx-background-color: -fx-normal-background-color;
-    -fx-border-color: -fx-normal-border-color;
-    -fx-text-fill: -fx-normal-text-color;
-    -fx-border-radius: 5;
-    -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
-}
-
-#ListDropDown:hover {
-    -fx-background-color: -fx-hover-background-color;
-    -fx-text-fill: -fx-hover-text-color;
-    -fx-border-color: -fx-hover-border-color;
-}
-
-.list-view, .list-cell {
-    -fx-background-color: -fx-normal-background-color;
-    -fx-border-color: -fx-normal-text-color;
-    -fx-text-fill: -fx-normal-text-color;
-    -fx-font-family: 'Segoe UI';
-    -fx-font-weight: bold;
-    -fx-cursor: hand;
-    -fx-font-size: 15;
-}
-combo-box .arrow, .arrow-button {
-    -fx-padding: 0 10 0 10;
-    -fx-background-color: -fx-normal-background-color;
-    -fx-border-color: -fx-normal-text-color;
-    -fx-text-fill: -fx-normal-text-color;
-    -fx-font-size: 18;
-}
-
-.list-view:hover, .list-cell:hover, .spinner .increment-arrow-button:hover, .spinner .decrement-arrow-button:hover{
     -fx-background-color: -fx-hover-background-color;
     -fx-text-fill: -fx-hover-text-color;
 }
