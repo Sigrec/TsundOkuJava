@@ -26,7 +26,6 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
@@ -65,15 +64,14 @@ public class TsundOku extends Application {
 
     //Users main data
     private Integer totalVolumesCollected = 0, maxVolumesInCollection = 0;
-    private List<Series> userCollection;
+    private List<Series> userCollection = FXCollections.observableArrayList();
     private List<Series> filteredUserCollection;
     private Collector user;
     private TsundOkuTheme mainTheme = new TsundOkuTheme();
-    private StringBuilder currentTheme;
     private BorderPane content;
     private Scene mainScene;
     private char language = 'R';
-    public static final TsundOkuTheme DEFAULT_THEME = new TsundOkuTheme("rgb(44, 45, 66);", "rgb(223, 213, 158);", "rgb(223, 213, 158);", "rgba(44, 45, 66, 0.6);", "rgba(223, 213, 158, 0.70);", "rgb(223, 213, 158);", "rgb(18, 23, 29);", "rgb(223, 213, 158);", "rgb(44, 45, 66);");
+    public static final TsundOkuTheme DEFAULT_THEME = new TsundOkuTheme("rgb(44,45,66); ", "rgb(223,213,158); ", "rgb(223,213,158); ", "rgba(18,23,29,0.6); ", "rgba(223,213,158,0.70); ", "rgb(223,213,158); ", "rgb(18,23,29); ", "rgb(223,213,158); ", "rgb(18,23,29); ", "rgb(18,23,29); ", "rgb(223,213,158); ", "rgb(44,45,66); ", "rgba(32,35,45,0.95); ", "rgba(223,213,158,0.95); ", "rgb(32,35,45); ", "rgb(223,213,158); ", "rgb(223,213,158); ", "rgba(236,236,236,0.9); ", "rgb(44,45,66); ", "rgb(223,213,158); ", "rgb(44,45,66); ", "rgb(223,213,158); ", "rgb(223,213,158); ", "rgb(18,23,29); ", "rgb(223,213,158); ", "rgb(44,45,66); ");
 
     //Menu Bar Components
     private HBox menuBar;
@@ -83,12 +81,12 @@ public class TsundOku extends Application {
     private TextField titleSearch;
     private ToggleButton addNewSeriesButton;
     private ComboBox<String> languageSelect;
-    private String menuBarCSS;
+    private String collectionMasterCSS;
 
     @Override
     public void start(Stage primaryStage){
         getUsersData();
-        drawTheme(user.getMainTheme());
+        collectionMasterCSS = drawTheme(user.getMainTheme());
         Application.setUserAgentStylesheet(STYLESHEET_MODENA);
 
         content = new BorderPane();
@@ -114,118 +112,319 @@ public class TsundOku extends Application {
         primaryStage.setScene(mainScene);
 
         collectionSetup(primaryStage);
+        createNewSeriesWindow(primaryStage);
         menuSetup(content, primaryStage, mainScene);
 
-        Group root = new Group();
-        Scene newSeriesScene = new Scene(root);
-        newSeriesScene.getStylesheets().add("Master.css");
-        root.getChildren().add(createNewSeriesWindow(primaryStage));
-
-        newSeriesWindow.initStyle(StageStyle.UTILITY);
-        newSeriesWindow.setHeight(345);
-        newSeriesWindow.setWidth(290);
-        //newSeriesWindow.setResizable(false);
-        newSeriesWindow.setScene(newSeriesScene);
-        setupCollectionSettingsWindow(primaryStage);
+        //setupCollectionSettingsWindow(primaryStage);
         primaryStage.show();
     }
 
     public String drawTheme(TsundOkuTheme newTheme){
-        currentTheme = new StringBuilder()
-                .append("-fx-menu-bg-color: ").append(newTheme.getMenuBGColor())
-                .append("-fx-menu-bottom-border-color: ").append(newTheme.getMenuBottomBorderColor())
-                .append("-fx-menu-text-color: ").append(newTheme.getMenuTextColor())
-                .append("-fx-normal-menu-button-bg-color: ").append(newTheme.getMenuNormalButtonBGColor())
-                .append("-fx-hover-menu-button-bg-color: ").append(newTheme.getMenuHoverButtonBGColor())
-                .append("-fx-normal-menu-button-border-color: ").append(newTheme.getMenuNormalButtonBorderColor())
-                .append("-fx-hover-menu-button-border-color: ").append(newTheme.getMenuHoverButtonBorderColor())
-                .append("-fx-normal-menu-button-text-color: ").append(newTheme.getMenuNormalButtonTextColor())
-                .append("-fx-hover-menu-button-text-color: ").append(newTheme.getMenuHoverButtonTextColor());
-        menuBarCSS = currentTheme.toString();
-        return menuBarCSS;
+        return "-fx-menu-bg-color: " + newTheme.getMenuBGColor() +
+                "-fx-menu-bottom-border-color: " + newTheme.getMenuBottomBorderColor() +
+                "-fx-menu-text-color: " + newTheme.getMenuTextColor() +
+                "-fx-normal-menu-button-bg-color: " + newTheme.getMenuNormalButtonBGColor() +
+                "-fx-hover-menu-button-bg-color: " + newTheme.getMenuHoverButtonBGColor() +
+                "-fx-normal-menu-button-border-color: " + newTheme.getMenuNormalButtonBorderColor() +
+                "-fx-hover-menu-button-border-color: " + newTheme.getMenuHoverButtonBorderColor() +
+                "-fx-normal-menu-button-text-color: " + newTheme.getMenuNormalButtonTextColor() +
+                "-fx-hover-menu-button-text-color: " + newTheme.getMenuHoverButtonTextColor() +
+                "-fx-collection-bg-color: " + newTheme.getCollectionBGColor() +
+                "-fx-collection-link-normal-text-color: " + newTheme.getCollectionLinkNormalTextColor() +
+                "-fx-collection-link-hover-text-color: " + newTheme.getCollectionLinkHoverTextColor() +
+                "-fx-collection-link-normal-bg-color: " + newTheme.getCollectionLinkNormalBGColor() +
+                "-fx-collection-link-hover-bg-color: " + newTheme.getCollectionLinkHoverBGColor() +
+                "-fx-collection-card-main-bg-color: " + newTheme.getCollectionCardMainBGColor() +
+                "-fx-collection-title-color: " + newTheme.getCollectionTitleColor() +
+                "-fx-collection-subheader-color: " + newTheme.getCollectionSubHeaderColor() +
+                "-fx-collection-desc-color: " + newTheme.getCollectionDescColor() +
+                "-fx-collection-bottom-card-bg-color: " + newTheme.getCollectionCardBottomBGColor() +
+                "-fx-collection-normal-icon-color: " + newTheme.getCollectionNormalIconColor() +
+                "-fx-collection-hover-icon-color: " + newTheme.getCollectionHoverIconColor() +
+                "-fx-collection-progress-bar-border-color: " + newTheme.getCollectionProgressBarBorderColor() +
+                "-fx-collection-progress-bar-color: " + newTheme.getCollectionProgressBarColor() +
+                "-fx-collection-progress-bar-bg-color: " + newTheme.getCollectionProgressBarBGColor() +
+                "-fx-collection-normal-volprogress-text-color: " + newTheme.getCollectionNormalVolProgressTextColor() +
+                "-fx-collection-hover-volprogress-text-color: " + newTheme.getCollectionHoverVolProgressTextColor();
     }
 
     private String formatColorCode(Color newColor){
-        return "#" + newColor.toString().substring(2, 8) + ";";
+        return "rgba(" + (int) (newColor.getRed() * 255) + "," + (int) (newColor.getGreen() * 255) + "," + (int) (newColor.getBlue() * 255) + "," + String.format("%.2f", newColor.getOpacity()) + "); ";
+    }
+
+    private Color convertStringToColor(String color){
+        Color convertedColor = null;
+        if (color.startsWith("#")){
+            convertedColor = Color.web(color.substring(0, 7));
+        }
+        else {
+            String substring = color.substring(color.indexOf("(") + 1, color.indexOf(")"));
+            if (color.startsWith("rgba")){
+                String[] colArray = substring.split(",");
+                convertedColor = Color.rgb(Integer.parseInt(colArray[0]), Integer.parseInt(colArray[1]), Integer.parseInt(colArray[2]), Double.parseDouble(colArray[3]));
+            }
+            else if (color.startsWith("rgb")){
+                String[] colArray = substring.split(",");
+                convertedColor = Color.rgb(Integer.parseInt(colArray[0]), Integer.parseInt(colArray[1]), Integer.parseInt(colArray[2]));
+            }
+        }
+        return convertedColor;
     }
 
     private void setupCollectionSettingsWindow(Stage primaryStage){
-        TsundOkuTheme newTheme = mainTheme;
+        TsundOkuTheme newTheme = null;
+        try {
+            newTheme = (TsundOkuTheme) mainTheme.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        TsundOkuTheme finalNewTheme = newTheme;
         AtomicBoolean newThemeSaved = new AtomicBoolean(false);
 
         ColorPicker menuBGColor = new ColorPicker();
-        menuBGColor.setStyle(mainCSS_Styling);
+        menuBGColor.setPrefWidth(181);
+        menuBGColor.setValue(convertStringToColor(mainTheme.getMenuBGColor()));
         menuBGColor.setOnAction(event -> {
             Color newMenuBGColor = menuBGColor.getValue();
-            newTheme.setMenuBGColor(formatColorCode(newMenuBGColor));
-            menuBar.setBackground(new Background(new BackgroundFill(newMenuBGColor, null, null)));
+            finalNewTheme.setMenuBGColor(formatColorCode(newMenuBGColor));
+            menuBar.setBackground(new Background(new BackgroundFill(newMenuBGColor, CornerRadii.EMPTY, Insets.EMPTY)));
         });
 
         Label menuBGColorLabel = new Label("Menu Background Color");
         menuBGColorLabel.setLabelFor(menuBGColor);
         menuBGColorLabel.setId("SettingsTextStyling");
-        menuBGColorLabel.setStyle(mainCSS_Styling);
 
         VBox menuBGColorRoot = new VBox();
         menuBGColorRoot.setSpacing(5);
         menuBGColorRoot.getChildren().addAll(menuBGColorLabel, menuBGColor);
 
+        ColorPicker menuBottomBorderColor = new ColorPicker();
+        menuBottomBorderColor.setPrefWidth(181);
+        menuBottomBorderColor.setValue(convertStringToColor(mainTheme.getMenuBottomBorderColor()));
+        menuBottomBorderColor.setOnAction(event -> {
+            Color newBottomBorderColor = menuBottomBorderColor.getValue();
+            finalNewTheme.setMenuBottomBorderColor(formatColorCode(newBottomBorderColor));
+            menuBar.setBorder(new Border(new BorderStroke(newBottomBorderColor, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(0, 0, 2, 0))));
+        });
+
+        Label menuBottomBorderColorLabel = new Label("Divider Color");
+        menuBottomBorderColorLabel.setLabelFor(menuBGColor);
+        menuBottomBorderColorLabel.setId("SettingsTextStyling");
+
+        VBox menuBottomBorderColorRoot = new VBox();
+        menuBottomBorderColorRoot.setSpacing(5);
+        menuBottomBorderColorRoot.getChildren().addAll(menuBottomBorderColorLabel, menuBottomBorderColor);
+
         ColorPicker menuTextColor = new ColorPicker();
-        menuTextColor.setStyle(mainCSS_Styling);
+        menuTextColor.setPrefWidth(181);
+        menuTextColor.setValue(convertStringToColor(mainTheme.getMenuTextColor()));
         menuTextColor.setOnAction(event -> {
             Color newMenuTextColor = menuTextColor.getValue();
-            newTheme.setMenuTextColor(formatColorCode(newMenuTextColor));
+            finalNewTheme.setMenuTextColor(formatColorCode(newMenuTextColor));
             userName.setFill(newMenuTextColor);
             totalVolDisplay.setFill(newMenuTextColor);
             totalToCollect.setFill(newMenuTextColor);
             searchLabel.setTextFill(newMenuTextColor);
-            mainTheme.setMenuTextColor(formatColorCode(newMenuTextColor));
-            titleSearch.setStyle(drawTheme(mainTheme));
         });
 
         Label menuTextColorLabel = new Label("Menu Text Color");
         menuTextColorLabel.setLabelFor(menuBGColor);
         menuTextColorLabel.setId("SettingsTextStyling");
-        menuTextColorLabel.setStyle(mainCSS_Styling);
 
         VBox menuTextColorRoot = new VBox();
         menuTextColorRoot.setSpacing(5);
         menuTextColorRoot.getChildren().addAll(menuTextColorLabel, menuTextColor);
 
-        VBox themeChangePane = new VBox();
-        themeChangePane.setSpacing(20);
-        themeChangePane.setPadding(new Insets(10, 0, 0, 10));
-        themeChangePane.getChildren().addAll(menuBGColorRoot, menuTextColorRoot);
+        ColorPicker menuNormalButtonBGColor = new ColorPicker();
+        menuNormalButtonBGColor.setPrefWidth(181);
+        menuNormalButtonBGColor.setValue(convertStringToColor(mainTheme.getMenuNormalButtonBGColor()));
+        menuNormalButtonBGColor.setOnAction(event -> {
+            Color newMenuButtonBGColor = menuNormalButtonBGColor.getValue();
+            finalNewTheme.setMenuNormalButtonBGColor(formatColorCode(newMenuButtonBGColor));
+            String newCSS = drawTheme(finalNewTheme);
+            addNewSeriesButton.setStyle(newCSS);
+            settingsButton.setStyle(newCSS);
+            languageSelect.setStyle(newCSS);
+            titleSearch.setStyle(newCSS);
+        });
+
+        Label menuNormalButtonBGColorLabel = new Label("Menu Button BG Color");
+        menuNormalButtonBGColorLabel.setLabelFor(menuBGColor);
+        menuNormalButtonBGColorLabel.setId("SettingsTextStyling");
+
+        VBox menuNormalButtonBGColorRoot = new VBox();
+        menuNormalButtonBGColorRoot.setSpacing(5);
+        menuNormalButtonBGColorRoot.getChildren().addAll(menuNormalButtonBGColorLabel, menuNormalButtonBGColor);
+
+        ColorPicker menuHoverButtonBGColor = new ColorPicker();
+        menuHoverButtonBGColor.setPrefWidth(181);
+        menuHoverButtonBGColor.setValue(convertStringToColor(mainTheme.getMenuHoverButtonBGColor()));
+        menuHoverButtonBGColor.setOnAction(event -> {
+            Color newMenuHoverButtonBGColor = menuHoverButtonBGColor.getValue();
+            finalNewTheme.setMenuHoverButtonBGColor(formatColorCode(newMenuHoverButtonBGColor));
+            String newCSS = drawTheme(finalNewTheme);
+            addNewSeriesButton.setStyle(newCSS);
+            settingsButton.setStyle(newCSS);
+            languageSelect.setStyle(newCSS);
+            titleSearch.setStyle(newCSS);
+        });
+
+        Label menuHoverButtonBGColorLabel = new Label("Menu Button BG Color (Hover)");
+        menuHoverButtonBGColorLabel.setLabelFor(menuBGColor);
+        menuHoverButtonBGColorLabel.setId("SettingsTextStyling");
+
+        VBox menuHoverButtonBGColorRoot = new VBox();
+        menuHoverButtonBGColorRoot.setSpacing(5);
+        menuHoverButtonBGColorRoot.getChildren().addAll(menuHoverButtonBGColorLabel, menuHoverButtonBGColor);
+
+        ColorPicker menuNormalButtonBorderColor = new ColorPicker();
+        menuNormalButtonBorderColor.setPrefWidth(181);
+        menuNormalButtonBorderColor.setValue(convertStringToColor(mainTheme.getMenuNormalButtonBorderColor()));
+        menuNormalButtonBorderColor.setOnAction(event -> {
+            Color newMenuNormalButtonBorderColor = menuNormalButtonBorderColor.getValue();
+            finalNewTheme.setMenuNormalButtonBorderColor(formatColorCode(newMenuNormalButtonBorderColor));
+            String newCSS = drawTheme(finalNewTheme);
+            addNewSeriesButton.setStyle(newCSS);
+            settingsButton.setStyle(newCSS);
+            languageSelect.setStyle(newCSS);
+            titleSearch.setStyle(newCSS);
+        });
+
+        Label menuNormalButtonBorderColorLabel = new Label("Menu Button Border Color");
+        menuNormalButtonBorderColorLabel.setLabelFor(menuBGColor);
+        menuNormalButtonBorderColorLabel.setId("SettingsTextStyling");
+
+        VBox menuNormalButtonBorderColorRoot = new VBox();
+        menuNormalButtonBorderColorRoot.setSpacing(5);
+        menuNormalButtonBorderColorRoot.getChildren().addAll(menuNormalButtonBorderColorLabel, menuNormalButtonBorderColor);
+
+        ColorPicker menuHoverButtonBorderColor = new ColorPicker();
+        menuHoverButtonBorderColor.setPrefWidth(181);
+        menuHoverButtonBorderColor.setValue(convertStringToColor(mainTheme.getMenuHoverButtonBorderColor()));
+        menuHoverButtonBorderColor.setOnAction(event -> {
+            Color newMenuHoverButtonBorderColor = menuHoverButtonBorderColor.getValue();
+            finalNewTheme.setMenuHoverButtonBorderColor(formatColorCode(newMenuHoverButtonBorderColor));
+            String newCSS = drawTheme(finalNewTheme);
+            addNewSeriesButton.setStyle(newCSS);
+            settingsButton.setStyle(newCSS);
+            languageSelect.setStyle(newCSS);
+            titleSearch.setStyle(newCSS);
+        });
+
+        Label menuHoverButtonBorderColorLabel = new Label("Menu Button Border Color (Hover)");
+        menuHoverButtonBorderColorLabel.setLabelFor(menuBGColor);
+        menuHoverButtonBorderColorLabel.setId("SettingsTextStyling");
+
+        VBox menuHoverButtonBorderColorRoot = new VBox();
+        menuHoverButtonBorderColorRoot.setSpacing(5);
+        menuHoverButtonBorderColorRoot.getChildren().addAll(menuHoverButtonBorderColorLabel, menuHoverButtonBorderColor);
+
+        ColorPicker menuNormalButtonTextColor = new ColorPicker();
+        menuNormalButtonTextColor.setPrefWidth(181);
+        menuNormalButtonTextColor.setValue(convertStringToColor(mainTheme.getMenuNormalButtonTextColor()));
+        menuNormalButtonTextColor.setOnAction(event -> {
+            System.out.println(menuHoverButtonBorderColorLabel.getWidth());
+            Color newMenuNormalButtonTextColor = menuNormalButtonTextColor.getValue();
+            finalNewTheme.setMenuNormalButtonTextColor(formatColorCode(newMenuNormalButtonTextColor));
+            String newCSS = drawTheme(finalNewTheme);
+            addNewSeriesButton.setStyle(newCSS);
+            settingsButton.setStyle(newCSS);
+            languageSelect.setStyle(newCSS);
+            titleSearch.setStyle(newCSS);
+        });
+
+        Label menuNormalButtonTextColorLabel = new Label("Menu Button Text Color");
+        menuNormalButtonTextColorLabel.setLabelFor(menuBGColor);
+        menuNormalButtonTextColorLabel.setId("SettingsTextStyling");
+
+        VBox menuNormalButtonTextColorRoot = new VBox();
+        menuNormalButtonTextColorRoot.setSpacing(5);
+        menuNormalButtonTextColorRoot.getChildren().addAll(menuNormalButtonTextColorLabel, menuNormalButtonTextColor);
+
+        ColorPicker menuHoverButtonTextColor = new ColorPicker();
+        menuHoverButtonTextColor.setPrefWidth(181);
+        menuHoverButtonTextColor.setValue(convertStringToColor(mainTheme.getMenuHoverButtonTextColor()));
+        menuHoverButtonTextColor.setOnAction(event -> {
+            Color newMenuHoverButtonTextColor = menuHoverButtonTextColor.getValue();
+            finalNewTheme.setMenuHoverButtonTextColor(formatColorCode(newMenuHoverButtonTextColor));
+            String newCSS = drawTheme(finalNewTheme);
+            addNewSeriesButton.setStyle(newCSS);
+            settingsButton.setStyle(newCSS);
+            languageSelect.setStyle(newCSS);
+            titleSearch.setStyle(newCSS);
+        });
+
+        Label menuHoverButtonTextColorLabel = new Label("Menu Button Text Color (Hover)");
+        menuHoverButtonTextColorLabel.setLabelFor(menuBGColor);
+        menuHoverButtonTextColorLabel.setId("SettingsTextStyling");
+
+        VBox menuHoverButtonTextColorRoot = new VBox();
+        menuHoverButtonTextColorRoot.setSpacing(5);
+        menuHoverButtonTextColorRoot.getChildren().addAll(menuHoverButtonTextColorLabel, menuHoverButtonTextColor);
+
+        FlowPane menuThemeChangePane = new FlowPane();
+        menuThemeChangePane.setId("ThemeSettingsBox");
+        menuThemeChangePane.getChildren().addAll(menuBGColorRoot, menuBottomBorderColorRoot, menuTextColorRoot, menuNormalButtonBGColorRoot, menuHoverButtonBGColorRoot, menuNormalButtonBorderColorRoot, menuHoverButtonBorderColorRoot, menuNormalButtonTextColorRoot, menuHoverButtonTextColorRoot);
+
+        Label menuLabel = new Label("Menu Bar Theme");
+        menuLabel.setLabelFor(menuThemeChangePane);
+        menuLabel.setId("SettingsLabelStyling");
+
+        ColorPicker collectionBGColor = new ColorPicker();
+        collectionBGColor.setPrefWidth(181);
+        collectionBGColor.setValue(convertStringToColor(mainTheme.getMenuHoverButtonTextColor()));
+        collectionBGColor.setOnAction(event -> {
+            Color newMenuHoverButtonTextColor = collectionBGColor.getValue();
+            finalNewTheme.setMenuHoverButtonTextColor(formatColorCode(newMenuHoverButtonTextColor));
+            String newCSS = drawTheme(finalNewTheme);
+            addNewSeriesButton.setStyle(newCSS);
+            settingsButton.setStyle(newCSS);
+            languageSelect.setStyle(newCSS);
+            titleSearch.setStyle(newCSS);
+        });
+
+        Label collectionBGColorLabel = new Label("Collection BG");
+        collectionBGColorLabel.setLabelFor(collectionBGColor);
+        collectionBGColorLabel.setId("SettingsTextStyling");
+
+        VBox collectionBGColorRoot = new VBox();
+        collectionBGColorRoot.setSpacing(5);
+        collectionBGColorRoot.getChildren().addAll(collectionBGColorLabel, collectionBGColor);
+
+        FlowPane collectionThemePane = new FlowPane();
+        collectionThemePane.setId("ThemeSettingsBox");
+        //collectionThemePane.getChildren().addAll(menuBGColorRoot, menuBottomBorderColorRoot, menuTextColorRoot, menuNormalButtonBGColorRoot, menuHoverButtonBGColorRoot, menuNormalButtonBorderColorRoot, menuHoverButtonBorderColorRoot, menuNormalButtonTextColorRoot, menuHoverButtonTextColorRoot);
+
+        Label collectionLabel = new Label("Collection Theme");
+        collectionLabel.setLabelFor(collectionThemePane);
+        collectionLabel.setId("SettingsLabelStyling");
 
         Button saveNewThemeButton = new Button("Save Theme");
         saveNewThemeButton.setId("MenuButton");
-        saveNewThemeButton.setStyle(menuBarCSS);
         saveNewThemeButton.setOnMouseClicked(event -> {
             newThemeSaved.set(true);
-            user.addNewTheme(newTheme);
-            user.setNewMainTheme(newTheme);
+            user.addNewTheme(finalNewTheme);
+            user.setNewMainTheme(finalNewTheme);
         });
 
-        BorderPane collectionSettingRoot = new BorderPane();
-        collectionSettingRoot.setStyle("-fx-background-color: rgb(18, 23, 29);");
-        collectionSettingRoot.setTop(themeChangePane);
-        collectionSettingRoot.setCenter(saveNewThemeButton);
+        VBox collectionSettingRoot = new VBox();
+        collectionSettingRoot.setId("ThemeSettingsPane");
+        collectionSettingRoot.setStyle(collectionMasterCSS);
+        collectionSettingRoot.getChildren().addAll(menuLabel, menuThemeChangePane, collectionLabel, collectionThemePane, saveNewThemeButton);
 
         Scene collectionSettingsScene = new Scene(collectionSettingRoot);
         collectionSettingsScene.getStylesheets().add("Master.css");
 
-        //user.addNewTheme(newTheme);
         Stage collectionSettingsStage = new Stage();
         collectionSettingsStage.setOnCloseRequest(event -> {
-            System.out.println(newThemeSaved.get());
-
             if (!newThemeSaved.get()){
-                drawTheme(DEFAULT_THEME);
+                collectionMasterCSS = drawTheme(mainTheme);
                 menuSetup(content, primaryStage, mainScene);
+                primaryStage.setScene(mainScene);
             }
         });
         collectionSettingsStage.setHeight(700);
-        collectionSettingsStage.setWidth(500);
+        collectionSettingsStage.setWidth(850);
         collectionSettingsStage.setScene(collectionSettingsScene);
         collectionSettingsStage.show();
     }
@@ -234,16 +433,14 @@ public class TsundOku extends Application {
         menuBar = new HBox();
         menuBar.setPrefHeight(NAV_HEIGHT);
         menuBar.setId("MenuBar");
-        menuBar.setStyle(menuBarCSS);
+        menuBar.setStyle(collectionMasterCSS);
 
         userName = new Text(user.getUserName());
-        userName.setId("MenuTextStyling");
-        userName.setStyle(menuBarCSS);
+        userName.setId("MenuText");
 
         settingsButton = new Button("Settings");
         settingsButton.setPrefWidth(135);
         settingsButton.setId("MenuButton");
-        settingsButton.setStyle(menuBarCSS);
 
         VBox userNameAndSettingsButtonLayout = new VBox();
         userNameAndSettingsButtonLayout.setId("UserNameAndSettingsButtonLayout");
@@ -251,12 +448,10 @@ public class TsundOku extends Application {
 
         searchLabel = new Label("Search Collection");
         searchLabel.setPrefWidth(203);
-        searchLabel.setId("MenuLabelStyling");
-        searchLabel.setStyle(menuBarCSS);
+        searchLabel.setId("MenuLabel");
 
         titleSearch = new TextField();
         titleSearch.setId("MenuTextField");
-        titleSearch.setStyle(menuBarCSS);
         titleSearch.textProperty().addListener((obs, oldText, newText) -> {
             filteredUserCollection = userCollection.parallelStream().filter(series ->
                     containsIgnoreCase(series.getRomajiTitle(), newText) |
@@ -280,26 +475,22 @@ public class TsundOku extends Application {
         Integer userVolumes = user.getTotalVolumes();
 
         totalVolDisplay = new Text("Collected\n" + userVolumes + " Volumes");
-        totalVolDisplay.setId("MenuTextStyling");
-        totalVolDisplay.setStyle(menuBarCSS);
+        totalVolDisplay.setId("MenuText");
         totalVolDisplay.setCache(true);
         totalVolDisplay.setCacheHint(CacheHint.DEFAULT);
 
         totalToCollect = new Text("Need To Collect\n" + (maxVolumesInCollection - userVolumes) + " Volumes");
-        totalToCollect.setId("MenuTextStyling");
-        totalToCollect.setStyle(menuBarCSS);
+        totalToCollect.setId("MenuText");
         totalToCollect.setCache(true);
         totalToCollect.setCacheHint(CacheHint.DEFAULT);
 
         addNewSeriesButton = new ToggleButton("Add New Series");
         addNewSeriesButton.setOnMouseClicked((MouseEvent event) -> newSeriesWindow.show());
         addNewSeriesButton.setId("MenuButton");
-        addNewSeriesButton.setStyle(menuBarCSS);
 
         languageSelect = new ComboBox<>(LANGUAGE_OPTIONS);
         languageSelect.setPrefWidth(135);
         languageSelect.setPromptText("Romaji");
-        languageSelect.setStyle(menuBarCSS);
         languageSelect.setOnAction((event) -> {
             switch(languageSelect.getValue()){
                 case "English":
@@ -375,163 +566,128 @@ public class TsundOku extends Application {
         return false;
     }
 
-    private Pane createNewSeriesWindow(Stage primaryStage){
+    private void createNewSeriesWindow(Stage primaryStage){
         AtomicReference<String> bookType = new AtomicReference<>("");
         ArrayList<String[]> newSeriesList = new ArrayList<>();
 
         TextField titleEnter = new TextField();
-        titleEnter.setId("TextFieldStyling");
-        titleEnter.setStyle(mainCSS_Styling);
+        titleEnter.setId("MenuTextField");
         titleEnter.setPrefWidth(250);
-        titleEnter.setFont(Font.font(APP_FONT, FontWeight.SEMI_BOLD, 15));
-        titleEnter.setCache(true);
         titleEnter.relocate(20, 32);
-        titleEnter.setCache(true);
-        titleEnter.setCacheHint(CacheHint.SPEED);
 
-        Label titleLabel = new Label("Enter Title (Copy Title From AniList)");
-        titleLabel.relocate(20, 12);
-        titleLabel.setTextFill(Color.rgb(223,213,158));
-        titleLabel.setFont(Font.font(APP_FONT, FontWeight.BOLD, 15));
-        titleLabel.setLabelFor(titleEnter);
+        Label inputTitleLabel = new Label("Enter Title (Copy Title From AniList)");
+        inputTitleLabel.relocate(20, 12);
+        inputTitleLabel.setId("MenuLabel");
+        inputTitleLabel.setLabelFor(titleEnter);
+
+        VBox inputTitleRoot = new VBox();
+        inputTitleRoot.setId("SettingsLabel");
+        inputTitleRoot.getChildren().addAll(inputTitleLabel, titleEnter);
 
         TextField publisherEnter = new TextField();
-        publisherEnter.setId("TextFieldStyling");
-        publisherEnter.setStyle(mainCSS_Styling);
+        publisherEnter.setId("MenuTextField");
         publisherEnter.setPrefWidth(250);
-        publisherEnter.setFont(Font.font(APP_FONT, FontWeight.SEMI_BOLD, 15));
-        publisherEnter.setCache(true);
         publisherEnter.relocate(20, 95);
-        publisherEnter.setCache(true);
-        publisherEnter.setCacheHint(CacheHint.SPEED);
 
-        Label publisherLabel = new Label("Enter Publisher");
-        publisherLabel.relocate(20, 75);
-        publisherLabel.setTextFill(Color.rgb(223,213,158));
-        publisherLabel.setFont(Font.font(APP_FONT, FontWeight.BOLD, 15));
-        publisherLabel.setLabelFor(publisherEnter);
+        Label inputPublisherLabel = new Label("Enter Publisher");
+        inputPublisherLabel.relocate(20, 75);
+        inputPublisherLabel.setId("MenuLabel");
+        inputPublisherLabel.setLabelFor(publisherEnter);
 
-        Tooltip enabledToolTip = new Tooltip("Enabled");
-        Tooltip disabledToolTip = new Tooltip("Disabled");
+        VBox inputPublisherRoot = new VBox();
+        inputPublisherRoot.setId("SettingsLabel");
+        inputPublisherRoot.getChildren().addAll(inputPublisherLabel, publisherEnter);
 
         ToggleButton mangaButton = new ToggleButton("Manga");
         ToggleButton lightNovelButton = new ToggleButton("Novel");
 
-        mangaButton.setId("BookTypeButton");
+        mangaButton.setId("MenuButton");
         mangaButton.setPrefSize(100, 10);
-        mangaButton.setFont(Font.font(APP_FONT, FontWeight.BOLD, 15));
-        mangaButton.setStyle(mainCSS_Styling);
-        mangaButton.setTextFill(Color.rgb(223,213,158));
         mangaButton.setOnMouseClicked((MouseEvent event) -> {
-            lightNovelButton.setTooltip(disabledToolTip);
-            mangaButton.setTooltip(enabledToolTip);
             bookType.set("Manga");
             mangaButton.setDisable(true);
             lightNovelButton.setDisable(false);
         });
-        mangaButton.setCache(true);
-        mangaButton.setCacheHint(CacheHint.SPEED);
 
-        lightNovelButton.setId("BookTypeButton");
+        lightNovelButton.setId("MenuButton");
         lightNovelButton.setPrefSize(100, 10);
-        lightNovelButton.setFont(Font.font(APP_FONT, FontWeight.BOLD, 15));
-        lightNovelButton.setStyle(mainCSS_Styling);
-        lightNovelButton.setTextFill(Color.rgb(223,213,158));
         lightNovelButton.setOnMouseClicked((MouseEvent event) -> {
-            mangaButton.setTooltip(disabledToolTip);
-            lightNovelButton.setTooltip(enabledToolTip);
             bookType.set("Novel");
             mangaButton.setDisable(false);
             lightNovelButton.setDisable(true);
         });
-        lightNovelButton.setCache(true);
-        lightNovelButton.setCacheHint(CacheHint.SPEED);
-
-
-        HBox bookTypeRoot = new HBox();
-        bookTypeRoot.relocate(40, 145);
-        bookTypeRoot.setSpacing(10);
-        bookTypeRoot.getChildren().addAll(mangaButton, lightNovelButton);
-
-        Spinner<Integer> curVolSpinner = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 999, 0, 1));
-        Spinner<Integer> maxVolSpinner = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999, 1, 1));
 
         UnaryOperator<TextFormatter.Change> filter = change -> {
             String text = change.getText();
-            if (text.matches("\\\\d+")) {
-                return change;
-            }
+            if (text.matches("[0-9]")) { return change; }
             return null;
         };
 
-        curVolSpinner.setPrefSize(100, 10);
-        curVolSpinner.getEditor().setTextFormatter(new TextFormatter<>(filter));
-        curVolSpinner.setEditable(true);
-        curVolSpinner.setStyle(mainCSS_Styling);
-        curVolSpinner.getEditor().setId("SpinnerStyling");
-        curVolSpinner.getEditor().setStyle(mainCSS_Styling);
+        Label bookTypeLabel = new Label("Select Book Type");
+        bookTypeLabel.setId("MenuLabel");
 
-        maxVolSpinner.setPrefSize(100, 10);
-        maxVolSpinner.setEditable(true);
-        maxVolSpinner.getEditor().setTextFormatter(new TextFormatter<>(filter));
-        maxVolSpinner.setStyle(mainCSS_Styling);
-        maxVolSpinner.getEditor().setId("SpinnerStyling");
-        maxVolSpinner.getEditor().setStyle(mainCSS_Styling);
+        HBox bookTypePane = new HBox();
+        bookTypePane.relocate(40, 145);
+        bookTypePane.setSpacing(10);
+        bookTypePane.setAlignment(Pos.CENTER);
+        bookTypePane.getChildren().addAll(mangaButton, lightNovelButton);
+
+        VBox bookTypeRoot = new VBox();
+        bookTypeRoot.setId("SettingsLabel");
+        bookTypeRoot.setAlignment(Pos.CENTER);
+        bookTypeRoot.getChildren().addAll(bookTypeLabel, bookTypePane);
+
+        TextField curVolumes = new TextField();
+        curVolumes.setPrefWidth(50);
+        curVolumes.setId("MenuTextField");
+        curVolumes.setTextFormatter(new TextFormatter<>(filter));
+
+        TextField maxVolumes = new TextField();
+        maxVolumes.setPrefWidth(50);
+        maxVolumes.setId("MenuTextField");
+        maxVolumes.setTextFormatter(new TextFormatter<>(filter));
 
         Label curVolLabel = new Label("Cur Volumes");
-        curVolLabel.setPadding(new Insets(0, 0, 0, 5));
-        curVolLabel.setAlignment(Pos.CENTER);
-        curVolLabel.setTextFill(Color.rgb(223,213,158));
-        curVolLabel.setFont(Font.font(APP_FONT, FontWeight.BOLD, 15));
+        curVolLabel.setId("MenuLabel");
 
         Label maxVolLabel = new Label("Max Volumes");
-        maxVolLabel.setPadding(new Insets(0, 0, 0, 1));
-        maxVolLabel.setAlignment(Pos.CENTER);
-        maxVolLabel.setTextFill(Color.rgb(223,213,158));
-        maxVolLabel.setFont(Font.font(APP_FONT, FontWeight.BOLD, 15));
+        maxVolLabel.setId("MenuLabel");
 
         GridPane volProgressRoot = new GridPane();
-        volProgressRoot.relocate(40, 190);
         volProgressRoot.setVgap(5);
         volProgressRoot.setHgap(10);
+        volProgressRoot.setAlignment(Pos.CENTER);
         volProgressRoot.add(curVolLabel, 0, 0);
-        volProgressRoot.add(curVolSpinner, 0 , 1);
+        volProgressRoot.add(curVolumes, 0 , 1);
         volProgressRoot.add(maxVolLabel, 1, 0);
-        volProgressRoot.add(maxVolSpinner, 1 , 1);
+        volProgressRoot.add(maxVolumes, 1 , 1);
 
-        ToggleButton getNewSeries = new ToggleButton("Run");
         Button submitButton = new Button("Add");
         submitButton.setPrefSize(60, 10);
         submitButton.relocate(115, 255);
         submitButton.setId("MenuButton");
-        submitButton.setStyle(mainCSS_Styling);
-        submitButton.setTextFill(Color.rgb(223,213,158));
-        submitButton.setFont(Font.font(APP_FONT, FontWeight.BOLD, 15));
         submitButton.setOnMouseClicked(event -> {
-            newSeriesList.add(new String[]{titleEnter.getText(), publisherEnter.getText(), bookType.get(), curVolSpinner.getEditor().getText(), maxVolSpinner.getEditor().getText()});
+            newSeriesList.add(new String[]{titleEnter.getText(), publisherEnter.getText(), bookType.get(), curVolumes.getText(), maxVolumes.getText()});
            if (newSeriesList.size() == 90) { submitButton.setDisable(true); }
         });
 
+        Button getNewSeries = new Button("Run");
         getNewSeries.setPrefSize(60, 10);
         getNewSeries.relocate(115, 295);
         getNewSeries.setId("MenuButton");
-        getNewSeries.setStyle(mainCSS_Styling);
-        getNewSeries.setTextFill(Color.rgb(223,213,158));
-        getNewSeries.setFont(Font.font(APP_FONT, FontWeight.BOLD, 15));
         getNewSeries.setOnMouseClicked(event -> {
-            newSeriesList.forEach(series -> userCollection.add(new Series().CreateNewSeries(series[0], series[1], series[2], Integer.parseInt(series[3]), Integer.parseInt(series[4]))));
+            newSeriesList.forEach(series -> {
+                userCollection.add(new Series().CreateNewSeries(series[0], series[1], series[2], Integer.parseInt(series[3]), Integer.parseInt(series[4])));
+                System.out.println("Series Added");
+            });
             filteredUserCollection = userCollection;
             collectionSetup(primaryStage);
             primaryStage.setScene(mainScene);
         });
 
-        Pane newSeriesPane = new Pane();
-        newSeriesPane.setStyle("" +
-                "-fx-background-color: rgb(18, 23, 29);" +
-                "-fx-border-color: rgb(223, 213, 158);" +
-                "-fx-border-width: 4;"
-        );
-        newSeriesPane.setPrefSize(290, 345);
+        VBox newSeriesPane = new VBox();
+        newSeriesPane.setId("NewSeriesPane");
+        newSeriesPane.setStyle(collectionMasterCSS);
         newSeriesPane.setOnMousePressed(event -> {
             xOffset = newSeriesWindow.getX() - event.getScreenX();
             yOffset = newSeriesWindow.getY() - event.getScreenY();
@@ -543,9 +699,17 @@ public class TsundOku extends Application {
         newSeriesPane.setCache(true);
         newSeriesPane.setCacheHint(CacheHint.SPEED);
 
-        newSeriesPane.getChildren().addAll(titleLabel, titleEnter, publisherLabel, publisherEnter, bookTypeRoot, volProgressRoot, submitButton, getNewSeries);
+        newSeriesPane.getChildren().addAll(inputTitleRoot, inputPublisherRoot, bookTypeRoot, volProgressRoot, submitButton, getNewSeries);
 
-        return newSeriesPane;
+        Group root = new Group();
+        Scene newSeriesScene = new Scene(root);
+        newSeriesScene.getStylesheets().add("Master.css");
+        root.getChildren().add(newSeriesPane);
+
+        newSeriesWindow.initStyle(StageStyle.UNDECORATED);
+        newSeriesWindow.setHeight(447);
+        newSeriesWindow.setWidth(418);
+        newSeriesWindow.setScene(newSeriesScene);
     }
 
     private void updateCollectionNumbers(){
@@ -561,48 +725,38 @@ public class TsundOku extends Application {
         maxVolumesInCollection = 0;
 
         FlowPane collection = new FlowPane();
-        collection.setHgap(40);
-        collection.setVgap(40);
-        collection.setPadding(new Insets(20, 0, 20, 0));
-        collection.setAlignment(Pos.CENTER);
-        collection.setStyle("-fx-background-color: rgb(18, 23, 29);");
+        collection.setId("Collection");
+        collection.setStyle(collectionMasterCSS);
         collection.setCache(true);
         collection.setCacheHint(CacheHint.DEFAULT);
 
         ScrollPane collectionScroll = new ScrollPane();
-        collectionScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        collectionScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        collectionScroll.setStyle("-fx-focus-color: transparent; -fx-padding: -1 0 0 0;");
-        collectionScroll.setFitToHeight(true);
-        collectionScroll.setFitToWidth(true);
+        collectionScroll.setId("CollectionScroll");
         collectionScroll.setCache(true);
         collectionScroll.setCacheHint(CacheHint.DEFAULT);
 
-        Pane seriesCard;
         for (Series series : filteredUserCollection) {
-            seriesCard = new Pane();
-            seriesCard.setStyle("" +
-                    "-fx-border-radius: 5px 5px 5px 5px;" +
-                    "-fx-background-radius: 5px 5px 5px 5px;" +
-                    "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 10, 0.0, 2, 2);");
+            Pane seriesCard = new Pane();
+            seriesCard.setId("SeriesCard");
             seriesCard.setMinSize(SERIES_CARD_WIDTH, SERIES_CARD_HEIGHT);
             seriesCard.getChildren().addAll(leftSideCardSetup(series), rightSideCardSetup(series, language, primaryStage));
             seriesCard.setCache(true);
             seriesCard.setCacheHint(CacheHint.DEFAULT);
             collection.getChildren().add(seriesCard);
         }
+
         user.setTotalVolumes(totalVolumesCollected);
         collectionScroll.setContent(collection);
         content.setCenter(collectionScroll);
     }
 
     private Hyperlink leftSideCardSetup(Series series){
-        Rectangle coverRound = new Rectangle(LEFT_SIDE_CARD_WIDTH, SERIES_CARD_HEIGHT);
-        coverRound.setStyle("-fx-border-radius: 5px 5px 5px 5px; -fx-background-radius: 5px 5px 5px 5px;");
-        coverRound.setArcWidth(12);
-        coverRound.setArcHeight(12);
-        coverRound.setCache(true);
-        coverRound.setCacheHint(CacheHint.DEFAULT);
+        Rectangle coverImgScaling = new Rectangle(LEFT_SIDE_CARD_WIDTH, SERIES_CARD_HEIGHT);
+        coverImgScaling.setId("ImgScaling");
+        coverImgScaling.setArcWidth(12);
+        coverImgScaling.setArcHeight(12);
+        coverImgScaling.setCache(true);
+        coverImgScaling.setCacheHint(CacheHint.DEFAULT);
 
         ImageView cover = new ImageView("File:" + series.getCover());
         cover.setFitHeight(SERIES_CARD_HEIGHT);
@@ -610,58 +764,30 @@ public class TsundOku extends Application {
         cover.setSmooth(true);
         cover.isResizable();
         cover.relocate(0, 0);
-        cover.setClip(coverRound);
+        cover.setClip(coverImgScaling);
         cover.setCache(true);
-        cover.setCacheHint(CacheHint.DEFAULT);
+        cover.setCacheHint(CacheHint.QUALITY);
 
         Label bookTypeAndPrintStatus = new Label(series.getBookType()+ " | " + series.getPrintStatus());
         bookTypeAndPrintStatus.setPrefHeight(BOTTOM_CARD_HEIGHT);
         bookTypeAndPrintStatus.setPrefWidth(LEFT_SIDE_CARD_WIDTH);
         bookTypeAndPrintStatus.relocate(0, SERIES_CARD_HEIGHT - BOTTOM_CARD_HEIGHT);
-        bookTypeAndPrintStatus.setStyle(mainCSS_Styling);
-        bookTypeAndPrintStatus.setFont(Font.font(APP_FONT, FontWeight.BOLD, 17));
-        bookTypeAndPrintStatus.setAlignment(Pos.CENTER);
-        bookTypeAndPrintStatus.setStyle("" +
-                "-fx-background-color: rgb(32, 35, 45, 0.9);" +
-                "-fx-border-radius: 0px 0px 5px 5px;" +
-                "-fx-background-radius: 0px 0px 5px 5px;" +
-                "-fx-text-fill: rgb(223, 213, 158);" +
-                "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10, 0.0, 1, 1);"
-        );
-        bookTypeAndPrintStatus.setCache(true);
-        bookTypeAndPrintStatus.setCacheHint(CacheHint.DEFAULT);
+        bookTypeAndPrintStatus.setId("SeriesStatus");
 
         Pane leftSideOfSeriesCard = new Pane();
         leftSideOfSeriesCard.relocate(0, 0);
         leftSideOfSeriesCard.setPrefWidth(LEFT_SIDE_CARD_WIDTH);
         leftSideOfSeriesCard.setPrefHeight(SERIES_CARD_HEIGHT);
         leftSideOfSeriesCard.setMaxSize(LEFT_SIDE_CARD_WIDTH, SERIES_CARD_HEIGHT);
-        leftSideOfSeriesCard.setCache(true);
-        leftSideOfSeriesCard.setCacheHint(CacheHint.DEFAULT);
-        //leftSideOfSeriesCard.setId("LeftSideCardStyling");
-        leftSideOfSeriesCard.setOnMouseEntered((MouseEvent event) -> bookTypeAndPrintStatus.setStyle("" +
-                "-fx-background-color: rgb(223, 213, 158, 0.95);" +
-                "-fx-text-fill: rgb(44, 45, 66);" +
-                "-fx-border-radius: 0px 0px 5px 5px;" +
-                "-fx-background-radius: 0px 0px 5px 5px;" +
-                "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 5, 0.0, 1, 1);"));
-        leftSideOfSeriesCard.setOnMouseExited((MouseEvent event) -> bookTypeAndPrintStatus.setStyle("" +
-                "-fx-background-color: rgb(32, 35, 45, 0.95);" +
-                "-fx-border-radius: 0px 0px 5px 5px;" +
-                "-fx-background-radius: 0px 0px 5px 5px;" +
-                "-fx-text-fill: rgb(223, 213, 158);" +
-                "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 5, 0.0, 1, 1);"));
+        leftSideOfSeriesCard.setId("LeftSideCard");
         leftSideOfSeriesCard.getChildren().addAll(cover, bookTypeAndPrintStatus);
 
         Hyperlink aniListLink = new Hyperlink(series.getLink());
         aniListLink.setPrefHeight(SERIES_CARD_HEIGHT);
         aniListLink.setPrefWidth(LEFT_SIDE_CARD_WIDTH);
-        aniListLink.setPadding(new Insets(0, 0, 0, -1));
-        aniListLink.setStyle("-fx-border-radius: 5px 5px 5px 5px; -fx-background-radius: 5px 5px 5px 5px;");
+        aniListLink.setId("AniListLink");
         aniListLink.setOnMouseClicked((MouseEvent event) -> getHostServices().showDocument(aniListLink.getText()));
         aniListLink.setGraphic(leftSideOfSeriesCard);
-        aniListLink.setCache(true);
-        aniListLink.setCacheHint(CacheHint.DEFAULT);
 
         return aniListLink;
     }
@@ -671,118 +797,90 @@ public class TsundOku extends Application {
         Integer maxVolumes = series.getMaxVolumes();
 
         Text publisher = new Text(series.getPublisher() + "\n");
-        publisher.setFill(Color.rgb(223,213,158));
-        publisher.setFont(Font.font(APP_FONT, FontWeight.LIGHT, FontPosture.ITALIC,11.5));
-        publisher.setCache(true);
-        publisher.setCacheHint(CacheHint.SPEED);
+        publisher.setId("Publisher");
 
         Text seriesTitle = new Text();
-        seriesTitle.setCacheHint(CacheHint.SPEED);
-        seriesTitle.setStyle("-fx-background-color: -fx-normal-background-color;\n" +
-                "    -fx-fill: rgb(223,213,158);\n" +
-                "    -fx-font-family: 'Segoe UI';\n" +
-                "    -fx-font-size: 24;\n" +
-                "    -fx-font-weight: bold;\n" +
-                "    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);");
+        seriesTitle.setId("SeriesTitle");
 
         Text mangaka = new Text();
-        mangaka.setCacheHint(CacheHint.SPEED);
-        mangaka.setFill(Color.rgb(223,213,158));
-        mangaka.setFont(Font.font(APP_FONT,12));
+        mangaka.setId("Mangaka");
 
-        if (language == 'R'){
-            seriesTitle.setText(series.getRomajiTitle());
-            mangaka.setText("\n" + series.getRomajiStaff());
-        }
-        else if (language == 'E'){
-            seriesTitle.setText(series.getEnglishTitle());
-            mangaka.setText("\n" +series.getRomajiStaff());
-        }
-        else if (language == 'N'){
-            seriesTitle.setText(series.getNativeTitle());
-            mangaka.setText("\n" +series.getNativeStaff());
-        }
-        else{
-            seriesTitle.setText("Title Error");
-            mangaka.setText("\n" + "Staff Error");
+        switch (language){
+            case 'R':
+                seriesTitle.setText(series.getRomajiTitle());
+                mangaka.setText("\n" + series.getRomajiStaff());
+                break;
+            case 'E':
+                seriesTitle.setText(series.getEnglishTitle());
+                mangaka.setText("\n" +series.getRomajiStaff());
+                break;
+            case 'N':
+                seriesTitle.setText(series.getNativeTitle());
+                mangaka.setText("\n" +series.getNativeStaff());
+                break;
+            default:
+                seriesTitle.setText("Title Error");
+                mangaka.setText("\n" + "Staff Error");
+                break;
         }
 
         Text desc = new Text(series.getSeriesDesc());
-        desc.setFill(Color.rgb(236, 236, 236, 0.8));
-        desc.setLineSpacing(1.6);
-        desc.setFont(Font.font(APP_FONT, FontWeight.SEMI_BOLD,14));
-        desc.setCache(true);
-        desc.setCacheHint(CacheHint.SPEED);
+        desc.setId("SeriesDescriptionText");
 
         TextFlow descWrap = new TextFlow();
-        descWrap.setStyle("-fx-background-color: rgb(32, 35, 45);");
+        descWrap.setId("SeriesDescriptionWrap");
         descWrap.getChildren().add(desc);
-        descWrap.setCache(true);
-        descWrap.setCacheHint(CacheHint.SPEED);
 
         ScrollPane descScroll = new ScrollPane();
+        descScroll.setId("SeriesDescriptionScroll");
         descScroll.setStyle("-fx-background-color: transparent;");
-        descScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        descScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        descScroll.setFitToHeight(true);
-        descScroll.setFitToWidth(true);
         descScroll.setContent(descWrap);
-        descScroll.setCache(true);
-        descScroll.setCacheHint(CacheHint.SPEED);
 
         TextFlow topTextWrap = new TextFlow();
         topTextWrap.setLineSpacing(-2.5);
         topTextWrap.setTextAlignment(TextAlignment.LEFT);
-        topTextWrap.setCache(true);
-        topTextWrap.setCacheHint(CacheHint.SPEED);
         topTextWrap.getChildren().addAll(publisher, seriesTitle, mangaka);
 
         double volAmount = (double) curVolumes / maxVolumes;
         DoubleProperty volUpdate = new SimpleDoubleProperty();
         volUpdate.set(volAmount);
 
-        String progTxt = String.format("%s/%s", curVolumes, maxVolumes);
+        String progTxt = curVolumes + "/" + maxVolumes;
         Label progressTxt = new Label(progTxt);
         progressTxt.setId("VolProgressTxt");
-        progressTxt.setStyle(mainCSS_Styling);
         progressTxt.setPrefWidth(RIGHT_SIDE_CARD_WIDTH - (RIGHT_SIDE_CARD_WIDTH - 70));
-        progressTxt.setAlignment(Pos.CENTER);
         progressTxt.setCache(true);
         progressTxt.setCacheHint(CacheHint.SPEED);
 
         Button decrementButton = new Button("-");
         Button incrementButton = new Button("+");
 
-        decrementButton.setStyle(mainCSS_Styling + "-fx-padding: -18 0 -7 0; -fx-font-size: 30;");
+        decrementButton.setStyle("-fx-padding: -18 0 -7 0; -fx-font-size: 30;");
         decrementButton.setId("VolProgressButton");
         decrementButton.setOnMouseClicked((MouseEvent event) -> {
             if (series.getCurVolumes() > 0){
                 series.setCurVolumes(series.getCurVolumes() - 1);
                 Integer seriesCurVolumes = series.getCurVolumes();
-                progressTxt.setText(String.format("%s/%s", seriesCurVolumes, maxVolumes));
+                progressTxt.setText(seriesCurVolumes + "/" + maxVolumes);
                 volUpdate.set((double) seriesCurVolumes / maxVolumes);
-
                 user.setTotalVolumes(user.getTotalVolumes() - 1);
                 updateCollectionNumbers();
-
                 incrementButton.setDisable(false);
             }
         });
         decrementButton.setCache(true);
         decrementButton.setCacheHint(CacheHint.SPEED);
 
-        incrementButton.setStyle(mainCSS_Styling + "-fx-padding: -12 0 -2 0; -fx-font-size: 27;");
+        incrementButton.setStyle("-fx-padding: -12 0 -2 0; -fx-font-size: 27;");
         incrementButton.setId("VolProgressButton");
         incrementButton.setOnMouseClicked((MouseEvent event) -> {
             if (series.getCurVolumes() < maxVolumes){
                 series.setCurVolumes(series.getCurVolumes() + 1);
                 Integer seriesCurVolumes = series.getCurVolumes();
-                progressTxt.setText(String.format("%s/%s", seriesCurVolumes, maxVolumes));
+                progressTxt.setText(seriesCurVolumes + "/" + maxVolumes);
                 volUpdate.set((double) seriesCurVolumes / maxVolumes);
-
                 user.setTotalVolumes(user.getTotalVolumes() + 1);
                 updateCollectionNumbers();
-
                 decrementButton.setDisable(false);
             }
         });
@@ -801,8 +899,7 @@ public class TsundOku extends Application {
         ProgressBar volProgressBar = new ProgressBar();
         volProgressBar.progressProperty().bind(volUpdate);
         volProgressBar.setPrefSize(RIGHT_SIDE_CARD_WIDTH - 110, BOTTOM_CARD_HEIGHT);
-        volProgressBar.setId("ProgressBarStyling");
-        volProgressBar.setStyle(mainCSS_Styling);
+        volProgressBar.setId("ProgressBar");
         volProgressBar.setCache(true);
         volProgressBar.setCacheHint(CacheHint.SPEED);
 
@@ -820,53 +917,41 @@ public class TsundOku extends Application {
 
         FontIcon seriesSettingIcon = new FontIcon(BootstrapIcons.JOURNAL_TEXT);
         seriesSettingIcon.setIconSize(25);
-        seriesSettingIcon.setIconColor(Color.rgb(223,213,158));
+        seriesSettingIcon.setId("CollectionIcon");
 
         Button seriesCardSettingsButton = new Button();
-        seriesCardSettingsButton.setAlignment(Pos.CENTER);
         seriesCardSettingsButton.setPrefSize(RIGHT_SIDE_CARD_WIDTH - 310, BOTTOM_CARD_HEIGHT - 1);
         seriesCardSettingsButton.setGraphic(seriesSettingIcon);
-        seriesCardSettingsButton.setId("IconButton");
-        seriesCardSettingsButton.setStyle(mainCSS_Styling);
-        seriesCardSettingsButton.setOnMouseEntered((MouseEvent event) -> seriesSettingIcon.setIconColor(Color.rgb(44, 45, 66)));
-        seriesCardSettingsButton.setOnMouseExited((MouseEvent event) -> seriesSettingIcon.setIconColor(Color.rgb(223,213,158)));
-        seriesCardSettingsButton.setCache(true);
-        seriesCardSettingsButton.setCacheHint(CacheHint.SPEED);
+        seriesCardSettingsButton.setId("CollectionIconButton");
 
         FontIcon backToSeriesDataIcon = new FontIcon(BootstrapIcons.CARD_HEADING);
+        backToSeriesDataIcon.setId("CollectionIcon");
         backToSeriesDataIcon.setIconSize(25);
-        backToSeriesDataIcon.setIconColor(Color.rgb(223,213,158));
 
         Button backToSeriesCardDataButton = new Button();
-        backToSeriesCardDataButton.setAlignment(Pos.CENTER);
         backToSeriesCardDataButton.setPrefSize(RIGHT_SIDE_CARD_WIDTH - 310, BOTTOM_CARD_HEIGHT - 1);
         backToSeriesCardDataButton.setGraphic(backToSeriesDataIcon);
-        backToSeriesCardDataButton.setId("IconButton");
-        backToSeriesCardDataButton.setStyle(mainCSS_Styling);
-        backToSeriesCardDataButton.setCache(true);
-        backToSeriesCardDataButton.setCacheHint(CacheHint.SPEED);
-        backToSeriesCardDataButton.setOnMouseEntered((MouseEvent event) -> backToSeriesDataIcon.setIconColor(Color.rgb(44, 45, 66)));
-        backToSeriesCardDataButton.setOnMouseExited((MouseEvent event) -> backToSeriesDataIcon.setIconColor(Color.rgb(223,213,158)));
+        backToSeriesCardDataButton.setId("CollectionIconButton");
 
         BorderPane rightSideBottomPane = new BorderPane();
         rightSideBottomPane.setPrefSize(RIGHT_SIDE_CARD_WIDTH, BOTTOM_CARD_HEIGHT);
-        rightSideBottomPane.setStyle("-fx-background-color: rgb(44, 45, 66); -fx-background-radius: 0px 0px 5px 5px; -fx-border-radius: 0px 0px 5px 5px;");
+        rightSideBottomPane.setId("SeriesCardBottomPane");
+        rightSideBottomPane.setStyle(collectionMasterCSS);
         rightSideBottomPane.setLeft(seriesCardSettingsButton);
         rightSideBottomPane.setCenter(volProgressBar);
         rightSideBottomPane.setRight(volProgress);
 
         BorderPane rightSideOfSeriesCard = new BorderPane();
-        rightSideOfSeriesCard.setStyle("-fx-background-color: rgb(32, 35, 45); -fx-border-radius: 5px 5px 5px 5px; -fx-background-radius: 5px 5px 5px 5px;");
+        rightSideOfSeriesCard.setId("RightSideCard");
+        rightSideOfSeriesCard.setStyle(collectionMasterCSS);
         rightSideOfSeriesCard.setPrefSize(RIGHT_SIDE_CARD_WIDTH, SERIES_CARD_HEIGHT - 50);
         rightSideOfSeriesCard.setMaxSize(RIGHT_SIDE_CARD_WIDTH, SERIES_CARD_HEIGHT - 50);
         rightSideOfSeriesCard.setLayoutX(LEFT_SIDE_CARD_WIDTH);
         rightSideOfSeriesCard.setTop(rightSideTopPane);
         rightSideOfSeriesCard.setBottom(rightSideBottomPane);
-        rightSideOfSeriesCard.setCache(true);
-        rightSideOfSeriesCard.setCacheHint(CacheHint.SPEED);
 
         seriesCardSettingsButton.setOnMouseClicked((MouseEvent event) -> {
-            rightSideOfSeriesCard.setTop(SeriesCardSettingPane(series, primaryStage));
+            rightSideOfSeriesCard.setTop(seriesCardSettingsPane(series, primaryStage));
             rightSideBottomPane.setLeft(backToSeriesCardDataButton);
         });
         backToSeriesCardDataButton.setOnMouseClicked((MouseEvent event) -> {
@@ -880,35 +965,27 @@ public class TsundOku extends Application {
         return rightSideOfSeriesCard;
     }
 
-    private HBox SeriesCardSettingPane(Series series, Stage primaryStage){
+    private HBox seriesCardSettingsPane(Series series, Stage primaryStage){
         TextArea userNotes = new TextArea(series.getUserNotes());
         userNotes.setFocusTraversable(false);
-        userNotes.setStyle(mainCSS_Styling);
+        userNotes.setStyle(collectionMasterCSS);
         userNotes.setWrapText(true);
         userNotes.setPrefSize(RIGHT_SIDE_CARD_WIDTH - 40, SERIES_CARD_HEIGHT - (2 * BOTTOM_CARD_HEIGHT));
         userNotes.textProperty().addListener((object, oldText, newText) -> series.setUserNotes(newText));
-        userNotes.setCache(true);
-        userNotes.setCacheHint(CacheHint.SPEED);
 
         FontIcon deleteButtonIcon = new FontIcon(BootstrapIcons.TRASH);
+        deleteButtonIcon.setId("CollectionIcon");
         deleteButtonIcon.setIconSize(30);
-        deleteButtonIcon.setIconColor(Color.rgb(223,213,158));
 
         Button deleteSeriesButton = new Button();
+        deleteSeriesButton.setPrefSize(RIGHT_SIDE_CARD_WIDTH - 310, BOTTOM_CARD_HEIGHT - 1);
         deleteSeriesButton.setGraphic(deleteButtonIcon);
-        deleteSeriesButton.setId("IconButtonSettings");
-        deleteSeriesButton.setStyle(mainCSS_Styling);
-        deleteSeriesButton.setCache(true);
-        deleteSeriesButton.setCacheHint(CacheHint.SPEED);
+        deleteSeriesButton.setId("CollectionIconButton");
         deleteSeriesButton.setOnMouseClicked((MouseEvent event) -> {
             userCollection.removeIf(delSeries -> delSeries.getRomajiTitle().equals(series.getRomajiTitle()));
             collectionSetup(primaryStage);
             primaryStage.setScene(mainScene);
         });
-       deleteSeriesButton.setOnMouseEntered((MouseEvent event) -> deleteButtonIcon.setIconColor(Color.rgb(44, 45, 66)));
-        deleteSeriesButton.setOnMouseExited((MouseEvent event) -> deleteButtonIcon.setIconColor(Color.rgb(223,213,158)));
-        deleteSeriesButton.setCache(true);
-        deleteSeriesButton.setCacheHint(CacheHint.SPEED);
 
         UnaryOperator<TextFormatter.Change> filter = change -> {
             String text = change.getText();
@@ -917,28 +994,21 @@ public class TsundOku extends Application {
         };
 
         TextField curVolChange = new TextField();
-        curVolChange.setPrefWidth(50);
-        curVolChange.setId("TextFieldStyling");
-        curVolChange.setStyle(mainCSS_Styling);
-        curVolChange.setAlignment(Pos.CENTER);
+        curVolChange.setId("CollectionTextField");
         curVolChange.setTextFormatter(new TextFormatter<>(filter));
 
         TextField maxVolChange = new TextField();
-        maxVolChange.setPrefWidth(50);
-        maxVolChange.setId("TextFieldStyling");
-        maxVolChange.setStyle(mainCSS_Styling);
-        maxVolChange.setAlignment(Pos.CENTER);
+        maxVolChange.setId("CollectionTextField");
         maxVolChange.setTextFormatter(new TextFormatter<>(filter));
 
         FontIcon changeVolButtonIcon = new FontIcon(BootstrapIcons.ARROW_REPEAT);
+        changeVolButtonIcon.setId("CollectionIcon");
         changeVolButtonIcon.setIconSize(30);
-        changeVolButtonIcon.setIconColor(Color.rgb(223,213,158));
 
         Button changeVolCountButton = new Button();
-        changeVolCountButton.setAlignment(Pos.CENTER);
-        changeVolCountButton.setGraphic((changeVolButtonIcon));
-        changeVolCountButton.setId("IconButtonSettings");
-        changeVolCountButton.setStyle(mainCSS_Styling);
+        changeVolCountButton.setPrefSize(RIGHT_SIDE_CARD_WIDTH - 310, BOTTOM_CARD_HEIGHT - 1);
+        changeVolCountButton.setGraphic(changeVolButtonIcon);
+        changeVolCountButton.setId("CollectionIconButton");
         changeVolCountButton.setOnMouseClicked((MouseEvent event) -> {
             int newMaxVolumeAmount = Integer.parseInt(maxVolChange.getText());
             int newCurVolAmount = Integer.parseInt(curVolChange.getText());
@@ -952,27 +1022,19 @@ public class TsundOku extends Application {
             collectionSetup(primaryStage);
             primaryStage.setScene(mainScene);
         });
-        changeVolCountButton.setOnMouseEntered((MouseEvent event) -> changeVolButtonIcon.setIconColor(Color.rgb(44, 45, 66)));
-        changeVolCountButton.setOnMouseExited((MouseEvent event) -> changeVolButtonIcon.setIconColor(Color.rgb(223,213,158)));
-        changeVolCountButton.setCache(true);
-        changeVolCountButton.setCacheHint(CacheHint.SPEED);
 
         VBox settingsButtons = new VBox();
         settingsButtons.setSpacing(10);
         settingsButtons.setPadding(new Insets(0, 7, 0, 0));
         settingsButtons.setAlignment(Pos.CENTER);
         settingsButtons.getChildren().addAll(deleteSeriesButton, curVolChange, maxVolChange, changeVolCountButton);
-        settingsButtons.setCache(true);
-        settingsButtons.setCacheHint(CacheHint.SPEED);
 
         HBox settingsCardPane = new HBox();
-        settingsCardPane.setStyle("-fx-padding: 5 2 4 10;");
+        settingsCardPane.setPadding(new Insets(5, 2, 4, 10));
         settingsCardPane.setAlignment(Pos.CENTER);
         settingsCardPane.setPrefSize(RIGHT_SIDE_CARD_WIDTH - 20, SERIES_CARD_HEIGHT - BOTTOM_CARD_HEIGHT);
         settingsCardPane.setSpacing(10);
         settingsCardPane.getChildren().addAll(userNotes, settingsButtons);
-        settingsCardPane.setCache(true);
-        settingsCardPane.setCacheHint(CacheHint.SPEED);
 
         return settingsCardPane;
     }
