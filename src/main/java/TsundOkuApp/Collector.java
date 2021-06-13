@@ -1,9 +1,8 @@
 package TsundOkuApp;
 
-import javafx.scene.paint.Color;
-
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class Collector implements java.io.Serializable{
@@ -11,10 +10,19 @@ public class Collector implements java.io.Serializable{
 	private String userName;
 	private Integer totalVolumes;
 	private char curLanguage;
-	private ArrayList<TsundOkuTheme> savedThemes;
+	private TsundOkuTheme mainTheme;
+	private HashMap<String, TsundOkuTheme> savedThemes;
 	private List<Series> collection;
 
 	public Collector() { }
+
+	public Collector(String userName, char curLanguage, TsundOkuTheme mainTheme, HashMap<String, TsundOkuTheme> savedThemes, List<Series> collection) {
+		this.userName = userName;
+		this.curLanguage = curLanguage;
+		this.mainTheme = mainTheme;
+		this.savedThemes = savedThemes;
+		this.collection = collection;
+	}
 
 	public char getCurLanguage() {
 		return curLanguage;
@@ -32,15 +40,16 @@ public class Collector implements java.io.Serializable{
 
 	public void setTotalVolumes(Integer totalVolumes) { this.totalVolumes = totalVolumes; }
 
-	public void setSavedThemes(ArrayList<TsundOkuTheme> savedThemes) { this.savedThemes = savedThemes; }
+	public HashMap<String, TsundOkuTheme>  getSavedThemes() { return savedThemes; }
 
-	public ArrayList<TsundOkuTheme> getSavedThemes() { return savedThemes; }
+	public void addNewTheme(TsundOkuTheme newTheme) { this.savedThemes.put(newTheme.getThemeName(), newTheme); }
 
-	public void addNewTheme(TsundOkuTheme newTheme) { this.savedThemes.add(newTheme); }
+	public TsundOkuTheme getMainTheme(){ return this.mainTheme; }
 
-	public TsundOkuTheme getMainTheme(){ return this.savedThemes != null ? this.savedThemes.get(0) : null; }
-
-	public void setNewMainTheme(TsundOkuTheme newMainTheme) { Collections.swap(this.savedThemes, this.savedThemes.indexOf(newMainTheme),0); }
+	public TsundOkuTheme setNewMainTheme(String themeName) {
+		this.mainTheme = this.savedThemes.get(themeName);
+		return mainTheme;
+	}
 
 	public List<Series> getCollection() { return collection; }
 

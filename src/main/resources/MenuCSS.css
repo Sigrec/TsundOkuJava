@@ -13,7 +13,7 @@
     -fx-font-size: 22;
     -fx-font-weight: bold;
     -fx-text-alignment: center;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10, 0.0, 1, 1);
 }
 
 #MenuLabel {
@@ -22,7 +22,7 @@
     -fx-font-size: 22;
     -fx-font-weight: bold;
     -fx-alignment: center;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10, 0.0, 1, 1);
 }
 
 #MenuButton {
@@ -43,13 +43,7 @@
 #MenuButton:hover {
     -fx-background-color: -fx-hover-menu-button-bg-color;
     -fx-border-color: -fx-hover-menu-button-border-color;
-    -fx-text-fill: -fx-normal-menu-button-text-color;
-}
-
-#MenuButton:selected {
-    -fx-background-color: -fx-hover-menu-button-bg-color;
-    -fx-border-color: -fx-hover-menu-button-border-color;
-    -fx-text-fill: -fx-normal-menu-button-text-color;
+    -fx-text-fill: -fx-hover-menu-button-text-color;
 }
 
 #MenuButton:disabled {
@@ -82,6 +76,8 @@
     -fx-background-color: -fx-normal-menu-button-bg-color;
     -fx-border-color: -fx-normal-menu-button-border-color;
     -fx-text-fill: -fx-normal-menu-button-text-color;
+    -fx-background-radius: 7;
+    -fx-background-insets: 0;
     -fx-border-radius: 5;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
@@ -97,6 +93,7 @@ combo-box .arrow, .combo-box .arrow-button {
 .combo-box:hover {
     -fx-background-color: -fx-hover-menu-button-bg-color;
     -fx-text-fill: -fx-hover-menu-button-text-color;
+    -fx-border-color: -fx-hover-menu-button-border-color;
 }
 
 .list-view, .list-cell {
@@ -200,8 +197,8 @@ combo-box .arrow, .combo-box .arrow-button {
 }
 
 #SeriesCard {
-    -fx-border-radius: 5px 5px 5px 5px;
-    -fx-background-radius: 5px 5px 5px 5px;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 10, 0.0, 2, 2);
 }
 
@@ -265,7 +262,16 @@ combo-box .arrow, .combo-box .arrow-button {
 }
 
 #SeriesDescriptionWrap {
+    -fx-border-width: 0;
     -fx-background-color: -fx-collection-card-main-bg-color;
+}
+
+#SeriesDescriptionScroll {
+    -fx-background-color: transparent;
+    -fx-hbar-policy: never;
+    -fx-vbar-policy: never;
+    -fx-fit-to-width: true;
+    -fx-fit-to-height: true;
 }
 
 #VolProgressTxt {
@@ -296,14 +302,6 @@ combo-box .arrow, .combo-box .arrow-button {
     -fx-text-fill: -fx-collection-hover-volprogress-text-color;
 }
 
-#SeriesDescriptionScroll {
-    -fx-background-color: transparent;
-    -fx-hbar-policy: never;
-    -fx-vbar-policy: never;
-    -fx-fit-to-width: true;
-    -fx-fit-to-height: true;
-}
-
 #ProgressBar {
     -fx-control-inner-background: -fx-collection-progress-bar-bg-color;
     -fx-text-box-border: -fx-collection-progress-bar-border-color;
@@ -317,7 +315,7 @@ combo-box .arrow, .combo-box .arrow-button {
     -fx-background-radius: 0px 0px 0px 5px;
     -fx-border-radius: 0px 0px 0px 5px;
     -fx-padding: 2 0 0 0;
-    -fx-background-color: -fx-collection-bottom-card-bg-color;
+    -fx-background-color: -fx-collection-button-icon-color;
     -fx-cursor: hand;
     -fx-alignment: center;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10.0, 0.0, 1.0, 1.0);
@@ -340,14 +338,16 @@ combo-box .arrow, .combo-box .arrow-button {
 
 #RightSideCard {
     -fx-background-color: -fx-collection-card-main-bg-color;
-    -fx-border-radius: 5px 5px 5px 5px;
-    -fx-background-radius: 5px 5px 5px 5px;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
 }
 
 .text-area {
-    -fx-background-color: -fx-collection-progress-bar-bg-color;
-    -fx-border-color: -fx-collection-progress-bar-border-color;
-    -fx-text-fill: -fx-collection-desc-color;
+    -fx-background-color: -fx-collection-usernotes-bg-color;
+    -fx-border-color: -fx-collection-usernotes-border-color;
+    -fx-text-fill: -fx-collection-usernotes-text-color;
+    -fx-background-radius: 7;
+    -fx-background-insets: 0;
     -fx-border-radius: 5;
     -fx-border-width: 2 2 2 2;
     -fx-font-family: 'Segoe UI';
@@ -376,9 +376,11 @@ combo-box .arrow, .combo-box .arrow-button {
 }
 
 #CollectionTextField{
-    -fx-background-color: -fx-collection-progress-bar-bg-color;
-    -fx-border-color: -fx-collection-progress-bar-border-color;
-    -fx-text-fill: -fx-collection-desc-color;
+    -fx-background-color: -fx-collection-usernotes-bg-color;
+    -fx-border-color: -fx-collection-usernotes-border-color;
+    -fx-text-fill: -fx-collection-usernotes-text-color;
+    -fx-background-radius: 7;
+    -fx-background-insets: 0;
     -fx-border-radius: 5;
     -fx-border-width: 2 2 2 2;
     -fx-font-family: 'Segoe UI';
@@ -388,11 +390,3 @@ combo-box .arrow, .combo-box .arrow-button {
     -fx-alignment: center;
     -fx-pref-width: 84;
 }
-
-/*#IconButtonSettings {
-    -fx-background-radius: 0px 0px 0px 5px;
-    -fx-border-radius: 0px 0px 0px 5px;
-    -fx-background-color: -fx-normal-background-color;
-    -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10.0, 0.0, 1.0, 1.0);
-}*/

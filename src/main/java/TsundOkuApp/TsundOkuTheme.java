@@ -2,6 +2,7 @@ package TsundOkuApp;
 
 public class TsundOkuTheme implements java.io.Serializable, Cloneable{
 
+	private String themeName;
 	private String menuBGColor;
 	private String menuBottomBorderColor;
 	private String menuTextColor;
@@ -21,6 +22,7 @@ public class TsundOkuTheme implements java.io.Serializable, Cloneable{
 	private String collectionSubHeaderColor;
 	private String collectionDescColor;
 	private String collectionCardBottomBGColor;
+	private String collectionIconButtonColor;
 	private String collectionNormalIconColor;
 	private String collectionHoverIconColor;
 	private String collectionProgressBarBorderColor;
@@ -28,10 +30,16 @@ public class TsundOkuTheme implements java.io.Serializable, Cloneable{
 	private String collectionProgressBarBGColor;
 	private String collectionNormalVolProgressTextColor;
 	private String collectionHoverVolProgressTextColor;
+	private String collectionUserNotesBGColor;
+	private String collectionUserNotesBorderColor;
+	private String collectionUserNotesTextColor;
+
+	public static final TsundOkuTheme DEFAULT_THEME = new TsundOkuTheme("Default Theme", "rgb(44,45,66); ", "rgb(223,213,158); ", "rgb(223,213,158); ", "rgba(18,23,29,0.6); ", "rgba(223,213,158,0.70); ", "rgb(223,213,158); ", "rgb(18,23,29); ", "rgb(223,213,158); ", "rgb(18,23,29); ", "rgb(18,23,29); ", "rgb(223,213,158); ", "rgb(44,45,66); ", "rgba(32,35,45,0.95); ", "rgba(223,213,158,0.95); ", "rgb(32,35,45); ", "rgb(223,213,158); ", "rgb(223,213,158); ", "rgba(236,236,236,0.9); ", "rgb(44,45,66); ", "rgb(44,45,66); ","rgb(223,213,158); ", "rgb(44,45,66); ", "rgb(223,213,158); ", "rgb(223,213,158); ", "rgb(18,23,29); ", "rgb(223,213,158); ", "rgb(18,23,29); ", "rgb(18,23,29); ", "rgb(223,213,158); ", "rgb(223,213,158); ");
 
 	public TsundOkuTheme(){ }
 
-	public TsundOkuTheme(String menuBGColor, String menuBottomBorderColor, String menuTextColor, String menuNormalButtonBGColor, String menuHoverButtonBGColor, String menuNormalButtonBorderColor, String menuHoverButtonBorderColor, String menuNormalButtonTextColor, String menuHoverButtonTextColor, String collectionBGColor, String collectionLinkNormalTextColor, String collectionLinkHoverTextColor, String collectionLinkNormalBGColor, String collectionLinkHoverBGColor, String collectionCardMainBGColor, String collectionTitleColor, String collectionSubHeaderColor, String collectionDescColor, String collectionCardBottomBGColor, String collectionNormalIconColor, String collectionHoverIconColor, String collectionProgressBarBorderColor, String collectionProgressBarColor, String collectionProgressBarBGColor, String collectionNormalVolProgressTextColor, String collectionHoverVolProgressTextColor) {
+	public TsundOkuTheme(String themeName, String menuBGColor, String menuBottomBorderColor, String menuTextColor, String menuNormalButtonBGColor, String menuHoverButtonBGColor, String menuNormalButtonBorderColor, String menuHoverButtonBorderColor, String menuNormalButtonTextColor, String menuHoverButtonTextColor, String collectionBGColor, String collectionLinkNormalTextColor, String collectionLinkHoverTextColor, String collectionLinkNormalBGColor, String collectionLinkHoverBGColor, String collectionCardMainBGColor, String collectionTitleColor, String collectionSubHeaderColor, String collectionDescColor, String collectionCardBottomBGColor, String collectionIconButtonColor, String collectionNormalIconColor, String collectionHoverIconColor, String collectionProgressBarBorderColor, String collectionProgressBarColor, String collectionProgressBarBGColor, String collectionNormalVolProgressTextColor, String collectionHoverVolProgressTextColor, String collectionUserNotesBGColor, String collectionUserNotesBorderColor, String collectionUserNotesTextColor) {
+		this.themeName = themeName;
 		this.menuBGColor = menuBGColor;
 		this.menuBottomBorderColor = menuBottomBorderColor;
 		this.menuTextColor = menuTextColor;
@@ -51,6 +59,7 @@ public class TsundOkuTheme implements java.io.Serializable, Cloneable{
 		this.collectionSubHeaderColor = collectionSubHeaderColor;
 		this.collectionDescColor = collectionDescColor;
 		this.collectionCardBottomBGColor = collectionCardBottomBGColor;
+		this.collectionIconButtonColor = collectionIconButtonColor;
 		this.collectionNormalIconColor = collectionNormalIconColor;
 		this.collectionHoverIconColor = collectionHoverIconColor;
 		this.collectionProgressBarBorderColor = collectionProgressBarBorderColor;
@@ -58,11 +67,59 @@ public class TsundOkuTheme implements java.io.Serializable, Cloneable{
 		this.collectionProgressBarBGColor = collectionProgressBarBGColor;
 		this.collectionNormalVolProgressTextColor = collectionNormalVolProgressTextColor;
 		this.collectionHoverVolProgressTextColor = collectionHoverVolProgressTextColor;
+		this.collectionUserNotesBGColor = collectionUserNotesBGColor;
+		this.collectionUserNotesBorderColor = collectionUserNotesBorderColor;
+		this.collectionUserNotesTextColor = collectionUserNotesTextColor;
 	}
 
 	protected Object clone() throws CloneNotSupportedException{
 		TsundOkuTheme clonedTheme = (TsundOkuTheme) super.clone();
 		return clonedTheme;
+	}
+
+	@Override
+	public String toString() {
+		return "TsundOkuTheme{" + "\n" +
+				"themeName='" + themeName + '\'' + "\n" +
+				", menuBGColor='" + menuBGColor + '\'' + "\n" +
+				", menuBottomBorderColor='" + menuBottomBorderColor + '\'' + "\n" +
+				", menuTextColor='" + menuTextColor + '\'' + "\n" +
+				", menuNormalButtonBGColor='" + menuNormalButtonBGColor + '\'' + "\n" +
+				", menuHoverButtonBGColor='" + menuHoverButtonBGColor + '\'' + "\n" +
+				", menuNormalButtonBorderColor='" + menuNormalButtonBorderColor + '\'' + "\n" +
+				", menuHoverButtonBorderColor='" + menuHoverButtonBorderColor + '\'' + "\n" +
+				", menuNormalButtonTextColor='" + menuNormalButtonTextColor + '\'' + "\n" +
+				", menuHoverButtonTextColor='" + menuHoverButtonTextColor + '\'' + "\n" +
+				", collectionBGColor='" + collectionBGColor + '\'' + "\n" +
+				", collectionLinkNormalTextColor='" + collectionLinkNormalTextColor + '\'' + "\n" +
+				", collectionLinkHoverTextColor='" + collectionLinkHoverTextColor + '\'' + "\n" +
+				", collectionLinkNormalBGColor='" + collectionLinkNormalBGColor + '\'' + "\n" +
+				", collectionLinkHoverBGColor='" + collectionLinkHoverBGColor + '\'' + "\n" +
+				", collectionCardMainBGColor='" + collectionCardMainBGColor + '\'' + "\n" +
+				", collectionTitleColor='" + collectionTitleColor + '\'' + "\n" +
+				", collectionSubHeaderColor='" + collectionSubHeaderColor + '\'' + "\n" +
+				", collectionDescColor='" + collectionDescColor + '\'' + "\n" +
+				", collectionCardBottomBGColor='" + collectionCardBottomBGColor + '\'' + "\n" +
+				", collectionIconButtonColor='" + collectionIconButtonColor + '\'' + "\n" +
+				", collectionNormalIconColor='" + collectionNormalIconColor + '\'' + "\n" +
+				", collectionHoverIconColor='" + collectionHoverIconColor + '\'' + "\n" +
+				", collectionProgressBarBorderColor='" + collectionProgressBarBorderColor + '\'' + "\n" +
+				", collectionProgressBarColor='" + collectionProgressBarColor + '\'' + "\n" +
+				", collectionProgressBarBGColor='" + collectionProgressBarBGColor + '\'' + "\n" +
+				", collectionNormalVolProgressTextColor='" + collectionNormalVolProgressTextColor + '\'' + "\n" +
+				", collectionHoverVolProgressTextColor='" + collectionHoverVolProgressTextColor + '\'' + "\n" +
+				", collectionUserNotesBGColor='" + collectionUserNotesBGColor + '\'' + "\n" +
+				", collectionUserNotesBorderColor='" + collectionUserNotesBorderColor + '\'' + "\n" +
+				", collectionUserNotesTextColor='" + collectionUserNotesTextColor + '\'' + "\n" +
+				'}';
+	}
+
+	public String getThemeName() {
+		return themeName;
+	}
+
+	public void setThemeName(String themeName) {
+		this.themeName = themeName;
 	}
 
 	public String getMenuBGColor() {
@@ -271,5 +328,37 @@ public class TsundOkuTheme implements java.io.Serializable, Cloneable{
 
 	public void setCollectionHoverVolProgressTextColor(String collectionHoverVolProgressTextColor) {
 		this.collectionHoverVolProgressTextColor = collectionHoverVolProgressTextColor;
+	}
+
+	public String getCollectionIconButtonColor() {
+		return collectionIconButtonColor;
+	}
+
+	public void setCollectionIconButtonColor(String collectionIconButtonColor) {
+		this.collectionIconButtonColor = collectionIconButtonColor;
+	}
+
+	public String getCollectionUserNotesBGColor() {
+		return collectionUserNotesBGColor;
+	}
+
+	public void setCollectionUserNotesBGColor(String collectionUserNotesBGColor) {
+		this.collectionUserNotesBGColor = collectionUserNotesBGColor;
+	}
+
+	public String getCollectionUserNotesBorderColor() {
+		return collectionUserNotesBorderColor;
+	}
+
+	public void setCollectionUserNotesBorderColor(String collectionUserNotesBorderColor) {
+		this.collectionUserNotesBorderColor = collectionUserNotesBorderColor;
+	}
+
+	public String getCollectionUserNotesTextColor() {
+		return collectionUserNotesTextColor;
+	}
+
+	public void setCollectionUserNotesTextColor(String collectionUserNotesTextColor) {
+		this.collectionUserNotesTextColor = collectionUserNotesTextColor;
 	}
 }
