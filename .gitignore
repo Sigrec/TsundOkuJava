@@ -10,9 +10,6 @@ buildNumber.properties
 # https://github.com/takari/maven-wrapper#usage-without-binary-jar
 .mvn/wrapper/maven-wrapper.jar
 
-Covers/
-UsersCollection.bin
-
 *.class
 
 # Log file
