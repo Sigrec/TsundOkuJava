@@ -1,0 +1,214 @@
+#MenuBar {
+    -fx-alignment: center;
+    -fx-background-color: -fx-menu-bg-color;
+    -fx-spacing: 30;
+    -fx-border-color: -fx-menu-bottom-border-color;
+    -fx-border-width: 0 0 4 0;
+}
+
+#UserName {
+    -fx-fill: -fx-menu-username-text-color;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-size: 22;
+    -fx-font-weight: bold;
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10, 0.0, 1, 1);
+}
+
+#MenuText {
+    -fx-fill: -fx-menu-text-color;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-size: 22;
+    -fx-font-weight: bold;
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10, 0.0, 1, 1);
+}
+
+#MenuLabel {
+    -fx-text-fill: -fx-menu-text-color;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-size: 22;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10, 0.0, 1, 1);
+}
+
+#MenuButton {
+    -fx-background-color: -fx-normal-menu-button-bg-color;
+    -fx-background-radius: 7;
+    -fx-background-insets: 0;
+    -fx-font-weight: bold;
+    -fx-font-size: 15;
+    -fx-font-family: 'Segoe UI';
+    -fx-border-color: -fx-normal-menu-button-border-color;
+    -fx-text-fill: -fx-normal-menu-button-text-color;
+    -fx-border-radius: 5;
+    -fx-border-width: 2;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10.0, 0.0, 1.0, 1.0);
+}
+
+#MenuButton:hover {
+    -fx-background-color: -fx-hover-menu-button-bg-color;
+    -fx-border-color: -fx-hover-menu-button-border-color;
+    -fx-text-fill: -fx-hover-menu-button-text-color;
+}
+
+#MenuButton:disabled {
+    -fx-opacity: 1;
+    -fx-background-color: -fx-hover-menu-button-bg-color;
+    -fx-border-color: -fx-hover-menu-button-border-color;
+    -fx-text-fill: -fx-hover-menu-button-text-color;
+}
+
+#UserSettingsIcon {
+    -fx-icon-color: -fx-menu-normal-user-settings-icon-color;
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.7) , 10.0, 0.0, 1.0, 1.0);
+}
+
+#MenuButton:hover > #UserSettingsIcon {
+    -fx-icon-color: -fx-menu-hover-user-settings-icon-color;
+}
+
+#ThemeSettingsIcon {
+    -fx-icon-color: -fx-menu-normal-theme-settings-icon-color;
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.7) , 10.0, 0.0, 1.0, 1.0);
+}
+
+#MenuButton:hover > #ThemeSettingsIcon {
+    -fx-icon-color:-fx-menu-hover-theme-settings-icon-color;
+}
+
+#UserNameAndSettingsButtonLayout {
+    -fx-alignment: center;
+    -fx-spacing: 5;
+}
+
+#MenuTextField {
+    -fx-background-color: -fx-normal-menu-button-bg-color;
+    -fx-background-radius: 7;
+    -fx-background-insets: 0;
+    -fx-border-color: -fx-normal-menu-button-border-color;
+    -fx-border-radius: 5;
+    -fx-border-width: 2 2 2 2;
+    -fx-font-size: 15;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10.0, 0.0, 1.0, 1.0);
+    -fx-text-fill: -fx-normal-menu-button-text-color;
+    -fx-font-family: 'Segoe UI';
+    -fx-alignment: center;
+}
+
+#CollectionSearchField {
+    -fx-background-color: -fx-menu-collection-search-bg-color;
+    -fx-background-radius: 7;
+    -fx-background-insets: 0;
+    -fx-border-color: -fx-menu-collection-search-border-color;
+    -fx-border-radius: 5;
+    -fx-border-width: 2 2 2 2;
+    -fx-font-size: 15;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10.0, 0.0, 1.0, 1.0);
+    -fx-text-fill: -fx-menu-collection-search-text-color;
+    -fx-font-family: 'Segoe UI';
+    -fx-alignment: center;
+}
+
+.combo-box {
+    -fx-background-color: -fx-normal-menu-button-bg-color;
+    -fx-border-color: -fx-normal-menu-button-border-color;
+    -fx-text-fill: -fx-normal-menu-button-text-color;
+    -fx-background-radius: 7;
+    -fx-background-insets: 0;
+    -fx-border-radius: 5;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10.0, 0.0, 1.0, 1.0);
+}
+
+combo-box .arrow, .combo-box .arrow-button {
+    -fx-padding: 0 10 0 10;
+    -fx-background-color: -fx-normal-menu-button-bg-color;
+    -fx-border-color: -fx-normal-menu-button-border-color;
+    -fx-font-size: 18;
+}
+
+.list-view, .list-cell{
+    -fx-background-color: -fx-normal-menu-button-bg-color;
+    -fx-border-color: -fx-normal-menu-button-border-color;
+    -fx-text-fill: -fx-normal-menu-button-text-color;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-font-size: 15;
+}
+
+.combo-box:hover, .list-view:hover, .list-cell:hover, .combo-box-popup:hover, combo-box:hover .arrow, .combo-box:hover .arrow-button, .combo-box .list-view .cell:selected, .combo-box-base:hover .cell:selected:filled {
+    -fx-background-color: -fx-hover-menu-button-bg-color;
+    -fx-border-color: -fx-hover-menu-button-border-color;
+    -fx-text-fill: -fx-hover-menu-button-text-color;
+}
+
+#SettingsTextStyling {
+    -fx-text-fill: -fx-menu-text-color;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-size: 11;
+    -fx-font-weight: bold;
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10.0, 0.0, 1.0, 1.0);
+}
+
+.color-picker {
+    -fx-background-color: -fx-normal-menu-button-bg-color;
+    -fx-border-color: -fx-normal-menu-button-border-color;
+    -fx-border-radius: 5;
+    -fx-border-width: 2 2 2 2;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10.0, 0.0, 1.0, 1.0);
+}
+
+.color-picker .color-picker-label .text {
+    -fx-fill: -fx-normal-menu-button-text-color;
+    -fx-font-weight: bold;
+    -fx-font-size: 15;
+    -fx-font-family: 'Segoe UI';
+}
+
+#ThemeSettingsPane {
+    -fx-background-color: -fx-menu-bg-color;
+    -fx-alignment: center;
+    -fx-spacing: 15;
+}
+
+#ThemeSettingsBox {
+    -fx-hgap: 20.0;
+    -fx-vgap: 10.0;
+    -fx-alignment: center;
+    -fx-orientation: horizontal;
+    -fx-border-color: -fx-menu-bottom-border-color;
+    -fx-border-width: 0 0 2 0;
+    -fx-padding: 5 0 25 0;
+}
+
+#SettingsLabelStyling {
+    -fx-text-fill: -fx-menu-text-color;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-size: 22;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+    -fx-border-color: -fx-menu-bottom-border-color;
+    -fx-border-width: 0 0 3 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10.0, 0.0, 1.0, 1.0);
+}
+
+#NewSeriesPane {
+    -fx-background-color: -fx-menu-bg-color;
+    -fx-border-color: -fx-menu-bottom-border-color;
+    -fx-border-width: 4;
+    -fx-alignment: center;
+    -fx-padding: 20 20 20 20;
+    -fx-spacing: 15;
+}
+
+#SettingsLabel {
+    -fx-spacing: 3;
+}

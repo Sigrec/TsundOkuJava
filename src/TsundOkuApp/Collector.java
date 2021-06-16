@@ -1,7 +1,5 @@
 package TsundOkuApp;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -9,14 +7,14 @@ public class Collector implements java.io.Serializable{
 
 	private String userName;
 	private Integer totalVolumes;
-	private char curLanguage;
+	private String curLanguage;
 	private TsundOkuTheme mainTheme;
 	private HashMap<String, TsundOkuTheme> savedThemes;
 	private List<Series> collection;
 
 	public Collector() { }
 
-	public Collector(String userName, char curLanguage, TsundOkuTheme mainTheme, HashMap<String, TsundOkuTheme> savedThemes, List<Series> collection) {
+	public Collector(String userName, String curLanguage, TsundOkuTheme mainTheme, HashMap<String, TsundOkuTheme> savedThemes, List<Series> collection) {
 		this.userName = userName;
 		this.curLanguage = curLanguage;
 		this.mainTheme = mainTheme;
@@ -24,11 +22,11 @@ public class Collector implements java.io.Serializable{
 		this.collection = collection;
 	}
 
-	public char getCurLanguage() {
+	public String getCurLanguage() {
 		return curLanguage;
 	}
 
-	public void setCurLanguage(char curLanguage) {
+	public void setCurLanguage(String curLanguage) {
 		this.curLanguage = curLanguage;
 	}
 
@@ -43,6 +41,10 @@ public class Collector implements java.io.Serializable{
 	public HashMap<String, TsundOkuTheme>  getSavedThemes() { return savedThemes; }
 
 	public void addNewTheme(TsundOkuTheme newTheme) { this.savedThemes.put(newTheme.getThemeName(), newTheme); }
+
+	public void removeSavedTheme(String curTheme) {
+		this.savedThemes.entrySet().removeIf(entry -> (curTheme.equals(entry.getKey())));
+	}
 
 	public TsundOkuTheme getMainTheme(){ return this.mainTheme; }
 

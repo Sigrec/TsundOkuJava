@@ -9,8 +9,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.FutureTask;
+import java.util.stream.Collectors;
 
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 
 public class GraphQLQuery {
 
@@ -29,9 +32,8 @@ public class GraphQLQuery {
 		return this;
 	}
 
-	public GraphQLQuery reset() {
+	public void reset() {
 		this.variables.clear();
-		return this;
 	}
 
 	public FutureTask<String> submit() {
@@ -45,20 +47,13 @@ public class GraphQLQuery {
 				connection.setRequestProperty("User-Agent", USER_AGENT);
 
 				try (OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream())) {
-					JSONObject jsonObject = new JSONObject();
-					jsonObject.put("query", query);
-					jsonObject.put("variables", variables);
-
+					JsonObject jsonObject = new JsonObject();
+					jsonObject.addProperty("query", query);
+					jsonObject.addProperty("variables", new Gson().toJson(variables));
 					writer.write(jsonObject.toString());
 				}
 
-				BufferedReader output = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
-				String test = "";
-				while (output.ready()) {
-					test += output.readLine();
-				}
-
-				return test;
+				return new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

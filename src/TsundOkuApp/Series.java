@@ -1,15 +1,18 @@
 package TsundOkuApp;
 
-import org.json.JSONObject;
-import org.json.JSONArray;
-import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.FutureTask;
 
-public class Series implements java.io.Serializable, Comparable<Series> {
+import javax.imageio.ImageIO;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+public class Series implements java.io.Serializable {
 
 	private String bookType, publisher, printStatus, link, cover, romajiTitle, englishTitle, nativeTitle, romajiStaff, nativeStaff, seriesDesc, userNotes;
 	private Integer curVolumes, maxVolumes;
@@ -38,62 +41,63 @@ public class Series implements java.io.Serializable, Comparable<Series> {
 	public Series CreateNewSeries(String title, String publisher, String bookType, Integer curVol, Integer maxVol){
 		curVolumes = curVol;
 		maxVolumes = maxVol;
+		String seriesObj = "Empty";
 
 		GraphQLQuery seriesQuery = new GraphQLQuery("query ($title: String, $type: MediaFormat) {\n" +
-				"  Media(search: $title, format: $type) {\n" +
-				"    countryOfOrigin\n" +
-				"    title {\n" +
-				"      romaji\n" +
-				"      english\n" +
-				"      native\n" +
-				"    }\n" +
-				"    staff(sort: ROLE) {\n" +
-				"      edges {\n" +
-				"        role\n" +
-				"        node {\n" +
-				"          name {\n" +
-				"            full\n" +
-				"            native\n" +
-				"            alternative\n" +
-				"          }\n" +
+				"Media(search: $title, format: $type) {\n" +
+				"  countryOfOrigin\n" +
+				"  title {\n" +
+				"    romaji\n" +
+				"    english\n" +
+				"    native\n" +
+				"  }\n" +
+				"  staff(sort: ROLE) {\n" +
+				"    edges {\n" +
+				"      role\n" +
+				"      node {\n" +
+				"        name {\n" +
+				"          full\n" +
+				"          native\n" +
+				"          alternative\n" +
 				"        }\n" +
 				"      }\n" +
 				"    }\n" +
-				"    description\n" +
-				"    status(version: 2)\n" +
-				"    siteUrl\n" +
-				"    coverImage {\n" +
-				"      extraLarge\n" +
-				"    }\n" +
 				"  }\n" +
-				"}\n").withVariable("title", title).withVariable("type", bookType.toUpperCase());
+				"  description\n" +
+				"  status(version: 2)\n" +
+				"  siteUrl\n" +
+				"  coverImage {\n" +
+				"    extraLarge\n" +
+				"  }\n" +
+				"}\n" +
+				"}").withVariable("title", title).withVariable("type", bookType.toUpperCase());
 
-		JSONObject mediaJson = null;
 		try {
 			FutureTask<String> task = seriesQuery.submit();
 			task.run();
-			mediaJson = new JSONObject(task.get()).getJSONObject("data").getJSONObject("Media");
+			if (task.isDone()){ seriesObj = task.get(); }
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		JSONObject titleJson = mediaJson.getJSONObject("title");
-		JSONArray staffJsonArray = mediaJson.getJSONObject("staff").getJSONArray("edges");
-		String jsonTitle = titleJson.optString("english");
-		String romajiTitle = titleJson.getString("romaji");
 
+		JsonObject mediaJson = JsonParser.parseString(seriesObj).getAsJsonObject().getAsJsonObject("data").getAsJsonObject("Media");
+		JsonObject titleJson = mediaJson.getAsJsonObject("title");
+		JsonArray staffJsonArray = mediaJson.getAsJsonObject("staff").getAsJsonArray("edges");
+		String jsonTitle = titleJson.get("english").getAsString();
+		String romajiTitle = titleJson.get("romaji").getAsString();
 
 		Series newSeries = new Series(
-				bookType.equals("Manga") ? getCorrectComicFormat(mediaJson.getString("countryOfOrigin")) : bookType,
-				getCardStatus(mediaJson.getString("status")),
-				mediaJson.getString("siteUrl"),
-				saveNewCoverImage(mediaJson.getJSONObject("coverImage").getString("extraLarge"), romajiTitle, bookType),
+				bookType.equals("Manga") ? getCorrectComicFormat(mediaJson.get("countryOfOrigin").getAsString()) : bookType,
+				getCardStatus(mediaJson.get("status").getAsString()),
+				mediaJson.get("siteUrl").getAsString(),
+				saveNewCoverImage(mediaJson.getAsJsonObject("coverImage").get("extraLarge").getAsString(), romajiTitle, bookType),
 				publisher,
 				romajiTitle,
 				jsonTitle.trim().equals("") ? romajiTitle : jsonTitle,
-				titleJson.getString("native"),
+				titleJson.get("native").getAsString(),
 				getSeriesStaff(staffJsonArray, "full"),
 				getSeriesStaff(staffJsonArray, "native"),
-				mediaJson.getString("description").replaceAll("<.*>", "").replaceFirst("\\(Source: [\\S\\s]+", "").trim(),
+				mediaJson.get("description").getAsString().replaceAll("<.*>", "").replaceFirst("\\(Source: [\\S\\s]+", "").trim(),
 				"Edit Notes:",
 				curVolumes,
 				maxVolumes);
@@ -102,17 +106,17 @@ public class Series implements java.io.Serializable, Comparable<Series> {
 		return newSeries;
 	}
 
-	public static String getSeriesStaff(JSONArray staffJsonArray, String nameType){
+	public static String getSeriesStaff(JsonArray staffJsonArray, String nameType){
 		StringBuilder staffNames = new StringBuilder();
 		String staffRole;
-		JSONObject staff;
+		JsonObject staff;
 
 		int count = 0;
-		while (count < staffJsonArray.length()){
-			staff = staffJsonArray.getJSONObject(count);
-			staffRole = staff.getString("role");
+		while (count < staffJsonArray.size()){
+			staff = staffJsonArray.get(count).getAsJsonObject();
+			staffRole = staff.get("role").getAsString();
 			if (staffRole.equals("Story & Art") | staffRole.equals("Story") | staffRole.equals("Art") | staffRole.equals("Original Creator") | staffRole.equals("Character Design") | staffRole.equals("Illustration") | staffRole.equals("Mechanical Design")){
-				staffNames.append(staff.getJSONObject("node").getJSONObject("name").getString(nameType)).append(" | ");
+				staffNames.append(staff.getAsJsonObject("node").getAsJsonObject("name").get(nameType).getAsString()).append(" | ");
 			}
 			count++;
 		}
@@ -121,19 +125,18 @@ public class Series implements java.io.Serializable, Comparable<Series> {
 	}
 
 	public static String getCorrectComicFormat(String jsonCountryOfOrigin){
-		switch (jsonCountryOfOrigin){
+		switch (jsonCountryOfOrigin) {
 			case "KR":
 				return "Manhwa";
 			case "CN":
 				return "Manhua";
-			case "JP":
 			default:
 				return "Manga";
 		}
 	}
 
 	public static String getCardStatus(String jsonStatus){
-		switch (jsonStatus){
+		switch (jsonStatus) {
 			case "RELEASING":
 				return "Ongoing";
 			case "FINISHED":
@@ -151,7 +154,7 @@ public class Series implements java.io.Serializable, Comparable<Series> {
 
 	public static String saveNewCoverImage(String coverLink, String title, String bookType){
 		String imgFormat = coverLink.substring(coverLink.length() - 3);
-		String newPath = "src/main/resources/Covers/" + title.replaceAll("[^A-Za-z\\d]", "") + "_" + bookType + "." + imgFormat;
+		String newPath = "Covers/" + title.replaceAll("[^A-Za-z\\d]", "") + "_" + bookType + "." + imgFormat;
 		try {
 			URL url = new URL(coverLink);
 			HttpURLConnection httpURLCon = (HttpURLConnection) url.openConnection();
@@ -161,34 +164,42 @@ public class Series implements java.io.Serializable, Comparable<Series> {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 		return newPath;
 	}
 
 	@Override
 	public String toString() {
-		return "Series{" +
-				"bookType='" + bookType + '\'' +
-				", publisher='" + publisher + '\'' +
-				", printStatus='" + printStatus + '\'' +
-				", link='" + link + '\'' +
-				", cover='" + cover + '\'' +
-				", romajiTitle='" + romajiTitle + '\'' +
-				", englishTitle='" + englishTitle + '\'' +
-				", nativeTitle='" + nativeTitle + '\'' +
-				", romajiStaff='" + romajiStaff + '\'' +
-				", nativeStaff='" + nativeStaff + '\'' +
-				", seriesDesc='" + seriesDesc + '\'' +
-				", userNotes='" + userNotes + '\'' +
-				", curVolumes=" + curVolumes +
-				", maxVolumes=" + maxVolumes +
+		return "Series{" + "\n" +
+				"bookType='" + bookType + '\'' + "\n" +
+				", publisher='" + publisher + '\'' + "\n" +
+				", printStatus='" + printStatus + '\'' + "\n" +
+				", link='" + link + '\'' + "\n" +
+				", cover='" + cover + '\'' + "\n" +
+				", romajiTitle='" + romajiTitle + '\'' + "\n" +
+				", englishTitle='" + englishTitle + '\'' + "\n" +
+				", nativeTitle='" + nativeTitle + '\'' + "\n" +
+				", romajiStaff='" + romajiStaff + '\'' + "\n" +
+				", nativeStaff='" + nativeStaff + '\'' + "\n" +
+				", seriesDesc='" + seriesDesc + '\'' + "\n" +
+				", userNotes='" + userNotes + '\'' + "\n" +
+				", curVolumes=" + curVolumes + '\'' + "\n" +
+				", maxVolumes=" + maxVolumes + '\'' + "\n" +
 				'}';
 	}
 
-	@Override
-	public int compareTo(Series series){
-		if (getRomajiTitle() == null || series.getRomajiTitle() == null) { return 0; }
-		return getRomajiTitle().compareTo(series.getRomajiTitle());
+	public static int compareByEnglishTitle(Series series1, Series series2){
+		if (series1.getEnglishTitle() == null || series2.getEnglishTitle() == null) { return 0; }
+		return series1.getEnglishTitle().compareTo(series2.getEnglishTitle());
+	}
+
+	public static int compareByNativeTitle(Series series1, Series series2) {
+		if (series1.getNativeTitle() == null || series2.getNativeTitle() == null) { return 0; }
+		return series1.getNativeTitle().compareTo(series2.getNativeTitle());
+	}
+
+	public static int compareByRomajiTitle(Series series1, Series series2){
+		if (series1.getRomajiTitle() == null || series2.getRomajiTitle() == null) { return 0; }
+		return series1.getRomajiTitle().compareTo(series2.getRomajiTitle());
 	}
 
 	public String getUserNotes() { return userNotes; }

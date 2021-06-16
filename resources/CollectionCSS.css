@@ -1,0 +1,214 @@
+#Collection {
+    -fx-background-color: -fx-collection-bg-color;
+    -fx-padding: 20 0 20 0;
+    -fx-hgap: 40;
+    -fx-vgap: 40;
+    -fx-alignment: center;
+}
+
+#CollectionScroll {
+    -fx-focus-color: transparent;
+    -fx-padding: -1 0 0 0;
+    -fx-hbar-policy: never;
+    -fx-vbar-policy: never;
+    -fx-fit-to-width: true;
+    -fx-fit-to-height: true;
+}
+
+#SeriesCard {
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 10, 0.0, 2, 2);
+}
+
+#ImgScaling {
+    -fx-border-radius: 5px 5px 5px 5px;
+    -fx-background-radius: 5px 5px 5px 5px;
+}
+
+#SeriesStatus {
+    -fx-background-color: -fx-collection-link-normal-bg-color;
+    -fx-border-radius: 0px 0px 5px 5px;
+    -fx-background-radius: 0px 0px 5px 5px;
+    -fx-text-fill: -fx-collection-link-normal-text-color;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10, 0.0, 1, 1);
+    -fx-alignment: center;
+    -fx-font-weight: bold;
+    -fx-font-size: 16.5;
+    -fx-font-family: 'Segoe UI';
+}
+
+#LeftSideCard:hover > #SeriesStatus {
+    -fx-background-color: -fx-collection-link-hover-bg-color;
+    -fx-text-fill: -fx-collection-link-hover-text-color;
+    -fx-border-radius: 0px 0px 5px 5px;
+    -fx-background-radius: 0px 0px 5px 5px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 5, 0.0, 1, 1);
+}
+
+#AniListLink {
+    -fx-border-radius: 5px 5px 5px 5px;
+    -fx-background-radius: 5px 5px 5px 5px;
+    -fx-padding: 0 0 0 -1;
+}
+
+#Publisher {
+    -fx-fill: -fx-collection-publisher-color;
+    -fx-font-size: 11.5;
+    -fx-font-weight: bold;
+    -fx-font-family: 'Segoe UI';
+}
+
+#SeriesTitle {
+    -fx-text-fill: -fx-collection-title-color;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-size: 24;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
+}
+
+#Mangaka {
+    -fx-fill: -fx-collection-mangaka-color;
+    -fx-font-size: 12;
+    -fx-font-style: italic;
+    -fx-font-weight: bold;
+    -fx-font-family: 'Segoe UI';
+}
+
+#SeriesDescriptionText {
+    -fx-fill: -fx-collection-desc-color;
+    -fx-font-size: 14;
+    -fx-font-family: 'Segoe UI';
+}
+
+#SeriesDescriptionWrap {
+    -fx-border-width: 0;
+    -fx-background-color: -fx-collection-card-main-bg-color;
+}
+
+#SeriesDescriptionScroll {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 0 10;
+    -fx-hbar-policy: never;
+    -fx-vbar-policy: never;
+    -fx-fit-to-width: true;
+    -fx-fit-to-height: true;
+}
+
+#VolProgressTxt {
+    -fx-background-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10.0, 0.0, 1.0, 1.0);
+    -fx-font-weight: bold;
+    -fx-font-family: 'Segoe UI';
+    -fx-text-fill: -fx-collection-normal-volprogress-text-color;
+    -fx-height: 8;
+    -fx-font-size: 16;
+    -fx-alignment: center;
+}
+
+#VolProgressButton {
+    -fx-text-fill: -fx-collection-normal-volprogress-text-color;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-weight: bold;
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10.0, 0.0, 1.0, 1.0);
+}
+
+#VolProgressButton:hover {
+    -fx-text-fill: -fx-collection-hover-volprogress-text-color;
+}
+
+#VolProgressButton:disabled {
+    -fx-text-fill: -fx-collection-hover-volprogress-text-color;
+}
+
+#ProgressBar {
+    -fx-control-inner-background: -fx-collection-progress-bar-bg-color;
+    -fx-text-box-border: -fx-collection-progress-bar-border-color;
+    -fx-accent: -fx-collection-progress-bar-color;
+    -fx-padding: 8 0 7 15;
+    -fx-shadow-highlight-color: transparent;
+    -fx-background-radius: 5;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10.0, 0.0, 1.0, 1.0);
+}
+
+#CollectionIconButton {
+    -fx-background-radius: 0px 0px 0px 5px;
+    -fx-border-radius: 0px 0px 0px 5px;
+    -fx-background-color: -fx-collection-button-icon-color;
+    -fx-cursor: hand;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10.0, 0.0, 1.0, 1.0);
+}
+
+#CollectionIcon{
+    -fx-icon-color: -fx-collection-normal-icon-color;
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.7) , 10.0, 0.0, 1.0, 1.0);
+}
+
+#CollectionIconButton:hover > #CollectionIcon {
+    -fx-icon-color: -fx-collection-hover-icon-color;
+}
+
+#SeriesCardBottomPane {
+    -fx-background-color: -fx-collection-bottom-card-bg-color;
+    -fx-background-radius: 0px 0px 5px 5px;
+    -fx-border-radius: 0px 0px 5px 5px;
+}
+
+#RightSideCard {
+    -fx-background-color: -fx-collection-card-main-bg-color;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.text-area{
+    -fx-background-color: -fx-collection-usernotes-bg-color;
+    -fx-border-color: -fx-collection-usernotes-border-color;
+    -fx-text-fill: -fx-collection-usernotes-text-color;
+    -fx-background-radius: 7;
+    -fx-background-insets: 0;
+    -fx-border-radius: 5;
+    -fx-border-width: 2 2 2 2;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-size: 14;
+}
+
+.text-area .scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.text-area .scroll-pane .viewport{
+    -fx-background-color: transparent;
+}
+
+.text-area .scroll-pane .content{
+    -fx-background-color: transparent;
+}
+
+.text-area .scroll-bar:vertical {
+    -fx-pref-width: 0;
+    -fx-opacity: 0;
+}
+
+*.focus {
+    -fx-outline: none;
+}
+
+#CollectionTextField{
+    -fx-background-color: -fx-collection-usernotes-bg-color;
+    -fx-border-color: -fx-collection-usernotes-border-color;
+    -fx-text-fill: -fx-collection-usernotes-text-color;
+    -fx-background-radius: 7;
+    -fx-background-insets: 0;
+    -fx-border-radius: 5;
+    -fx-border-width: 2 2 2 2;
+    -fx-font-family: 'Segoe UI';
+    -fx-font-size: 15;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10.0, 0.0, 1.0, 1.0);
+    -fx-alignment: center;
+    -fx-pref-width: 84;
+}
