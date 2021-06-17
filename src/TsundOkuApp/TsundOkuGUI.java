@@ -6,7 +6,12 @@ package TsundOkuApp;
 
 import java.awt.Desktop;
 
-import java.io.*;
+import java.io.File;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -25,7 +30,18 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.CacheHint;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextFormatter;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Label;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Clipboard;
@@ -172,7 +188,13 @@ public class TsundOkuGUI{
 		userSettingsButton.setPrefWidth(67.5);
 		userSettingsButton.setGraphic(userSettingsIcon);
 		userSettingsButton.setId("MenuButton");
-		userSettingsButton.setOnMouseClicked(event -> userSettingsWindow.show());
+		userSettingsButton.setOnMouseClicked(event -> {
+			if (userSettingsWindow.isShowing()){
+				userSettingsWindow.toFront();
+			} else {
+				userSettingsWindow.show();
+			}
+		});
 
 		FontIcon themeSettingsIcon = new FontIcon(BootstrapIcons.PALETTE2);
 		themeSettingsIcon.setIconSize(20);
@@ -182,7 +204,13 @@ public class TsundOkuGUI{
 		themeSettingsButton.setPrefWidth(67.5);
 		themeSettingsButton.setId("MenuButton");
 		themeSettingsButton.setGraphic(themeSettingsIcon);
-		themeSettingsButton.setOnMouseClicked(event -> themeSettingsWindow.show());
+		themeSettingsButton.setOnMouseClicked(event -> {
+			if (themeSettingsWindow.isShowing()){
+				themeSettingsWindow.toFront();
+			} else {
+				themeSettingsWindow.show();
+			}
+		});
 
 		HBox settingsRoot = new HBox(userSettingsButton, themeSettingsButton);
 		settingsRoot.setAlignment(Pos.CENTER);
@@ -227,7 +255,13 @@ public class TsundOkuGUI{
 		totalToCollect.setCacheHint(CacheHint.SPEED);
 
 		ToggleButton addNewSeriesButton = new ToggleButton("Add New Series");
-		addNewSeriesButton.setOnMouseClicked((MouseEvent event) -> addNewSeriesWindow.show());
+		addNewSeriesButton.setOnMouseClicked((MouseEvent event) -> {
+			if (addNewSeriesWindow.isShowing()){
+				addNewSeriesWindow.toFront();
+			} else {
+				addNewSeriesWindow.show();
+			}
+		});
 		addNewSeriesButton.setId("MenuButton");
 
 		ComboBox<String> languageSelect = new ComboBox<>(LANGUAGE_OPTIONS);
@@ -1178,12 +1212,15 @@ public class TsundOkuGUI{
 
 		submitButton.setPrefSize(60, 10);
 		submitButton.setId("MenuButton");
-		submitButton.disableProperty().bind(titleEnter.textProperty().isEmpty().or(publisherEnter.textProperty().isEmpty()).or( curVolumes.textProperty().isEmpty()).or(maxVolumes.textProperty().isEmpty()).or(bookTypeButtonGroup.selectedToggleProperty().isNull()));
+		submitButton.disableProperty().bind(titleEnter.textProperty().isEmpty().or(publisherEnter.textProperty().isEmpty()).or(curVolumes.textProperty().isEmpty()).or(maxVolumes.textProperty().isEmpty()).or(bookTypeButtonGroup.selectedToggleProperty().isNull()));
 		submitButton.setOnMouseClicked(event -> {
-			userCollection.add(new Series().CreateNewSeries(titleEnter.getText(), publisherEnter.getText(), bookType.get(), Integer.parseInt(curVolumes.getText()), Integer.parseInt(maxVolumes.getText())));
-			filteredUserCollection = userCollection;
-			collectionSetup(primaryStage);
-			updateCollectionNumbers();
+			String newTitle = titleEnter.getText();
+			if (userCollection.stream().noneMatch(series -> (containsIgnoreCase(newTitle, series.getRomajiTitle()) || containsIgnoreCase(newTitle, series.getEnglishTitle()) || containsIgnoreCase(newTitle, series.getNativeTitle())) && series.getBookType().equals(bookType.get()))){
+				userCollection.add(new Series().CreateNewSeries(newTitle, publisherEnter.getText(), bookType.get(), Integer.parseInt(curVolumes.getText()), Integer.parseInt(maxVolumes.getText())));
+				filteredUserCollection = userCollection;
+				collectionSetup(primaryStage);
+				updateCollectionNumbers();
+			}
 		});
 
 		VBox newSeriesPane = new VBox(inputTitleRoot, inputPublisherRoot, bookTypeRoot, volProgressRoot, submitButton);
@@ -1500,7 +1537,7 @@ public class TsundOkuGUI{
 		deleteSeriesButton.setGraphic(deleteButtonIcon);
 		deleteSeriesButton.setId("CollectionIconButton");
 		deleteSeriesButton.setOnMouseClicked((MouseEvent event) -> {
-			userCollection.removeIf(delSeries -> delSeries.getRomajiTitle().equals(series.getRomajiTitle()));
+			userCollection.removeIf(delSeries -> delSeries.getRomajiTitle().equals(series.getRomajiTitle()) && delSeries.getBookType().equals(series.getBookType()));
 			try {
 				Files.delete(Paths.get(series.getCover()));
 			} catch (IOException e) {

@@ -83,7 +83,6 @@ public class Series implements java.io.Serializable {
 		JsonObject mediaJson = JsonParser.parseString(seriesObj).getAsJsonObject().getAsJsonObject("data").getAsJsonObject("Media");
 		JsonObject titleJson = mediaJson.getAsJsonObject("title");
 		JsonArray staffJsonArray = mediaJson.getAsJsonObject("staff").getAsJsonArray("edges");
-		String jsonTitle = titleJson.get("english").getAsString();
 		String romajiTitle = titleJson.get("romaji").getAsString();
 
 		Series newSeries = new Series(
@@ -93,7 +92,7 @@ public class Series implements java.io.Serializable {
 				saveNewCoverImage(mediaJson.getAsJsonObject("coverImage").get("extraLarge").getAsString(), romajiTitle, bookType),
 				publisher,
 				romajiTitle,
-				jsonTitle.trim().equals("") ? romajiTitle : jsonTitle,
+				titleJson.get("english").isJsonNull() ? romajiTitle : titleJson.get("english").getAsString(),
 				titleJson.get("native").getAsString(),
 				getSeriesStaff(staffJsonArray, "full"),
 				getSeriesStaff(staffJsonArray, "native"),
