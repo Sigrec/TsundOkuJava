@@ -40,7 +40,7 @@
 - [Honto](https://honto.jp/)
 ***
 ### Important Info
-Do not delete or move any files that are inside this zip/folder, instead just pin the TsundOku.exe file to your taskbar or start menu or create a copy for your desktop.
+Do not delete or move any files that are inside this zip/folder, instead just pin the TsundOku.exe file to your taskbar
 
 If you lose or delete the UserData.dat file u will lose your entire collection, so do not delete it, u will have to start over again, the Covers folder I also made visible incase u want to change the img shown for a particular series just make sure u copy the EXACT name and extension (either JPG or PNG) from the image file.
 ***
