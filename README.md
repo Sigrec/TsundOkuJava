@@ -2,7 +2,7 @@
 ***
 ## [Follow Me on AL](https://anilist.co/user/Preminence/)
 ***
->Current Supported Version = V1.0.0
+>[Current Supported Version = V1.0.0](https://www.dropbox.com/sh/hxrirgtqa11lf5i/AAAMiOudi64grgileU0yDQiia?dl=0)
 ***
 ### Useful Links
 - [AniList Home](https://anilist.co/hom)
