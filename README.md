@@ -22,8 +22,8 @@
 ***
 ### Links to Buy Manga
 ***English***
-- [RightStufAnime](https://www.rightstufanime.com/)
-- [RobertsAnimeCornerStore](https://www.animecornerstore.com/graphicnovels1.html)
+- [✬RightStufAnime](https://www.rightstufanime.com/)
+- [✬RobertsAnimeCornerStore](https://www.animecornerstore.com/graphicnovels1.html)
 - [InStockTrades](https://www.instocktrades.com/)
 - [BookDepository (International)](https://www.bookdepository.com/manga-store/)
 - [Barnes & Noble](https://www.barnesandnoble.com/b/books/graphic-novels-comics/manga/_/N-1sZ29Z8q8Zucc)
@@ -32,10 +32,10 @@
 - [Indigo (Canada)](https://www.chapters.indigo.ca/en-ca/comic-book-shop/manga/)
 
 ***English & Japanese***
-- [Kinokuniya]()
+- [✬Kinokuniya](https://united-states.kinokuniya.com/)
 
 ***Japanese***
-- [Amazon.JP](https://www.amazon.co.jp/)
+- [✬Amazon.JP](https://www.amazon.co.jp/)
 - [Honto](https://honto.jp/)
 ***
 ### Important Info
