@@ -3,6 +3,7 @@
 ## [Follow Me on AL](https://anilist.co/user/Preminence/)
 ***
 >[Current Supported Version = V1.0.0](https://www.dropbox.com/sh/hxrirgtqa11lf5i/AAAMiOudi64grgileU0yDQiia?dl=0)
+>Leave all of the files in the "TsundOku" folder and just pin the TsundOku.exe file to your taskbar
 ***
 ### Useful Links
 - [AniList Home](https://anilist.co/hom)
