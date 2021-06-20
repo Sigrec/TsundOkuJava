@@ -1,4 +1,4 @@
-# Tsundoku (Desktop Manga & Novel Collection App)
+# [Tsundoku](https://en.wikipedia.org/wiki/Tsundoku) (Desktop Manga & Novel Collection App)
 ***
 ## [Follow Me on AL](https://anilist.co/user/Preminence/)
 ***
