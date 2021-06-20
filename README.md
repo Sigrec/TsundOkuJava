@@ -1,10 +1,10 @@
 # Tsundoku (Desktop Manga Collection App)
 ***
-##[Follow Me on AL](https://anilist.co/user/Preminence/)
+## [Follow Me on AL](https://anilist.co/user/Preminence/)
 ***
 >Current Supported Version = V1.0.0
 ***
-###Useful Links
+### Useful Links
 - [AniList Home](https://anilist.co/hom)
 - [Japanese Publisher Search](https://comic.k-manga.jp/)
   
@@ -20,7 +20,7 @@
 ***Others***
 - [PreMID (Discord Anime Extension)](https://premid.app/)
 ***
-###Links to Buy Manga
+### Links to Buy Manga
 ***English***
 - [RightStufAnime](https://www.rightstufanime.com/)
 - [RobertsAnimeCornerStore](https://www.animecornerstore.com/graphicnovels1.html)
@@ -38,12 +38,12 @@
 - [Amazon.JP](https://www.amazon.co.jp/)
 - [Honto](https://honto.jp/)
 ***
-###Important Info
+### Important Info
 Do not delete or move any files that are inside this zip/folder, instead just pin the TsundOku.exe file to your taskbar or start menu or create a copy for your desktop.
 
 If you lose or delete the UserData.dat file u will lose your entire collection, so do not delete it, u will have to start over again, the Covers folder I also made visible incase u want to change the img shown for a particular series just make sure u copy the EXACT name and extension (either JPG or PNG) from the image file.
 ***
-###Twitter Accounts to Follow for Manga News
+### Twitter Accounts to Follow for Manga News
 - https://twitter.com/shonenjump_plus (Japanese News)
 - https://twitter.com/Josu_ke (Japanese News)
 - https://twitter.com/Wsstalkback (Japanese News)
@@ -52,7 +52,7 @@ If you lose or delete the UserData.dat file u will lose your entire collection, 
 - https://twitter.com/MangaPlusENG (English News)
 - https://twitter.com/WSJ_manga (English & Japanese NewS)
 ***
-###HOW TO DOWNLOAD A JVM/JDK & UPDATE YOUR SYSTEM VARIABLES (WITHOUT A JVM/JDK YOU CAN NOT RUN ANY JAVA APPLICATIONS)
+### HOW TO DOWNLOAD A JVM/JDK & UPDATE YOUR SYSTEM VARIABLES (WITHOUT A JVM/JDK YOU CAN NOT RUN ANY JAVA APPLICATIONS)
 1.  *Go to this link (https://jdk.java.net/16/) and download the appropiate folder (.zip for Windows) for your OS*
     
 
