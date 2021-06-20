@@ -57,10 +57,10 @@ If you lose or delete the UserData.dat file u will lose your entire collection, 
 1.  *Go to this link (https://jdk.java.net/16/) and download the appropiate folder (.zip for Windows) for your OS*
     
 
-2. *Unzip the folder and move the unzipped folder to preferably your Program Files folder in your C.\ drive (I would rec creating a Java folder in there and putting the unzipped folder in there but it really doesn't matter)*
+2. *Unzip the folder and move the unzipped folder to preferably your Program Files folder in your C:\ drive (I would rec creating a Java folder in there and putting the unzipped folder in there but it really doesn't matter)*
 
 
-3. *COPY THE PATH TO THE JDK -> It should be something like this "C.\Program Files\Java\jdk-16.0.1"*
+3. *COPY THE PATH TO THE JDK -> It should be something like this "C:\Program Files\Java\jdk-16.0.1"*
 
 
 4. *Search in Windows "Edit the environment Variables" and run -> Click "Environment Variables" at the bottom right*
