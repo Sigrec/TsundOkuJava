@@ -9,11 +9,11 @@
 - [Japanese Publisher Search](https://comic.k-manga.jp/)
   
 ***Manga Streaming***
-- [MangaDex](https://mangadex.org/)
+- [✬MangaDex](https://mangadex.org/)
 - [MangaSee](https://mangasee123.com/)
 
 ***Anime Streaming***
-- [AniMixPlay](https://animixplay.to/)
+- [✬AniMixPlay](https://animixplay.to/)
 - [9Anime](https://9anime.to/)
 - [4Anime](https://4anime.to/)
 
