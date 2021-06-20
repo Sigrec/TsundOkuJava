@@ -6,12 +6,7 @@ package TsundOkuApp;
 
 import java.awt.Desktop;
 
-import java.io.File;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -22,31 +17,17 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.CacheHint;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextFormatter;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Label;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
@@ -69,13 +50,14 @@ import org.tbee.javafx.scene.layout.MigPane;
 public class TsundOkuGUI{
 
 	// Menu B& Settings Window Components
-	private Text totalVolDisplay, totalToCollect;
+	private SimpleStringProperty totalVolDisplayUpdate, totalToCollectUpdate;
 	private String collectionMasterCSS;
 	private final Stage addNewSeriesWindow = new Stage();
 	private final Stage themeSettingsWindow = new Stage();
 	private final Stage userSettingsWindow = new Stage();
 	private TsundOkuTheme finalNewTheme;
 	private HBox menuBar;
+	private ComboBox<String> languageSelect;
 
 	// Collection Components
 	private FlowPane collection;
@@ -85,21 +67,19 @@ public class TsundOkuGUI{
 	private static final int SERIES_CARD_HEIGHT = 245;
 	private static final int LEFT_SIDE_CARD_WIDTH = 165;
 	private static final int RIGHT_SIDE_CARD_WIDTH = SERIES_CARD_WIDTH - LEFT_SIDE_CARD_WIDTH;
-	private static final int MAX_SERIES_VOLUME_AMOUNT = 999;
 	private static final int NAV_HEIGHT = 100;
 	private static final int BOTTOM_CARD_HEIGHT = 38;
 	private static final double WINDOW_HEIGHT = Screen.getPrimary().getBounds().getHeight();
 	private static final double WINDOW_WIDTH = Screen.getPrimary().getBounds().getWidth();
-	private static final ObservableList<String> LANGUAGE_OPTIONS = FXCollections.observableArrayList("Romaji", "English", "日本語");
+	private static final ObservableList<String> LANGUAGE_OPTIONS = FXCollections.observableArrayList("Romaji", "English", "Native");
 
 	// Users Main Data
 	private Integer totalVolumesCollected = 0, maxVolumesInCollection = 0;
-	private List<Series> userCollection = new ArrayList<>();
-	private List<Series> filteredUserCollection;
+	private List<Series> userCollection;
+	private ObservableList<Series> filteredUserCollection;
 	private Collector user;
 	private TsundOkuTheme mainTheme;
 	private BorderPane content;
-	private Scene mainScene;
 	private String curTheme = "";
 	private ObservableList<String> usersSavedThemes;
 
@@ -107,29 +87,30 @@ public class TsundOkuGUI{
 
 	protected void setupTsundOkuGUI(Stage primaryStage) throws CloneNotSupportedException {
 		getUsersData();
-		filteredUserCollection = userCollection;
+		filteredUserCollection = FXCollections.observableArrayList(userCollection);
 		usersSavedThemes = FXCollections.observableArrayList(user.getSavedThemes().keySet());
 		mainTheme = user.getMainTheme();
 		collectionMasterCSS = drawTheme(mainTheme);
 
 		content = new BorderPane();
 		content.setCache(true);
+		content.setMaxSize(WINDOW_WIDTH - 100, WINDOW_HEIGHT - 100);
 		content.setCacheHint(CacheHint.SPEED);
 
-		mainScene = new Scene(content);
-		mainScene.getStylesheets().addAll("resources/CollectionCSS.css", "resources/MenuCSS.css");
+		Scene mainScene = new Scene(content);
+		mainScene.getStylesheets().addAll("CollectionCSS.css", "MenuCSS.css");
+
 		userSettingsWindow.initStyle(StageStyle.UNIFIED);
 		addNewSeriesWindow.initStyle(StageStyle.UNIFIED);
 		themeSettingsWindow.initStyle(StageStyle.UNIFIED);
 		collectionSetup(primaryStage);
-		menuSetup(content, primaryStage, mainScene);
+		sortCollection();
+		menuSetup(content, primaryStage);
 
 		primaryStage.setMinWidth(SERIES_CARD_WIDTH + 550);
 		primaryStage.setMinHeight(SERIES_CARD_HEIGHT + NAV_HEIGHT + 75);
-		primaryStage.setMaxWidth(WINDOW_WIDTH);
-		primaryStage.setMaxHeight(WINDOW_HEIGHT);
 		primaryStage.setTitle("TsundOku");
-		primaryStage.getIcons().add(new Image("resources/bookshelf.png"));
+		primaryStage.getIcons().add(new Image("bookshelf.png"));
 		primaryStage.setResizable(true);
 		primaryStage.setOnCloseRequest((WindowEvent event) -> {
 			storeUserData();
@@ -140,6 +121,20 @@ public class TsundOkuGUI{
 		primaryStage.initStyle(StageStyle.UNIFIED);
 		primaryStage.setScene(mainScene);
 		primaryStage.show();
+	}
+
+	private void sortCollection(){
+		switch (user.getCurLanguage()) {
+			case "English":
+				userCollection.sort(Series::compareByEnglishTitle);
+				break;
+			case "Native":
+				userCollection.sort(Series::compareByNativeTitle);
+				break;
+			default:
+				userCollection.sort(Series::compareByRomajiTitle);
+				break;
+		}
 	}
 
 	private void storeUserData(){
@@ -173,7 +168,7 @@ public class TsundOkuGUI{
 		}
 	}
 
-	private void menuSetup(BorderPane content, Stage primaryStage, Scene mainScene) throws CloneNotSupportedException {
+	private void menuSetup(BorderPane content, Stage primaryStage) throws CloneNotSupportedException {
 		userSettingsWindow(primaryStage);
 		setupCollectionSettingsWindow(primaryStage);
 		addNewSeriesWindow(primaryStage);
@@ -226,30 +221,50 @@ public class TsundOkuGUI{
 
 		TextField titleSearch = new TextField();
 		titleSearch.setId("CollectionSearchField");
-		titleSearch.textProperty().addListener((obs, oldText, newText) -> {
-			filteredUserCollection = userCollection
-					.parallelStream()
-					.filter(series -> containsIgnoreCase(series.getRomajiTitle(), newText) | containsIgnoreCase(series.getEnglishTitle(), newText) | containsIgnoreCase(series.getNativeTitle(), newText) | containsIgnoreCase(series.getRomajiStaff(), newText) | containsIgnoreCase(series.getNativeStaff(), newText) | containsIgnoreCase(series.getPublisher(), newText) | containsIgnoreCase(series.getBookType(), newText) | containsIgnoreCase(series.getPrintStatus(), newText))
-					.collect(Collectors.toList());
-			collectionSetup(primaryStage);
-			primaryStage.setScene(mainScene);
-		});
 		titleSearch.setCache(true);
 		titleSearch.setCacheHint(CacheHint.SPEED);
+
+		FontIcon searchButtonIcon = new FontIcon(BootstrapIcons.SEARCH);
+		searchButtonIcon.setIconSize(20);
+		searchButtonIcon.setId("ThemeSettingsIcon");
+
+		Button searchButton = new Button();
+		searchButton.setPrefWidth(30);
+		searchButton.setId("MenuButton");
+		searchButton.setGraphic(searchButtonIcon);
+		searchButton.setDefaultButton(true);
+		searchButton.setOnAction(event -> {
+			if (!titleSearch.getText().isEmpty()){
+				String newText = titleSearch.getText();
+				filteredUserCollection = FXCollections.observableArrayList(userCollection.parallelStream().filter(series -> containsIgnoreCase(series.getRomajiTitle(), newText) | containsIgnoreCase(series.getEnglishTitle(), newText) | containsIgnoreCase(series.getNativeTitle(), newText) | containsIgnoreCase(series.getRomajiStaff(), newText) | containsIgnoreCase(series.getNativeStaff(), newText) | containsIgnoreCase(series.getPublisher(), newText) | containsIgnoreCase(series.getBookType(), newText) | containsIgnoreCase(series.getPrintStatus(), newText)).collect(Collectors.toList()));
+			} else {
+				filteredUserCollection = FXCollections.observableArrayList(userCollection);
+			}
+			collectionSetup(primaryStage);
+			updateCollectionNumbers();
+		});
+
+		HBox searchPane = new HBox(titleSearch, searchButton);
+		searchPane.setAlignment(Pos.CENTER);
+		searchPane.setPrefWidth(200);
+		searchPane.setSpacing(2);
+
 
 		GridPane searchLayout = new GridPane();
 		searchLayout.setAlignment(Pos.CENTER);
 		searchLayout.add(searchLabel, 0, 0);
-		searchLayout.add(titleSearch, 0 ,1);
+		searchLayout.add(searchPane, 0 ,1);
 
-		Integer userVolumes = user.getTotalVolumes();
-
-		totalVolDisplay = new Text("Collected\n" + userVolumes + " Volumes");
+		totalVolDisplayUpdate = new SimpleStringProperty("Collected\n" + user.getTotalVolumes() + " Volumes");
+		Text totalVolDisplay = new Text();
+		totalVolDisplay.textProperty().bind(totalVolDisplayUpdate);
 		totalVolDisplay.setId("MenuText");
 		totalVolDisplay.setCache(true);
 		totalVolDisplay.setCacheHint(CacheHint.SPEED);
 
-		totalToCollect = new Text("Need To Collect\n" + (maxVolumesInCollection - userVolumes) + " Volumes");
+		totalToCollectUpdate = new SimpleStringProperty("Need To Collect\n" + (maxVolumesInCollection - user.getTotalVolumes()) + " Volumes");
+		Text totalToCollect = new Text();
+		totalToCollect.textProperty().bind(totalToCollectUpdate);
 		totalToCollect.setId("MenuText");
 		totalToCollect.setCache(true);
 		totalToCollect.setCacheHint(CacheHint.SPEED);
@@ -264,23 +279,14 @@ public class TsundOkuGUI{
 		});
 		addNewSeriesButton.setId("MenuButton");
 
-		ComboBox<String> languageSelect = new ComboBox<>(LANGUAGE_OPTIONS);
+		languageSelect = new ComboBox<>(LANGUAGE_OPTIONS);
 		languageSelect.setPrefWidth(135);
 		languageSelect.setValue(user.getCurLanguage());
 		languageSelect.setOnAction((event) -> {
-			switch (languageSelect.getValue()) {
-				case "English":
-					user.setCurLanguage("English");
-					break;
-				case "日本語":
-					user.setCurLanguage("日本語");
-					break;
-				default:
-					user.setCurLanguage("Romaji");
-					break;
-			}
+			user.setCurLanguage(languageSelect.getValue());
+			sortCollection();
+			filteredUserCollection = FXCollections.observableArrayList(userCollection);
 			collectionSetup(primaryStage);
-			primaryStage.setScene(mainScene);
 		});
 
 		VBox addSeriesAndLanguageLayout = new VBox(addNewSeriesButton, languageSelect);
@@ -292,6 +298,11 @@ public class TsundOkuGUI{
 		menuBar.setId("MenuBar");
 		menuBar.setStyle(collectionMasterCSS);
 		content.setTop(menuBar);
+	}
+
+	private void updateCollectionNumbers(){
+		totalVolDisplayUpdate.set("Collected\n" + user.getTotalVolumes() + " Volumes");
+		totalToCollectUpdate.set("Need To Collect\n" + (maxVolumesInCollection - user.getTotalVolumes()) + " Volumes");
 	}
 
 	private void userSettingsWindow(Stage primaryStage){
@@ -316,7 +327,7 @@ public class TsundOkuGUI{
 		saveUserNameButton.setOnMouseClicked(event -> {
 			user.setUserName(enterUserName.getText());
 			try {
-				menuSetup(content, primaryStage, mainScene);
+				menuSetup(content, primaryStage);
 			} catch (CloneNotSupportedException e) {
 				e.printStackTrace();
 			}
@@ -332,7 +343,7 @@ public class TsundOkuGUI{
 		deleteCollectionButton.setId("MenuButton");
 		deleteCollectionButton.setOnMouseClicked(event -> {
 			userCollection.clear();
-			filteredUserCollection = userCollection;
+			filteredUserCollection = FXCollections.observableArrayList(userCollection);
 			collectionSetup(primaryStage);
 		});
 
@@ -344,18 +355,12 @@ public class TsundOkuGUI{
 		userSettingsPane.setCacheHint(CacheHint.SPEED);
 
 		Scene userSettingsScene = new Scene(userSettingsPane);
-		userSettingsScene.getStylesheets().add("resources/MenuCSS.css");
+		userSettingsScene.getStylesheets().add("MenuCSS.css");
 
 		userSettingsWindow.setResizable(false);
-		userSettingsWindow.getIcons().add(new Image("resources/bookshelf.png"));
+		userSettingsWindow.getIcons().add(new Image("bookshelf.png"));
 		userSettingsWindow.setTitle(user.getUserName() + " Settings");
 		userSettingsWindow.setScene(userSettingsScene);
-	}
-
-	private void updateCollectionNumbers(){
-		Integer userVolumes = user.getTotalVolumes();
-		totalVolDisplay.setText("Collected\n" + userVolumes + " Volumes");
-		totalToCollect.setText("Need To Collect\n" + (maxVolumesInCollection - userVolumes) + " Volumes");
 	}
 
 	private static boolean containsIgnoreCase(String str, String searchStr){
@@ -985,12 +990,11 @@ public class TsundOkuGUI{
 			mainTheme = user.setNewMainTheme(userCurrentTheme.getValue());
 			collectionMasterCSS = drawTheme(mainTheme);
 			try {
-				menuSetup(content, primaryStage, mainScene);
+				menuSetup(content, primaryStage);
 			} catch (CloneNotSupportedException e) {
 				e.printStackTrace();
 			}
 			collectionSetup(primaryStage);
-			primaryStage.setScene(mainScene);
 		});
 
 		Button deleteThemeButton = new Button("X");
@@ -1030,13 +1034,14 @@ public class TsundOkuGUI{
 		themeSettingRoot.setStyle(collectionMasterCSS);
 
 		Scene collectionSettingsScene = new Scene(themeSettingRoot);
-		collectionSettingsScene.getStylesheets().add("resources/MenuCSS.css");
+		collectionSettingsScene.getStylesheets().add("MenuCSS.css");
 
 		themeSettingsWindow.setHeight(940);
 		themeSettingsWindow.setWidth(880);
 		themeSettingsWindow.setTitle("TsundOku Theme Settings");
-		themeSettingsWindow.getIcons().add(new Image("resources/bookshelf.png"));
+		themeSettingsWindow.getIcons().add(new Image("bookshelf.png"));
 		themeSettingsWindow.setScene(collectionSettingsScene);
+		themeSettingsWindow.setOnCloseRequest(event -> userCurrentTheme.setValue(user.getMainTheme().getThemeName()));
 	}
 
 	private String drawTheme(TsundOkuTheme newTheme){
@@ -1212,14 +1217,16 @@ public class TsundOkuGUI{
 
 		submitButton.setPrefSize(60, 10);
 		submitButton.setId("MenuButton");
-		submitButton.disableProperty().bind(titleEnter.textProperty().isEmpty().or(publisherEnter.textProperty().isEmpty()).or(curVolumes.textProperty().isEmpty()).or(maxVolumes.textProperty().isEmpty()).or(bookTypeButtonGroup.selectedToggleProperty().isNull()));
+		submitButton.disableProperty().bind(titleEnter.textProperty().isEmpty().or(publisherEnter.textProperty().isEmpty()).or(curVolumes.textProperty().isEmpty()).or(maxVolumes.textProperty().isEmpty()).or(bookTypeButtonGroup.selectedToggleProperty().isNull()).or(curVolumes.textProperty().greaterThan(maxVolumes.textProperty())));
 		submitButton.setOnMouseClicked(event -> {
-			String newTitle = titleEnter.getText();
-			if (userCollection.stream().noneMatch(series -> (containsIgnoreCase(newTitle, series.getRomajiTitle()) || containsIgnoreCase(newTitle, series.getEnglishTitle()) || containsIgnoreCase(newTitle, series.getNativeTitle())) && series.getBookType().equals(bookType.get()))){
-				userCollection.add(new Series().CreateNewSeries(newTitle, publisherEnter.getText(), bookType.get(), Integer.parseInt(curVolumes.getText()), Integer.parseInt(maxVolumes.getText())));
-				filteredUserCollection = userCollection;
-				collectionSetup(primaryStage);
-				updateCollectionNumbers();
+			if (Integer.parseInt(curVolumes.getText()) <= Integer.parseInt(maxVolumes.getText())){
+				String newTitle = titleEnter.getText();
+				if (userCollection.stream().noneMatch(series -> ((series.getRomajiTitle().equalsIgnoreCase(newTitle) || series.getEnglishTitle().equalsIgnoreCase(newTitle) || series.getNativeTitle().equalsIgnoreCase(newTitle)) && series.getBookType().equals(bookType.get())))){
+					userCollection.add(new Series().CreateNewSeries(newTitle, publisherEnter.getText(), bookType.get(), Integer.parseInt(curVolumes.getText()), Integer.parseInt(maxVolumes.getText())));
+					filteredUserCollection = FXCollections.observableArrayList(userCollection);
+					collectionSetup(primaryStage);
+					updateCollectionNumbers();
+				}
 			}
 		});
 
@@ -1230,25 +1237,14 @@ public class TsundOkuGUI{
 		newSeriesPane.setCacheHint(CacheHint.SPEED);
 
 		Scene newSeriesScene = new Scene(newSeriesPane);
-		newSeriesScene.getStylesheets().add("resources/MenuCSS.css");
+		newSeriesScene.getStylesheets().add("MenuCSS.css");
 		addNewSeriesWindow.setResizable(false);
-		addNewSeriesWindow.getIcons().add(new Image("resources/bookshelf.png"));
+		addNewSeriesWindow.getIcons().add(new Image("bookshelf.png"));
 		addNewSeriesWindow.setTitle("Add New Series");
 		addNewSeriesWindow.setScene(newSeriesScene);
 	}
 
 	private void collectionSetup(Stage primaryStage){
-		switch (user.getCurLanguage()) {
-			case "English":
-				userCollection.sort(Series::compareByEnglishTitle);
-				break;
-			case "日本語":
-				userCollection.sort(Series::compareByNativeTitle);
-				break;
-			default:
-				userCollection.sort(Series::compareByRomajiTitle);
-				break;
-		}
 		totalVolumesCollected = 0;
 		maxVolumesInCollection = 0;
 
@@ -1258,8 +1254,18 @@ public class TsundOkuGUI{
 		collection.setCache(true);
 		collection.setCacheHint(CacheHint.SPEED);
 
-		ScrollPane collectionScroll = new ScrollPane();
+		ScrollPane collectionScroll = new ScrollPane(collection);
 		collectionScroll.setId("CollectionScroll");
+		collectionScroll.setVvalue(collectionScroll.getVvalue() - 2000);
+		collectionScroll.getContent().setOnScroll(scrollEvent -> {
+			double deltaY = scrollEvent.getDeltaY() * 1.5;
+			double contentHeight = collectionScroll.getContent().getBoundsInLocal().getHeight();
+			double collectionScrollHeight = collectionScroll.getHeight();
+			double diff = contentHeight - collectionScrollHeight;
+			if (diff < 1) diff = 1;
+			double vvalue = collectionScroll.getVvalue();
+			collectionScroll.setVvalue(vvalue + -deltaY/diff);
+		});
 		collectionScroll.setCache(true);
 		collectionScroll.setCacheHint(CacheHint.SPEED);
 
@@ -1275,7 +1281,6 @@ public class TsundOkuGUI{
 		}
 
 		user.setTotalVolumes(totalVolumesCollected);
-		collectionScroll.setContent(collection);
 		content.setCenter(collectionScroll);
 	}
 
@@ -1327,19 +1332,44 @@ public class TsundOkuGUI{
 		return aniListLink;
 	}
 
+	private String getCurTitle(Series series, String curLanguage){
+		switch (curLanguage) {
+			case "Romaji":
+				return series.getRomajiTitle();
+			case "English":
+				return series.getEnglishTitle();
+			case "Native":
+				return series.getNativeTitle();
+			default:
+				return "Error Title\n";
+		}
+	}
+
+	private String getCurMangaka(Series series, String curLanguage){
+		switch (curLanguage) {
+			case "English":
+			case "Romaji":
+				return series.getRomajiStaff();
+			case "Native":
+				return series.getNativeStaff();
+			default:
+				return "Error Mangaka";
+		}
+	}
+
 	private MigPane rightSideCardSetup(Series series, Stage primaryStage){
 		Integer curVolumes = series.getCurVolumes();
 		Integer maxVolumes = series.getMaxVolumes();
 
-		Text publisher = new Text(series.getPublisher() + "\n");
+		Text publisher = new Text(series.getPublisher());
 		publisher.setId("Publisher");
 		TextFlow publisherFlow = new TextFlow(publisher);
-		publisherFlow.setPadding(new Insets(0, 5, 0, 10));
+		publisherFlow.setLineSpacing(0);
+		publisherFlow.setPadding(new Insets(0, 5, 2, 10));
 
-		Label seriesTitle = new Label();
-		seriesTitle.setWrapText(true);
-		seriesTitle.setPrefWidth(RIGHT_SIDE_CARD_WIDTH - 20);
-		seriesTitle.setLineSpacing(-5);
+		String curLanguage = user.getCurLanguage();
+		Text seriesTitle = new Text(getCurTitle(series, curLanguage));
+		seriesTitle.setWrappingWidth(RIGHT_SIDE_CARD_WIDTH - 20);
 		seriesTitle.setId("SeriesTitle");
 		seriesTitle.setOnMouseClicked(event -> {
 			Clipboard copy = Clipboard.getSystemClipboard();
@@ -1348,35 +1378,19 @@ public class TsundOkuGUI{
 			copy.setContent(titleContent);
 		});
 		TextFlow seriesTitleFlow = new TextFlow(seriesTitle);
-		seriesTitleFlow.setOnMouseClicked(event -> {
+		seriesTitleFlow.setLineSpacing(-5);
+		seriesTitleFlow.setPadding(new Insets(-3, 5, 2, 10));
+		seriesTitleFlow.setCache(true);
+		seriesTitleFlow.setCacheHint(CacheHint.SPEED);
 
-		});
-		seriesTitleFlow.setPadding(new Insets(0, 5, 0, 10));
-
-		Text mangaka = new Text();
+		Text mangaka = new Text(getCurMangaka(series, curLanguage));
 		mangaka.setWrappingWidth(RIGHT_SIDE_CARD_WIDTH);
 		mangaka.setId("Mangaka");
 		TextFlow mangakaFlow = new TextFlow(mangaka);
+		mangakaFlow.setLineSpacing(0);
 		mangakaFlow.setPadding(new Insets(0, 5, 0, 10));
-
-		switch (user.getCurLanguage()) {
-			case "Romaji":
-				seriesTitle.setText(series.getRomajiTitle() + "\n");
-				mangaka.setText(series.getRomajiStaff());
-				break;
-		case "English":
-				seriesTitle.setText(series.getEnglishTitle() + "\n");
-				mangaka.setText(series.getRomajiStaff());
-				break;
-			case "日本語":
-				seriesTitle.setText(series.getNativeTitle() + "\n");
-				mangaka.setText(series.getNativeStaff());
-				break;
-			default:
-				seriesTitle.setText("Title Error\n");
-				mangaka.setText("Staff Error");
-				break;
-		}
+		mangakaFlow.setCache(true);
+		mangakaFlow.setCacheHint(CacheHint.SPEED);
 
 		Text desc = new Text(series.getSeriesDesc());
 		desc.setId("SeriesDescriptionText");
@@ -1393,8 +1407,7 @@ public class TsundOkuGUI{
 		DoubleProperty volUpdate = new SimpleDoubleProperty();
 		volUpdate.set(volAmount);
 
-		String progTxt = curVolumes + "/" + maxVolumes;
-		Label progressTxt = new Label(progTxt);
+		Label progressTxt = new Label(curVolumes + "/" + maxVolumes);
 		progressTxt.setId("VolProgressTxt");
 		progressTxt.setPrefSize(RIGHT_SIDE_CARD_WIDTH - (RIGHT_SIDE_CARD_WIDTH - 70) + 20, 20);
 		progressTxt.setCache(true);
@@ -1501,7 +1514,7 @@ public class TsundOkuGUI{
 		rightSideOfSeriesCard.add(seriesData, "north");
 		rightSideOfSeriesCard.add(rightSideBottomPane, "south");
 
-		HBox seriesSettingsPane = seriesCardSettingsPane(series, primaryStage);
+		HBox seriesSettingsPane = seriesCardSettingsPane(series, primaryStage, progressTxt);
 		seriesSettingsPane.setCache(true);
 		seriesSettingsPane.setCacheHint(CacheHint.SPEED);
 		seriesCardSettingsButton.setOnMouseClicked((MouseEvent event) -> {
@@ -1521,7 +1534,7 @@ public class TsundOkuGUI{
 		return rightSideOfSeriesCard;
 	}
 
-	private HBox seriesCardSettingsPane(Series series, Stage primaryStage){
+	private HBox seriesCardSettingsPane(Series series, Stage primaryStage, Label progressTxt){
 		TextArea userNotes = new TextArea(series.getUserNotes());
 		userNotes.setFocusTraversable(false);
 		userNotes.setWrapText(true);
@@ -1544,8 +1557,9 @@ public class TsundOkuGUI{
 				e.printStackTrace();
 			}
 			collectionSetup(primaryStage);
+			sortCollection();
+			filteredUserCollection = FXCollections.observableArrayList(userCollection);
 			updateCollectionNumbers();
-			primaryStage.setScene(mainScene);
 		});
 
 		UnaryOperator<TextFormatter.Change> filter = change -> {
@@ -1585,17 +1599,18 @@ public class TsundOkuGUI{
 		changeVolCountButton.setPrefSize(RIGHT_SIDE_CARD_WIDTH - 310, BOTTOM_CARD_HEIGHT - 1);
 		changeVolCountButton.setGraphic(changeVolButtonIcon);
 		changeVolCountButton.setId("CollectionIconButton");
-		changeVolCountButton.disableProperty().bind(curVolChange.textProperty().isEmpty().or(maxVolChange.textProperty().isEmpty()));
+		changeVolCountButton.disableProperty().bind(maxVolChange.textProperty().isEmpty().or(curVolChange.textProperty().isEmpty()));
 		changeVolCountButton.setOnMouseClicked((MouseEvent event) -> {
-			int newMaxVolumeAmount = Integer.parseInt(maxVolChange.getText());
-			int newCurVolAmount = Integer.parseInt(curVolChange.getText());
-			if (newMaxVolumeAmount > 0 && newCurVolAmount >= 0 && newCurVolAmount <= newMaxVolumeAmount && newMaxVolumeAmount <= MAX_SERIES_VOLUME_AMOUNT && newCurVolAmount < MAX_SERIES_VOLUME_AMOUNT){
+			if (Integer.parseInt(maxVolChange.getText()) >= Integer.parseInt(curVolChange.getText())){
+				int newMaxVolumeAmount = Integer.parseInt(maxVolChange.getText());
+				int newCurVolAmount = Integer.parseInt(curVolChange.getText());
+				user.setTotalVolumes(user.getTotalVolumes() - series.getCurVolumes() + newCurVolAmount);
+				maxVolumesInCollection = maxVolumesInCollection - series.getMaxVolumes() + newMaxVolumeAmount;
 				series.setMaxVolumes(newMaxVolumeAmount);
 				series.setCurVolumes(newCurVolAmount);
+				progressTxt.setText(series.getCurVolumes() + "/" + series.getMaxVolumes());
+				updateCollectionNumbers();
 			}
-			collectionSetup(primaryStage);
-			updateCollectionNumbers();
-			primaryStage.setScene(mainScene);
 		});
 		VBox settingsButtons = new VBox(deleteSeriesButton, curVolChange, maxVolChange, changeVolCountButton);
 		settingsButtons.setSpacing(10);

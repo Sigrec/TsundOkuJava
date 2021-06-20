@@ -60,11 +60,12 @@
 }
 
 #SeriesTitle {
-    -fx-text-fill: -fx-collection-title-color;
+    -fx-fill: -fx-collection-title-color;
     -fx-font-family: 'Segoe UI';
     -fx-font-size: 24;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1) , 10, 0.0, 1, 1);
+    -fx-cursor: hand;
 }
 
 #Mangaka {

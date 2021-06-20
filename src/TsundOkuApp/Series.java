@@ -1,16 +1,23 @@
 package TsundOkuApp;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.Buffer;
+import java.util.HashMap;
 import java.util.concurrent.FutureTask;
 
 import javax.imageio.ImageIO;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.stream.JsonReader;
 
 public class Series implements java.io.Serializable {
 
@@ -75,15 +82,27 @@ public class Series implements java.io.Serializable {
 		try {
 			FutureTask<String> task = seriesQuery.submit();
 			task.run();
-			if (task.isDone()){ seriesObj = task.get(); }
+			if (task.isDone()) { seriesObj = task.get(); }
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 
 		JsonObject mediaJson = JsonParser.parseString(seriesObj).getAsJsonObject().getAsJsonObject("data").getAsJsonObject("Media");
 		JsonObject titleJson = mediaJson.getAsJsonObject("title");
 		JsonArray staffJsonArray = mediaJson.getAsJsonObject("staff").getAsJsonArray("edges");
 		String romajiTitle = titleJson.get("romaji").getAsString();
+
+		if (!romajiTitle.equalsIgnoreCase(title) && !titleJson.get("english").getAsString().equalsIgnoreCase(title) && !titleJson.get("native").getAsString().equalsIgnoreCase(title)) { // AL has the series
+			try {
+				mediaJson = new Gson().toJsonTree(new Gson().fromJson(new BufferedReader(new FileReader("ExtraSeries.json")), HashMap.class).get(title.toLowerCase())).getAsJsonObject().getAsJsonObject("Media");
+				titleJson = mediaJson.getAsJsonObject("title");
+				staffJsonArray = mediaJson.getAsJsonObject("staff").getAsJsonArray("edges");
+				romajiTitle = titleJson.get("romaji").getAsString();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
 		Series newSeries = new Series(
 				bookType.equals("Manga") ? getCorrectComicFormat(mediaJson.get("countryOfOrigin").getAsString()) : bookType,
@@ -96,7 +115,7 @@ public class Series implements java.io.Serializable {
 				titleJson.get("native").getAsString(),
 				getSeriesStaff(staffJsonArray, "full"),
 				getSeriesStaff(staffJsonArray, "native"),
-				mediaJson.get("description").getAsString().replaceAll("<.*>", "").replaceFirst("\\(Source: [\\S\\s]+", "").trim(),
+				mediaJson.get("description").getAsString().replaceAll("\\<(.*?)\\>", "").replaceAll("&#9472;&#9472;", "──").replaceFirst("\\(Source: [\\S\\s]+", "").trim(),
 				"Edit Notes:",
 				curVolumes,
 				maxVolumes);
@@ -113,9 +132,20 @@ public class Series implements java.io.Serializable {
 		int count = 0;
 		while (count < staffJsonArray.size()){
 			staff = staffJsonArray.get(count).getAsJsonObject();
-			staffRole = staff.get("role").getAsString();
+			staffRole = staff.get("role").getAsString().trim();
 			if (staffRole.equals("Story & Art") | staffRole.equals("Story") | staffRole.equals("Art") | staffRole.equals("Original Creator") | staffRole.equals("Character Design") | staffRole.equals("Illustration") | staffRole.equals("Mechanical Design")){
-				staffNames.append(staff.getAsJsonObject("node").getAsJsonObject("name").get(nameType).getAsString()).append(" | ");
+				JsonElement newStaff = staff.getAsJsonObject("node").getAsJsonObject("name").get(nameType);
+				if (!newStaff.isJsonNull()){
+					staffNames.append(newStaff.getAsString()).append(" | ");
+				}
+				else{
+					if (nameType.equals("native")){ // Native name is null
+						staffNames.append(staff.getAsJsonObject("node").getAsJsonObject("name").get("full").getAsString()).append(" | ");
+					}
+					else { // Full name is null
+						staffNames.append(staff.getAsJsonObject("node").getAsJsonObject("name").get(nameType).getAsString()).append(" | ");
+					}
+				}
 			}
 			count++;
 		}
@@ -129,6 +159,8 @@ public class Series implements java.io.Serializable {
 				return "Manhwa";
 			case "CN":
 				return "Manhua";
+			case "FR":
+				return "Manfra";
 			default:
 				return "Manga";
 		}

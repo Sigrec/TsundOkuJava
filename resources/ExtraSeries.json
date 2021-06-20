@@ -1,0 +1,66 @@
+{
+  "radiant": {
+    "Media": {
+      "countryOfOrigin": "FR",
+      "title": {
+        "romaji": "Radiant",
+        "english": "RADIANT",
+        "native": "Radiant"
+      },
+      "staff": {
+        "edges": [
+          {
+            "role": "Story & Art",
+            "node": {
+              "name": {
+                "full": "Tony Valente",
+                "native": "Tony Valente",
+                "alternative": [
+                  ""
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "description": "Seth is an aspiring wizard living in a pastoral village under the watchful eye of his mentor. Like all wizards, he is an “infected”: one of the few living creatures that has survived contact with a Nemesis, creatures fallen from the sky that contaminate all they touch. His apparent immunity led him to choose a path that seemed to be perfect—to become someone who hunts and fights the Nemesis. But Seth longs for a quest that goes beyond the simple hunt for monsters. He wants to find their home, Radiant. Along with other wizards, he travels the world in search of Radiant, under the sinister eye of the Inquisition…",
+      "status": "RELEASING",
+      "siteUrl": "https:\/\/en.wikipedia.org\/wiki\/Radiant_(manfra)",
+      "coverImage": {
+        "extraLarge": "https:\/\/upload.wikimedia.org\/wikipedia\/en\/thumb\/e\/e7\/Cover_art_of_the_first_volume_of_Radiant.jpg\/220px-Cover_art_of_the_first_volume_of_Radiant.jpg"
+      }
+    }
+  },
+  "radiant2": {
+    "Media": {
+      "countryOfOrigin": "FR",
+      "title": {
+        "romaji": "Radiant2",
+        "english": "Radiant2",
+        "native": "Radiant2"
+      },
+      "staff": {
+        "edges": [
+          {
+            "role": "Story & Art",
+            "node": {
+              "name": {
+                "full": "Tony Valente",
+                "native": "Tony Valente",
+                "alternative": [
+                  ""
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "description": "Radiant is a French comics series written and illustrated by Tony Valente. It has been published by Ankama since 2013 and currently has 14 volumes released in French. It was later published by the Japanese publisher Asukashinsha in 2015, making it the first French manfra to be published in Japan. The series has been licensed by Viz Media in English since 2018 and currently has 13 volumes released. The series received an anime television series adaptation by Lerche that aired from October 2018 to February 2019, followed by a second season aired from October 2019 to February 2020.",
+      "status": "RELEASING",
+      "siteUrl": "https:\/\/en.wikipedia.org\/wiki\/Radiant_(manfra)",
+      "coverImage": {
+        "extraLarge": "https:\/\/upload.wikimedia.org\/wikipedia\/en\/thumb\/e\/e7\/Cover_art_of_the_first_volume_of_Radiant.jpg\/220px-Cover_art_of_the_first_volume_of_Radiant.jpg"
+      }
+    }
+  }
+}
