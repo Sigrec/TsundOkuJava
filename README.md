@@ -49,9 +49,10 @@ If you lose or delete the UserData.dat file u will lose your entire collection, 
 - https://twitter.com/Josu_ke (Japanese News)
 - https://twitter.com/Wsstalkback (Japanese News)
 - https://twitter.com/MangaMoguraRE (Japanese News)
+- https://twitter.com/al_mavivi (Japanese News)
 - https://twitter.com/TheOASG (English News)
 - https://twitter.com/MangaPlusENG (English News)
-- https://twitter.com/WSJ_manga (English & Japanese NewS)
+- https://twitter.com/WSJ_manga (English & Japanese News)
 ***
 ### HOW TO DOWNLOAD A JVM/JDK & UPDATE YOUR SYSTEM VARIABLES (WITHOUT A JVM/JDK YOU CAN NOT RUN ANY JAVA APPLICATIONS)
 1.  *Go to this link (https://jdk.java.net/16/) and download the appropiate folder (.zip for Windows) for your OS*
