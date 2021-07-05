@@ -1,18 +1,17 @@
+/*
+	Created by Prem
+ */
+
 package TsundOkuApp.PriceAnalysis;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
-
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 
 import java.util.*;
 import java.util.regex.Matcher;
