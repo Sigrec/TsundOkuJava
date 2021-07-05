@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.Buffer;
 import java.util.HashMap;
 import java.util.concurrent.FutureTask;
 
@@ -17,7 +16,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.google.gson.stream.JsonReader;
 
 public class Series implements java.io.Serializable {
 
@@ -92,8 +90,9 @@ public class Series implements java.io.Serializable {
 		JsonObject titleJson = mediaJson.getAsJsonObject("title");
 		JsonArray staffJsonArray = mediaJson.getAsJsonObject("staff").getAsJsonArray("edges");
 		String romajiTitle = titleJson.get("romaji").getAsString();
+		JsonElement englishTitle = titleJson.get("english");
 
-		if (!romajiTitle.equalsIgnoreCase(title) && !titleJson.get("english").getAsString().equalsIgnoreCase(title) && !titleJson.get("native").getAsString().equalsIgnoreCase(title)) { // AL has the series
+		if (!romajiTitle.equalsIgnoreCase(title) && (englishTitle.isJsonNull() || !englishTitle.getAsString().equalsIgnoreCase(title)) && !titleJson.get("native").getAsString().equalsIgnoreCase(title)) { // AL has the series
 			try {
 				mediaJson = new Gson().toJsonTree(new Gson().fromJson(new BufferedReader(new FileReader("ExtraSeries.json")), HashMap.class).get(title.toLowerCase())).getAsJsonObject().getAsJsonObject("Media");
 				titleJson = mediaJson.getAsJsonObject("title");
@@ -111,11 +110,11 @@ public class Series implements java.io.Serializable {
 				saveNewCoverImage(mediaJson.getAsJsonObject("coverImage").get("extraLarge").getAsString(), romajiTitle, bookType),
 				publisher,
 				romajiTitle,
-				titleJson.get("english").isJsonNull() ? romajiTitle : titleJson.get("english").getAsString(),
+				englishTitle.isJsonNull() ? romajiTitle : titleJson.get("english").getAsString(),
 				titleJson.get("native").getAsString(),
 				getSeriesStaff(staffJsonArray, "full"),
 				getSeriesStaff(staffJsonArray, "native"),
-				mediaJson.get("description").getAsString().replaceAll("\\<(.*?)\\>", "").replaceAll("&#9472;&#9472;", "──").replaceFirst("\\(Source: [\\S\\s]+", "").trim(),
+				mediaJson.get("description").isJsonNull() ? "" : mediaJson.get("description").getAsString().replaceAll("\\<(.*?)\\>", "").replaceAll("&#9472;&#9472;", "──").replaceFirst("\\(Source: [\\S\\s]+", "").trim(),
 				"Edit Notes:",
 				curVolumes,
 				maxVolumes);

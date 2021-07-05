@@ -17,7 +17,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.*;
+import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -74,8 +77,8 @@ public class TsundOkuGUI{
 	private static final ObservableList<String> LANGUAGE_OPTIONS = FXCollections.observableArrayList("Romaji", "English", "Native");
 
 	// Users Main Data
-	private Integer totalVolumesCollected = 0, maxVolumesInCollection = 0;
-	private List<Series> userCollection;
+	private int totalVolumesCollected = 0, maxVolumesInCollection = 0;
+	private List<Series> userCollection = new ArrayList<>();
 	private ObservableList<Series> filteredUserCollection;
 	private Collector user;
 	private TsundOkuTheme mainTheme;
@@ -93,8 +96,8 @@ public class TsundOkuGUI{
 		collectionMasterCSS = drawTheme(mainTheme);
 
 		content = new BorderPane();
-		content.setCache(true);
 		content.setMaxSize(WINDOW_WIDTH - 100, WINDOW_HEIGHT - 100);
+		content.setCache(true);
 		content.setCacheHint(CacheHint.SPEED);
 
 		Scene mainScene = new Scene(content);
@@ -103,8 +106,7 @@ public class TsundOkuGUI{
 		userSettingsWindow.initStyle(StageStyle.UNIFIED);
 		addNewSeriesWindow.initStyle(StageStyle.UNIFIED);
 		themeSettingsWindow.initStyle(StageStyle.UNIFIED);
-		collectionSetup(primaryStage);
-		sortCollection();
+		collectionSetup(primaryStage); sortCollection();
 		menuSetup(content, primaryStage);
 
 		primaryStage.setMinWidth(SERIES_CARD_WIDTH + 550);
@@ -286,7 +288,7 @@ public class TsundOkuGUI{
 			user.setCurLanguage(languageSelect.getValue());
 			sortCollection();
 			filteredUserCollection = FXCollections.observableArrayList(userCollection);
-			collectionSetup(primaryStage);
+			//collectionSetup(primaryStage);
 		});
 
 		VBox addSeriesAndLanguageLayout = new VBox(addNewSeriesButton, languageSelect);
@@ -1254,23 +1256,24 @@ public class TsundOkuGUI{
 		collection.setCache(true);
 		collection.setCacheHint(CacheHint.SPEED);
 
+		MigPane seriesCard;
 		ScrollPane collectionScroll = new ScrollPane(collection);
 		collectionScroll.setId("CollectionScroll");
 		collectionScroll.setVvalue(collectionScroll.getVvalue() - 2000);
 		collectionScroll.getContent().setOnScroll(scrollEvent -> {
-			double deltaY = scrollEvent.getDeltaY() * 1.5;
-			double contentHeight = collectionScroll.getContent().getBoundsInLocal().getHeight();
-			double collectionScrollHeight = collectionScroll.getHeight();
-			double diff = contentHeight - collectionScrollHeight;
-			if (diff < 1) diff = 1;
-			double vvalue = collectionScroll.getVvalue();
-			collectionScroll.setVvalue(vvalue + -deltaY/diff);
+				double deltaY = scrollEvent.getDeltaY() * 1.5;
+				double contentHeight = collectionScroll.getContent().getBoundsInParent().getHeight();
+				double collectionScrollHeight = collectionScroll.getHeight();
+				double diff = contentHeight - collectionScrollHeight;
+				if (diff < 1) diff = 1;
+				double vvalue = collectionScroll.getVvalue();
+				collectionScroll.setVvalue(vvalue + (-deltaY / diff));
 		});
 		collectionScroll.setCache(true);
 		collectionScroll.setCacheHint(CacheHint.SPEED);
 
 		for (Series series : filteredUserCollection) {
-			MigPane seriesCard = new MigPane();
+			seriesCard = new MigPane();
 			seriesCard.setId("SeriesCard");
 			seriesCard.setPrefSize(SERIES_CARD_WIDTH, SERIES_CARD_HEIGHT);
 			seriesCard.add(leftSideCardSetup(series), "dock west");
@@ -1279,7 +1282,6 @@ public class TsundOkuGUI{
 			seriesCard.setCacheHint(CacheHint.SPEED);
 			collection.getChildren().add(seriesCard);
 		}
-
 		user.setTotalVolumes(totalVolumesCollected);
 		content.setCenter(collectionScroll);
 	}
@@ -1341,7 +1343,7 @@ public class TsundOkuGUI{
 			case "Native":
 				return series.getNativeTitle();
 			default:
-				return "Error Title\n";
+				return "Error Title";
 		}
 	}
 
@@ -1358,14 +1360,13 @@ public class TsundOkuGUI{
 	}
 
 	private MigPane rightSideCardSetup(Series series, Stage primaryStage){
-		Integer curVolumes = series.getCurVolumes();
-		Integer maxVolumes = series.getMaxVolumes();
+		int curVolumes = series.getCurVolumes();
+		int maxVolumes = series.getMaxVolumes();
 
 		Text publisher = new Text(series.getPublisher());
 		publisher.setId("Publisher");
 		TextFlow publisherFlow = new TextFlow(publisher);
-		publisherFlow.setLineSpacing(0);
-		publisherFlow.setPadding(new Insets(0, 5, 2, 10));
+		publisherFlow.setPadding(new Insets(2, 5, 0, 10));
 
 		String curLanguage = user.getCurLanguage();
 		Text seriesTitle = new Text(getCurTitle(series, curLanguage));
@@ -1378,8 +1379,8 @@ public class TsundOkuGUI{
 			copy.setContent(titleContent);
 		});
 		TextFlow seriesTitleFlow = new TextFlow(seriesTitle);
-		seriesTitleFlow.setLineSpacing(-5);
-		seriesTitleFlow.setPadding(new Insets(-3, 5, 2, 10));
+		seriesTitleFlow.setLineSpacing(-6.5);
+		seriesTitleFlow.setPadding(new Insets(1, 5, 0, 10));
 		seriesTitleFlow.setCache(true);
 		seriesTitleFlow.setCacheHint(CacheHint.SPEED);
 
@@ -1387,8 +1388,7 @@ public class TsundOkuGUI{
 		mangaka.setWrappingWidth(RIGHT_SIDE_CARD_WIDTH);
 		mangaka.setId("Mangaka");
 		TextFlow mangakaFlow = new TextFlow(mangaka);
-		mangakaFlow.setLineSpacing(0);
-		mangakaFlow.setPadding(new Insets(0, 5, 0, 10));
+		mangakaFlow.setPadding(new Insets(2, 5, 0, 10));
 		mangakaFlow.setCache(true);
 		mangakaFlow.setCacheHint(CacheHint.SPEED);
 
@@ -1397,14 +1397,13 @@ public class TsundOkuGUI{
 
 		TextFlow descWrap = new TextFlow(desc);
 		descWrap.setPrefSize(SERIES_CARD_WIDTH - 20, SERIES_CARD_HEIGHT - BOTTOM_CARD_HEIGHT);
-		desc.setLineSpacing(-0.5);
 		descWrap.setId("SeriesDescriptionWrap");
 
 		ScrollPane descScroll = new ScrollPane(descWrap);
 		descScroll.setId("SeriesDescriptionScroll");
 
 		double volAmount = (double) curVolumes / maxVolumes;
-		DoubleProperty volUpdate = new SimpleDoubleProperty();
+		SimpleDoubleProperty volUpdate = new SimpleDoubleProperty();
 		volUpdate.set(volAmount);
 
 		Label progressTxt = new Label(curVolumes + "/" + maxVolumes);
@@ -1420,10 +1419,12 @@ public class TsundOkuGUI{
 		decrementButton.setId("VolProgressButton");
 		decrementButton.setOnMouseClicked((MouseEvent event) -> {
 			if (series.getCurVolumes() > 0){
-				series.setCurVolumes(series.getCurVolumes() - 1);
-				Integer seriesCurVolumes = series.getCurVolumes();
-				progressTxt.setText(seriesCurVolumes + "/" + maxVolumes);
-				volUpdate.set((double) seriesCurVolumes / maxVolumes);
+				int seriesCurVolumes = series.getCurVolumes();
+				int seriesMaxVolumes = series.getMaxVolumes();
+				series.setCurVolumes(seriesCurVolumes - 1);
+				seriesCurVolumes = series.getCurVolumes();
+				progressTxt.setText(seriesCurVolumes + "/" + seriesMaxVolumes);
+				volUpdate.set((double) seriesCurVolumes / seriesMaxVolumes);
 				user.setTotalVolumes(user.getTotalVolumes() - 1);
 				updateCollectionNumbers();
 				incrementButton.setDisable(false);
@@ -1438,11 +1439,13 @@ public class TsundOkuGUI{
 		incrementButton.setStyle("-fx-font-size: 27; -fx-padding: -12 0 -3 0;");
 		incrementButton.setId("VolProgressButton");
 		incrementButton.setOnMouseClicked((MouseEvent event) -> {
-			if (series.getCurVolumes() < maxVolumes){
-				series.setCurVolumes(series.getCurVolumes() + 1);
-				Integer seriesCurVolumes = series.getCurVolumes();
-				progressTxt.setText(seriesCurVolumes + "/" + maxVolumes);
-				volUpdate.set((double) seriesCurVolumes / maxVolumes);
+			if (series.getCurVolumes() < series.getMaxVolumes()){
+				int seriesCurVolumes = series.getCurVolumes();
+				int seriesMaxVolumes = series.getMaxVolumes();
+				series.setCurVolumes(seriesCurVolumes + 1);
+				seriesCurVolumes = series.getCurVolumes();
+				progressTxt.setText(seriesCurVolumes + "/" + seriesMaxVolumes);
+				volUpdate.set((double) seriesCurVolumes / seriesMaxVolumes);
 				user.setTotalVolumes(user.getTotalVolumes() + 1);
 				updateCollectionNumbers();
 				decrementButton.setDisable(false);
@@ -1455,7 +1458,7 @@ public class TsundOkuGUI{
 		incrementButton.setCacheHint(CacheHint.SPEED);
 
 		if (curVolumes == 0) { decrementButton.setDisable(true); }
-		else if (curVolumes.equals(maxVolumes)) { incrementButton.setDisable(true); }
+		else if (curVolumes == maxVolumes) { incrementButton.setDisable(true); }
 
 		ProgressBar volProgressBar = new ProgressBar();
 		volProgressBar.progressProperty().bind(volUpdate);
@@ -1468,19 +1471,16 @@ public class TsundOkuGUI{
 		seriesSettingIcon.setIconSize(25);
 		seriesSettingIcon.setId("CollectionIcon");
 
-		Button seriesCardSettingsButton = new Button();
-		seriesCardSettingsButton.setPrefSize(RIGHT_SIDE_CARD_WIDTH - 310, BOTTOM_CARD_HEIGHT - 1);
-		seriesCardSettingsButton.setGraphic(seriesSettingIcon);
-		seriesCardSettingsButton.setId("CollectionIconButton");
+		AtomicReference<Button> seriesCardSettingsButton = new AtomicReference<>(new Button());
+		seriesCardSettingsButton.get().setPrefSize(RIGHT_SIDE_CARD_WIDTH - 310, BOTTOM_CARD_HEIGHT - 1);
+		seriesCardSettingsButton.get().setGraphic(seriesSettingIcon);
+		seriesCardSettingsButton.get().setId("CollectionIconButton");
+		seriesCardSettingsButton.get().setCache(true);
+		seriesCardSettingsButton.get().setCacheHint(CacheHint.SPEED);
 
 		FontIcon backToSeriesDataIcon = new FontIcon(BootstrapIcons.CARD_HEADING);
 		backToSeriesDataIcon.setId("CollectionIcon");
 		backToSeriesDataIcon.setIconSize(25);
-
-		Button backToSeriesCardDataButton = new Button();
-		backToSeriesCardDataButton.setPrefSize(RIGHT_SIDE_CARD_WIDTH - 310, BOTTOM_CARD_HEIGHT - 1);
-		backToSeriesCardDataButton.setGraphic(backToSeriesDataIcon);
-		backToSeriesCardDataButton.setId("CollectionIconButton");
 
 		HBox userButtons = new HBox(decrementButton, incrementButton);
 		userButtons.setAlignment(Pos.CENTER);
@@ -1494,14 +1494,12 @@ public class TsundOkuGUI{
 		volProgress.setBottom(userButtons);
 
 		BorderPane rightSideBottomPane = new BorderPane();
-		rightSideBottomPane.setPrefSize(RIGHT_SIDE_CARD_WIDTH, BOTTOM_CARD_HEIGHT);
 		rightSideBottomPane.setId("SeriesCardBottomPane");
-		rightSideBottomPane.setLeft(seriesCardSettingsButton);
+		rightSideBottomPane.setLeft(seriesCardSettingsButton.get());
 		rightSideBottomPane.setCenter(volProgressBar);
 		rightSideBottomPane.setRight(volProgress);
 
 		MigPane seriesData = new MigPane("insets 5 0 3 0, align left", "[]", "[][]-4[]2[]");
-		seriesData.setMaxSize(RIGHT_SIDE_CARD_WIDTH - 20, SERIES_CARD_HEIGHT - BOTTOM_CARD_HEIGHT);
 		seriesData.setStyle("-fx-border-radius: 5 5 0 0;  -fx-background-radius: 5 5 0 0;");
 		seriesData.add(publisherFlow,"wrap, hmax 3.5");
 		seriesData.add(seriesTitleFlow, "wrap");
@@ -1512,20 +1510,23 @@ public class TsundOkuGUI{
 		rightSideOfSeriesCard.setId("RightSideCard");
 		rightSideOfSeriesCard.setPrefSize(RIGHT_SIDE_CARD_WIDTH, SERIES_CARD_HEIGHT - BOTTOM_CARD_HEIGHT);
 		rightSideOfSeriesCard.add(seriesData, "north");
-		rightSideOfSeriesCard.add(rightSideBottomPane, "south");
+		rightSideOfSeriesCard.add(rightSideBottomPane);
 
-		HBox seriesSettingsPane = seriesCardSettingsPane(series, primaryStage, progressTxt);
+		HBox seriesSettingsPane = seriesCardSettingsPane(series, primaryStage, progressTxt, volUpdate, decrementButton, incrementButton);
 		seriesSettingsPane.setCache(true);
 		seriesSettingsPane.setCacheHint(CacheHint.SPEED);
-		seriesCardSettingsButton.setOnMouseClicked((MouseEvent event) -> {
-			rightSideOfSeriesCard.remove(seriesData);
-			rightSideOfSeriesCard.add(seriesSettingsPane, "north");
-			rightSideBottomPane.setLeft(backToSeriesCardDataButton);
-		});
-		backToSeriesCardDataButton.setOnMouseClicked((MouseEvent event) -> {
-			rightSideOfSeriesCard.remove(seriesSettingsPane);
-			rightSideOfSeriesCard.add(seriesData);
-			rightSideBottomPane.setLeft(seriesCardSettingsButton);
+		seriesCardSettingsButton.get().setOnMouseClicked(event -> {
+			Button seriesButton = seriesCardSettingsButton.get();
+			if (seriesButton.getGraphic() == seriesSettingIcon){
+				rightSideOfSeriesCard.remove(seriesData);
+				rightSideOfSeriesCard.add(seriesSettingsPane, "north");
+				seriesButton.setGraphic(backToSeriesDataIcon);
+			}
+			else{
+				rightSideOfSeriesCard.remove(seriesSettingsPane);
+				rightSideOfSeriesCard.add(seriesData, "north");
+				seriesButton.setGraphic(seriesSettingIcon);
+			}
 		});
 
 		totalVolumesCollected += curVolumes;
@@ -1534,7 +1535,7 @@ public class TsundOkuGUI{
 		return rightSideOfSeriesCard;
 	}
 
-	private HBox seriesCardSettingsPane(Series series, Stage primaryStage, Label progressTxt){
+	private HBox seriesCardSettingsPane(Series series, Stage primaryStage, Label progressTxt, SimpleDoubleProperty volUpdate, Button decrementButton, Button incrementButton){
 		TextArea userNotes = new TextArea(series.getUserNotes());
 		userNotes.setFocusTraversable(false);
 		userNotes.setWrapText(true);
@@ -1559,6 +1560,7 @@ public class TsundOkuGUI{
 			collectionSetup(primaryStage);
 			sortCollection();
 			filteredUserCollection = FXCollections.observableArrayList(userCollection);
+			user.setTotalVolumes(user.getTotalVolumes() - series.getCurVolumes());
 			updateCollectionNumbers();
 		});
 
@@ -1608,8 +1610,21 @@ public class TsundOkuGUI{
 				maxVolumesInCollection = maxVolumesInCollection - series.getMaxVolumes() + newMaxVolumeAmount;
 				series.setMaxVolumes(newMaxVolumeAmount);
 				series.setCurVolumes(newCurVolAmount);
-				progressTxt.setText(series.getCurVolumes() + "/" + series.getMaxVolumes());
+				volUpdate.set((double) newCurVolAmount / newMaxVolumeAmount); //Update progress bar
+				progressTxt.setText(newCurVolAmount + "/" + newMaxVolumeAmount);
 				updateCollectionNumbers();
+				if (newCurVolAmount == 0) {
+					decrementButton.setDisable(true);
+					incrementButton.setDisable(false);
+				}
+				else if (newCurVolAmount == newMaxVolumeAmount) {
+					decrementButton.setDisable(false);
+					incrementButton.setDisable(true);
+				}
+				else{
+					incrementButton.setDisable(false);
+					decrementButton.setDisable(false);
+				}
 			}
 		});
 		VBox settingsButtons = new VBox(deleteSeriesButton, curVolChange, maxVolChange, changeVolCountButton);

@@ -89,7 +89,7 @@
 
 #SeriesDescriptionScroll {
     -fx-background-color: transparent;
-    -fx-padding: 0 0 0 10;
+    -fx-padding: 0 5 0 10;
     -fx-hbar-policy: never;
     -fx-vbar-policy: never;
     -fx-fit-to-width: true;
