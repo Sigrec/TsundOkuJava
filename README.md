@@ -6,7 +6,7 @@
 >Leave all of the files in the "TsundOku" folder and just pin the TsundOku.exe file to your taskbar
 ***
 ### Here is my Current Theme titled "Rustic", showcasing what the app looks like when run
-![Example App](Misc/TsundOkuExample.png)
+![Example App](resources/TsundOkuExample.png)
 ***
 ### Important Info
 Do not delete or move any files that are inside this zip/folder, instead just pin the TsundOku.exe file to your taskbar
