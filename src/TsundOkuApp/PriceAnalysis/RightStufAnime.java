@@ -19,11 +19,14 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class RightStufAnime {
 	private static ArrayList<String> rightStufLinks = new ArrayList<>();
 	private static ArrayList<String[]> dataList = new ArrayList<>();
+
 	private static final HashMap<String, String> regexTitleFilterList = new HashMap<String, String>() {
 		{
 			put(" ", "%20");
@@ -55,7 +58,7 @@ public class RightStufAnime {
 		return url;
 	}
 
-	public static List<String[]> getRightStufAnimeData(String bookTitle, char bookType, boolean memberStatus, int currPageNum){
+	public static List<String[]> getRightStufAnimeData(String bookTitle, char bookType, boolean memberStatus, int currPageNum) {
 		EdgeOptions edgeOptions = new EdgeOptions();
 		edgeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
 		edgeOptions.addArguments("headless");
@@ -83,21 +86,20 @@ public class RightStufAnime {
 		BigDecimal GotAnimeDiscount = new BigDecimal("0.05");
 		BigDecimal priceVal;
 		String priceTxt, stockStatus, currTitle;
-		for (int x = 0; x < titleData.size(); x++)
-		{
+		for (int x = 0; x < titleData.size(); x++) {
 			currTitle = titleData.get(x).text();
 			//Checks to see if the title parsed from the website matches to the title the user wants
-			if(currTitle.toLowerCase().replaceAll("[^a-z']", "").contains(bookTitle.toLowerCase().replaceAll("[^a-z']", ""))){
+			if (currTitle.toLowerCase().replaceAll("[^a-z']", "").contains(bookTitle.toLowerCase().replaceAll("[^a-z']", ""))) {
 				priceVal = new BigDecimal(priceData.get(x).text().substring(1));
 				priceTxt = "$" + (memberStatus ? priceVal.subtract(priceVal.multiply(GotAnimeDiscount)).round(new MathContext(3, RoundingMode.UP)) : priceVal.round(new MathContext(3, RoundingMode.UP)));
 				stockStatus = stockStatusData.get(x).text();
-				if (stockStatus.contains("In Stock")){
+				if (stockStatus.contains("In Stock")) {
 					stockStatus = "IS";
-				} else if (stockStatus.contains("Out of Stock")){
+				} else if (stockStatus.contains("Out of Stock")) {
 					stockStatus = "OOS";
-				} else if (stockStatus.contains("Pre-Order")){
+				} else if (stockStatus.contains("Pre-Order")) {
 					stockStatus = "PO";
-				} else{
+				} else {
 					stockStatus = "OOP";
 				}
 
@@ -105,23 +107,23 @@ public class RightStufAnime {
 			}
 		}
 
-		if (pageCheck != null){
+		if (pageCheck != null) {
 			currPageNum++;
 			getRightStufAnimeData(bookTitle, bookType, memberStatus, currPageNum);
-		}
-		else{
+		} else {
 			driver.quit();
 			//dataList.sort(Comparator.comparing(o -> o[0]));
-			for (String[] data : dataList){
+			for (String[] data : dataList) {
 				System.out.println(Arrays.toString(data));
 			}
-			for (String link : rightStufLinks){
+			for (String link : rightStufLinks) {
 				System.out.println(link);
 			}
 		}
 
 		return dataList;
 	}
+
 	public static void main(String[] args) {
 		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
 		getRightStufAnimeData("JuJutsu Kaisen", 'M', true, 1);

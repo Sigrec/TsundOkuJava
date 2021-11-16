@@ -1,14 +1,22 @@
-# [Tsundoku](https://en.wikipedia.org/wiki/Tsundoku) (Desktop Manga & Novel Collection App)
+# [Tsundoku](https://en.wikipedia.org/wiki/Tsundoku) (Desktop Manga & Light Novel Collection App)
 ***
 ## [Follow Me on AL](https://anilist.co/user/Preminence/)
 ***
->[**Download** Current Supported Version = V1](https://www.dropbox.com/sh/hxrirgtqa11lf5i/AAAMiOudi64grgileU0yDQiia?dl=0)
+>[**Download** Current Supported Version = V1.5.0](https://www.dropbox.com/sh/hxrirgtqa11lf5i/AAAMiOudi64grgileU0yDQiia?dl=0)
 >Leave all of the files in the "TsundOku" folder and just pin the TsundOku.exe file to your taskbar
+***
+### Here is my Current Theme titled "Rustic", showcasing what the app looks like when run
+![Example App](Misc/TsundOkuExample.png)
+***
+### Important Info
+Do not delete or move any files that are inside this zip/folder, instead just pin the TsundOku.exe file to your taskbar
+
+If you lose or delete the UserData.dat file u will lose your entire collection, so do not delete it, u will have to start over again, the Covers folder I also made visible incase u want to change the img shown for a particular series just make sure u copy the EXACT name and extension (either JPG or PNG) from the image file. Maybe make a backup of the UserData.dat file and Covers folder incase anything happens.
 ***
 ### Useful Links
 - [AniList Home](https://anilist.co/hom)
 - [Japanese Publisher Search](https://comic.k-manga.jp/)
-  
+
 ***Manga Streaming***
 - [✬MangaDex](https://mangadex.org/)
 - [MangaSee](https://mangasee123.com/)
@@ -39,11 +47,6 @@
 - [✬Amazon.JP](https://www.amazon.co.jp/)
 - [Honto](https://honto.jp/)
 ***
-### Important Info
-Do not delete or move any files that are inside this zip/folder, instead just pin the TsundOku.exe file to your taskbar
-
-If you lose or delete the UserData.dat file u will lose your entire collection, so do not delete it, u will have to start over again, the Covers folder I also made visible incase u want to change the img shown for a particular series just make sure u copy the EXACT name and extension (either JPG or PNG) from the image file. Maybe make a backup of the UserData.dat file and Covers folder incase anything happens.
-***
 ### Twitter Accounts to Follow for Manga News
 - https://twitter.com/shonenjump_plus (Japanese News)
 - https://twitter.com/Josu_ke (Japanese News)
@@ -56,7 +59,7 @@ If you lose or delete the UserData.dat file u will lose your entire collection, 
 ***
 ### HOW TO DOWNLOAD A JVM/JDK & UPDATE YOUR SYSTEM VARIABLES (WITHOUT A JVM/JDK YOU CAN NOT RUN ANY JAVA APPLICATIONS)
 1.  *Go to this link (https://jdk.java.net/16/) and download the appropiate folder (.zip for Windows) for your OS*
-    
+
 
 2. *Unzip the folder and move the unzipped folder to preferably your Program Files folder in your C:\ drive (I would rec creating a Java folder in there and putting the unzipped folder in there but it really doesn't matter)*
 

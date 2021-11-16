@@ -12,6 +12,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.concurrent.FutureTask;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
@@ -52,34 +54,36 @@ public class Series implements java.io.Serializable {
 		maxVolumes = maxVol;
 		String seriesObj = "Empty";
 
-		GraphQLQuery seriesQuery = new GraphQLQuery("query ($title: String, $type: MediaFormat) {\n" +
-				"Media(search: $title, format: $type) {\n" +
-				"  countryOfOrigin\n" +
-				"  title {\n" +
-				"    romaji\n" +
-				"    english\n" +
-				"    native\n" +
-				"  }\n" +
-				"  staff(sort: ROLE) {\n" +
-				"    edges {\n" +
-				"      role\n" +
-				"      node {\n" +
-				"        name {\n" +
-				"          full\n" +
-				"          native\n" +
-				"          alternative\n" +
-				"        }\n" +
-				"      }\n" +
-				"    }\n" +
-				"  }\n" +
-				"  description\n" +
-				"  status(version: 2)\n" +
-				"  siteUrl\n" +
-				"  coverImage {\n" +
-				"    extraLarge\n" +
-				"  }\n" +
-				"}\n" +
-				"}").withVariable("title", title).withVariable("type", bookType.toUpperCase());
+		GraphQLQuery seriesQuery;
+		seriesQuery = new GraphQLQuery("""
+				query ($title: String, $type: MediaFormat) {
+				Media(search: $title, format: $type) {
+				  countryOfOrigin
+				  title {
+				    romaji
+				    english
+				    native
+				  }
+				  staff(sort: ROLE) {
+				    edges {
+				      role
+				      node {
+				        name {
+				          full
+				          native
+				          alternative
+				        }
+				      }
+				    }
+				  }
+				  description
+				  status(version: 2)
+				  siteUrl
+				  coverImage {
+				    extraLarge
+				  }
+				}
+				}""").withVariable("title", title).withVariable("type", bookType.toUpperCase());
 
 		try {
 			FutureTask<String> task = seriesQuery.submit();
@@ -118,13 +122,20 @@ public class Series implements java.io.Serializable {
 				titleJson.get("native").getAsString(),
 				getSeriesStaff(staffJsonArray, "full"),
 				getSeriesStaff(staffJsonArray, "native"),
-				mediaJson.get("description").isJsonNull() ? "" : mediaJson.get("description").getAsString().replaceAll("\\<(.*?)\\>", "").replaceAll("&#9472;&#9472;", "──").replaceFirst("\\(Source: [\\S\\s]+", "").trim(),
+				mediaJson.get("description").isJsonNull() ? "" : convertUnicodeInDesc(mediaJson.get("description").getAsString().replaceAll("\\<(.*?)\\>", "").replaceFirst("\\(Source: [\\S\\s]+", "").trim()),
 				"Edit Notes:",
 				curVolumes,
 				maxVolumes);
-
 		seriesQuery.reset();
 		return newSeries;
+	}
+
+	private static String convertUnicodeInDesc(String seriesDesc){
+		Matcher matcher = Pattern.compile("&#(\\d+?);").matcher(seriesDesc);
+		while(matcher.find()){
+			seriesDesc = seriesDesc.replaceAll(matcher.group(), Character.toString(Integer.parseInt(matcher.group(1))));
+		}
+		return seriesDesc;
 	}
 
 	public static String getSeriesStaff(JsonArray staffJsonArray, String nameType){
@@ -157,33 +168,23 @@ public class Series implements java.io.Serializable {
 	}
 
 	public static String getCorrectComicFormat(String jsonCountryOfOrigin){
-		switch (jsonCountryOfOrigin) {
-			case "KR":
-				return "Manhwa";
-			case "CN":
-				return "Manhua";
-			case "FR":
-				return "Manfra";
-			default:
-				return "Manga";
-		}
+		return switch (jsonCountryOfOrigin) {
+			case "KR" -> "Manhwa";
+			case "CN" -> "Manhua";
+			case "FR" -> "Manfra";
+			default -> "Manga";
+		};
 	}
 
 	public static String getCardStatus(String jsonStatus){
-		switch (jsonStatus) {
-			case "RELEASING":
-				return "Ongoing";
-			case "FINISHED":
-				return "Complete";
-			case "CANCELLED":
-				return "Cancelled";
-			case "HIATUS":
-				return "Hiatus";
-			case "NOT_YET_RELEASED":
-				return "Coming Soon";
-			default:
-				return "Error";
-		}
+		return switch (jsonStatus) {
+			case "RELEASING" -> "Ongoing";
+			case "FINISHED" -> "Complete";
+			case "CANCELLED" -> "Cancelled";
+			case "HIATUS" -> "Hiatus";
+			case "NOT_YET_RELEASED" -> "Coming Soon";
+			default -> "Error";
+		};
 	}
 
 	public static String saveNewCoverImage(String coverLink, String title, String bookType){

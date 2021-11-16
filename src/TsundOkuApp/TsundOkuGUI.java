@@ -6,32 +6,49 @@
 package TsundOkuApp;
 
 import java.awt.Desktop;
+import java.io.IOException;
+import java.io.File;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
-import java.io.*;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+
+import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.*;
-import javafx.beans.value.ObservableBooleanValue;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.CacheHint;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.*;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
@@ -65,6 +82,7 @@ public class TsundOkuGUI{
 
 	// Collection Components
 	private FlowPane collection;
+	private ScrollPane collectionScroll;
 
 	// Component Size Details
 	private static final int SERIES_CARD_WIDTH = 515;
@@ -107,7 +125,8 @@ public class TsundOkuGUI{
 		userSettingsWindow.initStyle(StageStyle.UNIFIED);
 		addNewSeriesWindow.initStyle(StageStyle.UNIFIED);
 		themeSettingsWindow.initStyle(StageStyle.UNIFIED);
-		collectionSetup(primaryStage); sortCollection();
+		sortCollection();
+		collectionSetup(primaryStage);
 		menuSetup(content, primaryStage);
 
 		primaryStage.setMinWidth(SERIES_CARD_WIDTH + 550);
@@ -128,15 +147,9 @@ public class TsundOkuGUI{
 
 	private void sortCollection(){
 		switch (user.getCurLanguage()) {
-			case "English":
-				userCollection.sort(Series::compareByEnglishTitle);
-				break;
-			case "Native":
-				userCollection.sort(Series::compareByNativeTitle);
-				break;
-			default:
-				userCollection.sort(Series::compareByRomajiTitle);
-				break;
+			case "English" -> userCollection.sort(Series::compareByEnglishTitle);
+			case "Native" -> userCollection.sort(Series::compareByNativeTitle);
+			default -> userCollection.sort(Series::compareByRomajiTitle);
 		}
 	}
 
@@ -240,11 +253,10 @@ public class TsundOkuGUI{
 			if (!titleSearch.getText().isEmpty()){
 				String newText = titleSearch.getText();
 				filteredUserCollection = FXCollections.observableArrayList(userCollection.parallelStream().filter(series -> containsIgnoreCase(series.getRomajiTitle(), newText) | containsIgnoreCase(series.getEnglishTitle(), newText) | containsIgnoreCase(series.getNativeTitle(), newText) | containsIgnoreCase(series.getRomajiStaff(), newText) | containsIgnoreCase(series.getNativeStaff(), newText) | containsIgnoreCase(series.getPublisher(), newText) | containsIgnoreCase(series.getBookType(), newText) | containsIgnoreCase(series.getPrintStatus(), newText)).collect(Collectors.toList()));
-			} else {
+			} else { // Reset back to the full list when field is blank and user presses enter
 				filteredUserCollection = FXCollections.observableArrayList(userCollection);
 			}
 			collectionSetup(primaryStage);
-			updateCollectionNumbers();
 		});
 
 		HBox searchPane = new HBox(titleSearch, searchButton);
@@ -289,7 +301,7 @@ public class TsundOkuGUI{
 			user.setCurLanguage(languageSelect.getValue());
 			sortCollection();
 			filteredUserCollection = FXCollections.observableArrayList(userCollection);
-			//collectionSetup(primaryStage);
+			collectionSetup(primaryStage);
 		});
 
 		VBox addSeriesAndLanguageLayout = new VBox(addNewSeriesButton, languageSelect);
@@ -341,6 +353,12 @@ public class TsundOkuGUI{
 
 		VBox userNameRoot = new VBox(enterUserNameLabel, changeUserNameRoot);
 		userNameRoot.setId("SettingsLabel");
+
+//		Button exportToExcelButton = new Button("Export to Excel");
+//		exportToExcelButton.setId("MenuButton");
+//		exportToExcelButton.setOnMouseClicked(event -> {
+//
+//		});
 
 		Button deleteCollectionButton = new Button("Delete Collection");
 		deleteCollectionButton.setId("MenuButton");
@@ -1257,8 +1275,7 @@ public class TsundOkuGUI{
 		collection.setCache(true);
 		collection.setCacheHint(CacheHint.SPEED);
 
-		MigPane seriesCard;
-		ScrollPane collectionScroll = new ScrollPane(collection);
+		collectionScroll = new ScrollPane(collection);
 		collectionScroll.setId("CollectionScroll");
 		collectionScroll.setVvalue(collectionScroll.getVvalue() - 2000);
 		collectionScroll.getContent().setOnScroll(scrollEvent -> {
@@ -1274,7 +1291,7 @@ public class TsundOkuGUI{
 		collectionScroll.setCacheHint(CacheHint.SPEED);
 
 		for (Series series : filteredUserCollection) {
-			seriesCard = new MigPane();
+			MigPane seriesCard = new MigPane();
 			seriesCard.setId("SeriesCard");
 			seriesCard.setPrefSize(SERIES_CARD_WIDTH, SERIES_CARD_HEIGHT);
 			seriesCard.add(leftSideCardSetup(series), "dock west");
@@ -1331,33 +1348,24 @@ public class TsundOkuGUI{
 			}
 		});
 		aniListLink.setGraphic(leftSideOfSeriesCard);
-
 		return aniListLink;
 	}
 
 	private String getCurTitle(Series series, String curLanguage){
-		switch (curLanguage) {
-			case "Romaji":
-				return series.getRomajiTitle();
-			case "English":
-				return series.getEnglishTitle();
-			case "Native":
-				return series.getNativeTitle();
-			default:
-				return "Error Title";
-		}
+		return switch (curLanguage) {
+			case "Romaji" -> series.getRomajiTitle();
+			case "English" -> series.getEnglishTitle();
+			case "Native" -> series.getNativeTitle();
+			default -> "Error Title";
+		};
 	}
 
 	private String getCurMangaka(Series series, String curLanguage){
-		switch (curLanguage) {
-			case "English":
-			case "Romaji":
-				return series.getRomajiStaff();
-			case "Native":
-				return series.getNativeStaff();
-			default:
-				return "Error Mangaka";
-		}
+		return switch (curLanguage) {
+			case "English", "Romaji" -> series.getRomajiStaff();
+			case "Native" -> series.getNativeStaff();
+			default -> "Error Mangaka";
+		};
 	}
 
 	private MigPane rightSideCardSetup(Series series, Stage primaryStage){
@@ -1558,9 +1566,8 @@ public class TsundOkuGUI{
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			collectionSetup(primaryStage);
-			sortCollection();
 			filteredUserCollection = FXCollections.observableArrayList(userCollection);
+			collectionSetup(primaryStage);
 			user.setTotalVolumes(user.getTotalVolumes() - series.getCurVolumes());
 			updateCollectionNumbers();
 		});
