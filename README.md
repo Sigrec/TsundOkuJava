@@ -3,7 +3,7 @@
 ## [Follow Me on AL](https://anilist.co/user/Preminence/)
 ***
 >[**Download** Current Supported Version = V1.5.0](https://www.dropbox.com/sh/hxrirgtqa11lf5i/AAAMiOudi64grgileU0yDQiia?dl=0)
->Leave all of the files in the "TsundOku" folder and just pin the TsundOku.exe file to your taskbar
+>Download the zip and unzip the folder into your desired location, then pin the exe to your taskbar. Other standalone files are for if you only need to update a few things.
 ***
 ### Here is my Current Theme titled "Rustic", showcasing what the app looks like when run
 ![Example App](resources/TsundOkuExample.png)
