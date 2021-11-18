@@ -14,41 +14,35 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 public class RightStufAnime {
-	private static ArrayList<String> rightStufLinks = new ArrayList<>();
-	private static ArrayList<String[]> dataList = new ArrayList<>();
-
-	private static final HashMap<String, String> regexTitleFilterList = new HashMap<String, String>() {
-		{
-			put(" ", "%20");
-			put("&", "%26");
-		}
-	};
+	private static final ArrayList<String> rightStufLinks = new ArrayList<>();
+	private static final ArrayList<String[]> dataList = new ArrayList<>();
 
 	private static String filterBookTitle(String bookTitle){
-		for (String curChar : regexTitleFilterList.keySet()){
-			bookTitle = bookTitle.replace(curChar, regexTitleFilterList.get(curChar));
-		}
-		return bookTitle;
+		return bookTitle.replaceAll(" ", "%20").replaceAll("&", "%26");
 	}
 
 	private static String checkBookType(char bookType){
-		if (bookType == 'M'){
-			return "Manga";
-		}
-		else if (bookType == 'N'){
-			return "Novels";
-		}
-		System.out.println("Invalid Book Type, must be a Manga (M) or Light Novel (LN)");
+		switch (bookType) {
+			case 'M' -> {
+				return "Manga";
+			}
+			case 'N' -> {
+				return "Novels";
+			}
+		};
 		return "Error";
 	}
 
@@ -58,7 +52,16 @@ public class RightStufAnime {
 		return url;
 	}
 
-	public static List<String[]> getRightStufAnimeData(String bookTitle, char bookType, boolean memberStatus, int currPageNum) {
+	/**
+	 * Main method that invokes driver to load the pages to get the HTML data to scrape for information based on what series and book type the user wants data for.
+	 * Last Edited: 11/17/2021
+	 * @param bookTitle [String], the title of the series the user wants data for
+	 * @param bookType [char], the type of book the user wants either a Manga or a Light Novel
+	 * @param memberStatus [boolean], whether the user is a GotAnime member at RightStufAnime to determine whether to apply the discount
+	 * @param currPageNum [byte], the current page number that is being traversed for data
+	 * @return [List<String[]>], the list of all the data pulled from the website
+	 */
+	public static ArrayList<String[]> GetRightStufAnimeData(String bookTitle, char bookType, boolean memberStatus, byte currPageNum) throws FileNotFoundException {
 		EdgeOptions edgeOptions = new EdgeOptions();
 		edgeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
 		edgeOptions.addArguments("headless");
@@ -73,7 +76,7 @@ public class RightStufAnime {
 		WebDriver driver = new EdgeDriver(edgeOptions);
 		driver.get(getUrl(bookTitle, bookType, currPageNum));
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(3000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -86,12 +89,13 @@ public class RightStufAnime {
 		BigDecimal GotAnimeDiscount = new BigDecimal("0.05");
 		BigDecimal priceVal;
 		String priceTxt, stockStatus, currTitle;
+		DecimalFormat priceRound = new DecimalFormat("$0.00");
 		for (int x = 0; x < titleData.size(); x++) {
 			currTitle = titleData.get(x).text();
 			//Checks to see if the title parsed from the website matches to the title the user wants
 			if (currTitle.toLowerCase().replaceAll("[^a-z']", "").contains(bookTitle.toLowerCase().replaceAll("[^a-z']", ""))) {
 				priceVal = new BigDecimal(priceData.get(x).text().substring(1));
-				priceTxt = "$" + (memberStatus ? priceVal.subtract(priceVal.multiply(GotAnimeDiscount)).round(new MathContext(3, RoundingMode.UP)) : priceVal.round(new MathContext(3, RoundingMode.UP)));
+				priceTxt = memberStatus ? priceRound.format(priceVal.subtract(priceVal.multiply(GotAnimeDiscount)).round(new MathContext(4, RoundingMode.UP))) : priceRound.format(priceVal.round(new MathContext(4, RoundingMode.UP)));
 				stockStatus = stockStatusData.get(x).text();
 				if (stockStatus.contains("In Stock")) {
 					stockStatus = "IS";
@@ -102,30 +106,39 @@ public class RightStufAnime {
 				} else {
 					stockStatus = "OOP";
 				}
-
 				dataList.add(new String[]{currTitle, priceTxt.trim(), stockStatus, "RightStufAnime"});
 			}
 		}
 
 		if (pageCheck != null) {
 			currPageNum++;
-			getRightStufAnimeData(bookTitle, bookType, memberStatus, currPageNum);
+			GetRightStufAnimeData(bookTitle, bookType, memberStatus, currPageNum);
 		} else {
 			driver.quit();
-			//dataList.sort(Comparator.comparing(o -> o[0]));
-			for (String[] data : dataList) {
-				System.out.println(Arrays.toString(data));
+			dataList.sort(Comparator.comparing(o -> Integer.parseInt(o[0].substring(o[0].indexOf("Volume")).replaceFirst(".*?(\\d+).*", "$1"))));
+
+			PrintWriter rightStufDataFile = new PrintWriter("src/TsundOkuApp/PriceAnalysis/Data/RightStufAnimeData.txt");
+			if (!dataList.isEmpty()){
+				for (String[] volumeData : dataList){
+					rightStufDataFile.println(Arrays.toString(volumeData));
+				}
 			}
+			else
+			{
+				rightStufDataFile.println(bookTitle + " " + bookType + " Does Not Exist at RightStufAnime\n");
+			}
+			rightStufDataFile.flush();
+			rightStufDataFile.close();
+
 			for (String link : rightStufLinks) {
 				System.out.println(link);
 			}
 		}
-
 		return dataList;
 	}
 
-	public static void main(String[] args) {
-		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
-		getRightStufAnimeData("JuJutsu Kaisen", 'M', true, 1);
-	}
+//	public static void main(String[] args) throws FileNotFoundException {
+//		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
+//		GetRightStufAnimeData("World Trigger", 'M', true, (byte) 1);
+//	}
 }

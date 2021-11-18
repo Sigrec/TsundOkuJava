@@ -116,8 +116,6 @@ public class TsundOkuGUI{
 
 		content = new BorderPane();
 		content.setMaxSize(WINDOW_WIDTH - 100, WINDOW_HEIGHT - 100);
-		content.setCache(true);
-		content.setCacheHint(CacheHint.SPEED);
 
 		Scene mainScene = new Scene(content);
 		mainScene.getStylesheets().addAll("CollectionCSS.css", "MenuCSS.css");
@@ -1254,8 +1252,6 @@ public class TsundOkuGUI{
 		VBox newSeriesPane = new VBox(inputTitleRoot, inputPublisherRoot, bookTypeRoot, volProgressRoot, submitButton);
 		newSeriesPane.setId("NewSeriesPane");
 		newSeriesPane.setStyle(collectionMasterCSS);
-		newSeriesPane.setCache(true);
-		newSeriesPane.setCacheHint(CacheHint.SPEED);
 
 		Scene newSeriesScene = new Scene(newSeriesPane);
 		newSeriesScene.getStylesheets().add("MenuCSS.css");
@@ -1272,8 +1268,6 @@ public class TsundOkuGUI{
 		collection = new FlowPane();
 		collection.setId("Collection");
 		collection.setStyle(collectionMasterCSS);
-		collection.setCache(true);
-		collection.setCacheHint(CacheHint.SPEED);
 
 		collectionScroll = new ScrollPane(collection);
 		collectionScroll.setId("CollectionScroll");
@@ -1287,8 +1281,6 @@ public class TsundOkuGUI{
 				double vvalue = collectionScroll.getVvalue();
 				collectionScroll.setVvalue(vvalue + (-deltaY / diff));
 		});
-		collectionScroll.setCache(true);
-		collectionScroll.setCacheHint(CacheHint.SPEED);
 
 		for (Series series : filteredUserCollection) {
 			MigPane seriesCard = new MigPane();
@@ -1296,8 +1288,6 @@ public class TsundOkuGUI{
 			seriesCard.setPrefSize(SERIES_CARD_WIDTH, SERIES_CARD_HEIGHT);
 			seriesCard.add(leftSideCardSetup(series), "dock west");
 			seriesCard.add(rightSideCardSetup(series, primaryStage), "dock east");
-			seriesCard.setCache(true);
-			seriesCard.setCacheHint(CacheHint.SPEED);
 			collection.getChildren().add(seriesCard);
 		}
 		user.setTotalVolumes(totalVolumesCollected);
@@ -1390,16 +1380,12 @@ public class TsundOkuGUI{
 		TextFlow seriesTitleFlow = new TextFlow(seriesTitle);
 		seriesTitleFlow.setLineSpacing(-6.5);
 		seriesTitleFlow.setPadding(new Insets(1, 5, 0, 10));
-		seriesTitleFlow.setCache(true);
-		seriesTitleFlow.setCacheHint(CacheHint.SPEED);
 
 		Text mangaka = new Text(getCurMangaka(series, curLanguage));
 		mangaka.setWrappingWidth(RIGHT_SIDE_CARD_WIDTH);
 		mangaka.setId("Mangaka");
 		TextFlow mangakaFlow = new TextFlow(mangaka);
 		mangakaFlow.setPadding(new Insets(2, 5, 0, 10));
-		mangakaFlow.setCache(true);
-		mangakaFlow.setCacheHint(CacheHint.SPEED);
 
 		Text desc = new Text(series.getSeriesDesc());
 		desc.setId("SeriesDescriptionText");
@@ -1418,8 +1404,6 @@ public class TsundOkuGUI{
 		Label progressTxt = new Label(curVolumes + "/" + maxVolumes);
 		progressTxt.setId("VolProgressTxt");
 		progressTxt.setPrefSize(RIGHT_SIDE_CARD_WIDTH - (RIGHT_SIDE_CARD_WIDTH - 70) + 20, 20);
-		progressTxt.setCache(true);
-		progressTxt.setCacheHint(CacheHint.SPEED);
 
 		Button decrementButton = new Button("-");
 		Button incrementButton = new Button("+");
@@ -1442,8 +1426,6 @@ public class TsundOkuGUI{
 				decrementButton.setDisable(true);
 			}
 		});
-		decrementButton.setCache(true);
-		decrementButton.setCacheHint(CacheHint.SPEED);
 
 		incrementButton.setStyle("-fx-font-size: 27; -fx-padding: -12 0 -3 0;");
 		incrementButton.setId("VolProgressButton");
@@ -1463,8 +1445,6 @@ public class TsundOkuGUI{
 				incrementButton.setDisable(true);
 			}
 		});
-		incrementButton.setCache(true);
-		incrementButton.setCacheHint(CacheHint.SPEED);
 
 		if (curVolumes == 0) { decrementButton.setDisable(true); }
 		else if (curVolumes == maxVolumes) { incrementButton.setDisable(true); }
@@ -1473,8 +1453,6 @@ public class TsundOkuGUI{
 		volProgressBar.progressProperty().bind(volUpdate);
 		volProgressBar.setPrefSize(RIGHT_SIDE_CARD_WIDTH - 110, BOTTOM_CARD_HEIGHT);
 		volProgressBar.setId("ProgressBar");
-		volProgressBar.setCache(true);
-		volProgressBar.setCacheHint(CacheHint.SPEED);
 
 		FontIcon seriesSettingIcon = new FontIcon(BootstrapIcons.JOURNAL_TEXT);
 		seriesSettingIcon.setIconSize(25);
@@ -1484,8 +1462,6 @@ public class TsundOkuGUI{
 		seriesCardSettingsButton.get().setPrefSize(RIGHT_SIDE_CARD_WIDTH - 310, BOTTOM_CARD_HEIGHT - 1);
 		seriesCardSettingsButton.get().setGraphic(seriesSettingIcon);
 		seriesCardSettingsButton.get().setId("CollectionIconButton");
-		seriesCardSettingsButton.get().setCache(true);
-		seriesCardSettingsButton.get().setCacheHint(CacheHint.SPEED);
 
 		FontIcon backToSeriesDataIcon = new FontIcon(BootstrapIcons.CARD_HEADING);
 		backToSeriesDataIcon.setId("CollectionIcon");
@@ -1522,8 +1498,6 @@ public class TsundOkuGUI{
 		rightSideOfSeriesCard.add(rightSideBottomPane);
 
 		HBox seriesSettingsPane = seriesCardSettingsPane(series, primaryStage, progressTxt, volUpdate, decrementButton, incrementButton);
-		seriesSettingsPane.setCache(true);
-		seriesSettingsPane.setCacheHint(CacheHint.SPEED);
 		seriesCardSettingsButton.get().setOnMouseClicked(event -> {
 			Button seriesButton = seriesCardSettingsButton.get();
 			if (seriesButton.getGraphic() == seriesSettingIcon){
