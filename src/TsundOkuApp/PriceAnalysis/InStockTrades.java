@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class InStockTrades {
 	public static ArrayList<String> inStockTradeLinks = new ArrayList<>();
@@ -59,13 +60,16 @@ public class InStockTrades {
 		Document inStockTradesLink = Jsoup.parse(driver.getPageSource());
 
 		// Get the page data from the HTML doc
-		List<Element> titleData = inStockTradesLink.select("div[class='title']");
+		List<Element> titleData = inStockTradesLink.select("div[class='title']").parallelStream().filter(data -> data.text().contains("Vol")).collect(Collectors.toList());
 		List<Element> priceData = inStockTradesLink.select("div[class='price']");
 		Element pageCheck = inStockTradesLink.selectFirst("a[class='btn hotaction']");
 
+		if (bookType == 'M'){
+			titleData.removeIf(data -> data.text().contains("Novel"));
+		}
 		for (int x = 0; x < titleData.size(); x++)
 		{
-			dataList.add(new String[]{titleData.get(x).text().trim(), priceData.get(x).text().trim(), "IS", "InStockTrades"});
+			dataList.add(new String[]{titleData.get(x).text().replaceAll(" GN| Manga", "").replaceAll(" \\(.*?\\)", "").trim(), priceData.get(x).text().trim(), "IS", "InStockTrades"});
 		}
 
 		if (pageCheck != null)
@@ -81,7 +85,8 @@ public class InStockTrades {
 			}
 		}
 
-		dataList.sort(Comparator.comparing(o -> Integer.parseInt(o[0].substring(o[0].indexOf("Vol")).replaceFirst(".*?(\\d+).*", "$1"))));
+		Comparator<String[]> test = Comparator.comparing(volData -> volData[0].substring(0, volData[0].indexOf("Vol")));
+		dataList.sort(test.thenComparing(volData -> Integer.parseInt(volData[0].substring(volData[0].indexOf("Vol")).replaceFirst(".*?(\\d+).*", "$1"))));
 		PrintWriter inStockTradesDataFile = new PrintWriter("src/TsundOkuApp/PriceAnalysis/Data/InStockTradesData.txt");
 		if (!dataList.isEmpty())
 		{
@@ -98,8 +103,8 @@ public class InStockTrades {
 		return dataList;
 	}
 
-//	public static void main (String[] args) throws FileNotFoundException {
-//		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
-//		GetInStockTradesData("World Trigger", 'M', (byte) 1);
-//	}
+	public static void main (String[] args) throws FileNotFoundException {
+		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
+		GetInStockTradesData("Overlord", 'M', (byte) 1);
+	}
 }

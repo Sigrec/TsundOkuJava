@@ -97,16 +97,23 @@ public class RightStufAnime {
 				priceVal = new BigDecimal(priceData.get(x).text().substring(1));
 				priceTxt = memberStatus ? priceRound.format(priceVal.subtract(priceVal.multiply(GotAnimeDiscount)).round(new MathContext(4, RoundingMode.UP))) : priceRound.format(priceVal.round(new MathContext(4, RoundingMode.UP)));
 				stockStatus = stockStatusData.get(x).text();
-				if (stockStatus.contains("In Stock")) {
+				if (stockStatus.contains("In Stock"))
+				{
 					stockStatus = "IS";
-				} else if (stockStatus.contains("Out of Stock")) {
+				}
+				else if (stockStatus.contains("Out of Stock"))
+				{
 					stockStatus = "OOS";
-				} else if (stockStatus.contains("Pre-Order")) {
+				}
+				else if (stockStatus.contains("Pre-Order"))
+				{
 					stockStatus = "PO";
-				} else {
+				}
+				else
+				{
 					stockStatus = "OOP";
 				}
-				dataList.add(new String[]{currTitle, priceTxt.trim(), stockStatus, "RightStufAnime"});
+				dataList.add(new String[]{currTitle.replaceAll("Volume", "Vol").replace(" Manga", ""), priceTxt.trim(), stockStatus, "RightStufAnime"});
 			}
 		}
 
@@ -115,7 +122,8 @@ public class RightStufAnime {
 			GetRightStufAnimeData(bookTitle, bookType, memberStatus, currPageNum);
 		} else {
 			driver.quit();
-			dataList.sort(Comparator.comparing(o -> Integer.parseInt(o[0].substring(o[0].indexOf("Volume")).replaceFirst(".*?(\\d+).*", "$1"))));
+			Comparator<String[]> test = Comparator.comparing(volData -> volData[0].substring(0, volData[0].indexOf("Vol")));
+			dataList.sort(test.thenComparing(volData -> Integer.parseInt(volData[0].substring(volData[0].indexOf("Vol")).replaceFirst(".*?(\\d+).*", "$1"))));
 
 			PrintWriter rightStufDataFile = new PrintWriter("src/TsundOkuApp/PriceAnalysis/Data/RightStufAnimeData.txt");
 			if (!dataList.isEmpty()){
@@ -137,8 +145,8 @@ public class RightStufAnime {
 		return dataList;
 	}
 
-//	public static void main(String[] args) throws FileNotFoundException {
-//		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
-//		GetRightStufAnimeData("World Trigger", 'M', true, (byte) 1);
-//	}
+	public static void main(String[] args) throws FileNotFoundException {
+		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
+		GetRightStufAnimeData("Overlord", 'M', true, (byte) 1);
+	}
 }

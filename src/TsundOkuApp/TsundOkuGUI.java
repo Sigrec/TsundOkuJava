@@ -70,12 +70,13 @@ import org.tbee.javafx.scene.layout.MigPane;
 
 public class TsundOkuGUI{
 
-	// Menu B& Settings Window Components
+	// Menu BG Settings Window Components
 	private SimpleStringProperty totalVolDisplayUpdate, totalToCollectUpdate;
 	private String collectionMasterCSS;
 	private final Stage addNewSeriesWindow = new Stage();
 	private final Stage themeSettingsWindow = new Stage();
 	private final Stage userSettingsWindow = new Stage();
+	private final Stage priceComparisonWindow = new Stage();
 	private TsundOkuTheme finalNewTheme;
 	private HBox menuBar;
 	private ComboBox<String> languageSelect;
@@ -183,9 +184,10 @@ public class TsundOkuGUI{
 	}
 
 	private void menuSetup(BorderPane content, Stage primaryStage) throws CloneNotSupportedException {
-		userSettingsWindow(primaryStage);
+		setupUserSettingsWindow(primaryStage);
 		setupCollectionSettingsWindow(primaryStage);
-		addNewSeriesWindow(primaryStage);
+		setupPriceComparisonWindow();
+		setupAddNewSeriesWindow(primaryStage);
 		Text userName = new Text(user.getUserName());
 		userName.setId("UserName");
 
@@ -194,7 +196,7 @@ public class TsundOkuGUI{
 		userSettingsIcon.setId("UserSettingsIcon");
 
 		Button userSettingsButton = new Button();
-		userSettingsButton.setPrefWidth(67.5);
+		userSettingsButton.setPrefWidth(45);
 		userSettingsButton.setGraphic(userSettingsIcon);
 		userSettingsButton.setId("MenuButton");
 		userSettingsButton.setOnMouseClicked(event -> {
@@ -210,7 +212,7 @@ public class TsundOkuGUI{
 		themeSettingsIcon.setId("ThemeSettingsIcon");
 
 		Button themeSettingsButton = new Button();
-		themeSettingsButton.setPrefWidth(67.5);
+		themeSettingsButton.setPrefWidth(45);
 		themeSettingsButton.setId("MenuButton");
 		themeSettingsButton.setGraphic(themeSettingsIcon);
 		themeSettingsButton.setOnMouseClicked(event -> {
@@ -221,7 +223,23 @@ public class TsundOkuGUI{
 			}
 		});
 
-		HBox settingsRoot = new HBox(userSettingsButton, themeSettingsButton);
+		FontIcon priceComparisonIcon = new FontIcon(BootstrapIcons.KANBAN);
+		priceComparisonIcon.setIconSize(20);
+		priceComparisonIcon.setId("ThemeSettingsIcon");
+
+		Button priceComparisonButton = new Button();
+		priceComparisonButton.setPrefWidth(45);
+		priceComparisonButton.setId("MenuButton");
+		priceComparisonButton.setGraphic(priceComparisonIcon);
+		priceComparisonButton.setOnMouseClicked(event -> {
+			if (priceComparisonWindow.isShowing()){
+				priceComparisonWindow.toFront();
+			} else {
+				priceComparisonWindow.show();
+			}
+		});
+
+		HBox settingsRoot = new HBox(userSettingsButton, themeSettingsButton, priceComparisonButton);
 		settingsRoot.setAlignment(Pos.CENTER);
 		settingsRoot.setPrefWidth(135);
 		settingsRoot.setSpacing(2);
@@ -313,12 +331,26 @@ public class TsundOkuGUI{
 		content.setTop(menuBar);
 	}
 
+	private void setupPriceComparisonWindow(){
+		VBox priceComparisonPane = new VBox();
+		priceComparisonPane.setSpacing(100);
+		priceComparisonPane.setId("NewSeriesPane");
+		priceComparisonPane.setStyle(collectionMasterCSS);
+
+		Scene priceComparisonScene = new Scene(priceComparisonPane);
+		priceComparisonScene.getStylesheets().add("MenuCSS.css");
+		//priceComparisonWindow.setResizable(false);
+		priceComparisonWindow.getIcons().add(new Image("bookshelf.png"));
+		priceComparisonWindow.setTitle("Price Analysis");
+		priceComparisonWindow.setScene(priceComparisonScene);
+	}
+
 	private void updateCollectionNumbers(){
 		totalVolDisplayUpdate.set("Collected\n" + user.getTotalVolumes() + " Volumes");
 		totalToCollectUpdate.set("Need To Collect\n" + (maxVolumesInCollection - user.getTotalVolumes()) + " Volumes");
 	}
 
-	private void userSettingsWindow(Stage primaryStage){
+	private void setupUserSettingsWindow(Stage primaryStage){
 		TextField enterUserName = new TextField();
 		enterUserName.setId("MenuTextField");
 		enterUserName.setPrefWidth(250);
@@ -370,8 +402,6 @@ public class TsundOkuGUI{
 		userSettingsPane.setSpacing(100);
 		userSettingsPane.setId("NewSeriesPane");
 		userSettingsPane.setStyle(collectionMasterCSS);
-		userSettingsPane.setCache(true);
-		userSettingsPane.setCacheHint(CacheHint.SPEED);
 
 		Scene userSettingsScene = new Scene(userSettingsPane);
 		userSettingsScene.getStylesheets().add("MenuCSS.css");
@@ -394,6 +424,139 @@ public class TsundOkuGUI{
 			}
 		}
 		return false;
+	}
+
+	private void setupAddNewSeriesWindow(Stage primaryStage){
+		AtomicReference<String> bookType = new AtomicReference<>("");
+
+		TextField titleEnter = new TextField();
+		titleEnter.setId("MenuTextField");
+		titleEnter.setPrefWidth(250);
+
+		Label inputTitleLabel = new Label("Enter Title (Copy Title From AniList)");
+		inputTitleLabel.setId("MenuLabel");
+		inputTitleLabel.setLabelFor(titleEnter);
+
+		VBox inputTitleRoot = new VBox();
+		inputTitleRoot.setId("SettingsLabel");
+		inputTitleRoot.getChildren().addAll(inputTitleLabel, titleEnter);
+
+		TextField publisherEnter = new TextField();
+		publisherEnter.setId("MenuTextField");
+		publisherEnter.setPrefWidth(250);
+
+		Label inputPublisherLabel = new Label("Enter Publisher");
+		inputPublisherLabel.setId("MenuLabel");
+		inputPublisherLabel.setLabelFor(publisherEnter);
+
+		VBox inputPublisherRoot = new VBox();
+		inputPublisherRoot.setId("SettingsLabel");
+		inputPublisherRoot.getChildren().addAll(inputPublisherLabel, publisherEnter);
+
+		ToggleGroup bookTypeButtonGroup = new ToggleGroup();
+		ToggleButton mangaButton = new ToggleButton("Manga");
+		ToggleButton lightNovelButton = new ToggleButton("Novel");
+
+		mangaButton.setToggleGroup(bookTypeButtonGroup);
+		mangaButton.setId("MenuButton");
+		mangaButton.setPrefSize(100, 10);
+		mangaButton.setOnMouseClicked((MouseEvent event) -> {
+			bookType.set("Manga");
+			mangaButton.setDisable(true);
+			lightNovelButton.setDisable(false);
+		});
+
+		lightNovelButton.setToggleGroup(bookTypeButtonGroup);
+		lightNovelButton.setId("MenuButton");
+		lightNovelButton.setPrefSize(100, 10);
+		lightNovelButton.setOnMouseClicked((MouseEvent event) -> {
+			bookType.set("Novel");
+			mangaButton.setDisable(false);
+			lightNovelButton.setDisable(true);
+		});
+
+		UnaryOperator<TextFormatter.Change> filter = change -> {
+			String newText = change.getControlNewText();
+			if (newText.matches("[0-9]*")) { return change; }
+			return null;
+		};
+
+		Label bookTypeLabel = new Label("Select Book Type");
+		bookTypeLabel.setId("MenuLabel");
+
+		HBox bookTypePane = new HBox(mangaButton, lightNovelButton);
+		bookTypePane.setSpacing(10);
+		bookTypePane.setAlignment(Pos.CENTER);
+
+		VBox bookTypeRoot = new VBox(bookTypeLabel, bookTypePane);
+		bookTypeRoot.setAlignment(Pos.CENTER);
+
+		TextField curVolumes = new TextField();
+		curVolumes.setPrefWidth(50);
+		curVolumes.setId("MenuTextField");
+		curVolumes.setTextFormatter(new TextFormatter<>(filter));
+		curVolumes.lengthProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue.intValue() > oldValue.intValue()) {
+				if (curVolumes.getText().length() >= 3) {
+					curVolumes.setText(curVolumes.getText().substring(0, 3));
+				}
+			}
+		});
+
+		TextField maxVolumes = new TextField();
+		maxVolumes.setPrefWidth(50);
+		maxVolumes.setId("MenuTextField");
+		maxVolumes.setTextFormatter(new TextFormatter<>(filter));
+		maxVolumes.lengthProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue.intValue() > oldValue.intValue()) {
+				if (maxVolumes.getText().length() >= 3) {
+					maxVolumes.setText(maxVolumes.getText().substring(0, 3));
+				}
+			}
+		});
+
+		Label curVolLabel = new Label("Cur Volumes");
+		curVolLabel.setId("MenuLabel");
+
+		Label maxVolLabel = new Label("Max Volumes");
+		maxVolLabel.setId("MenuLabel");
+
+		GridPane volProgressRoot = new GridPane();
+		volProgressRoot.setVgap(5);
+		volProgressRoot.setHgap(10);
+		volProgressRoot.setAlignment(Pos.CENTER);
+		volProgressRoot.add(curVolLabel, 0, 0);
+		volProgressRoot.add(curVolumes, 0 , 1);
+		volProgressRoot.add(maxVolLabel, 1, 0);
+		volProgressRoot.add(maxVolumes, 1 , 1);
+
+		Button submitButton = new Button("Add");
+
+		submitButton.setPrefSize(60, 10);
+		submitButton.setId("MenuButton");
+		submitButton.disableProperty().bind(titleEnter.textProperty().isEmpty().or(publisherEnter.textProperty().isEmpty()).or(curVolumes.textProperty().isEmpty()).or(maxVolumes.textProperty().isEmpty()).or(bookTypeButtonGroup.selectedToggleProperty().isNull()).or(curVolumes.textProperty().greaterThan(maxVolumes.textProperty())));
+		submitButton.setOnMouseClicked(event -> {
+			if (Integer.parseInt(curVolumes.getText()) <= Integer.parseInt(maxVolumes.getText())){
+				String newTitle = titleEnter.getText();
+				if (userCollection.stream().noneMatch(series -> ((series.getRomajiTitle().equalsIgnoreCase(newTitle) || series.getEnglishTitle().equalsIgnoreCase(newTitle) || series.getNativeTitle().equalsIgnoreCase(newTitle)) && series.getBookType().equals(bookType.get())))){
+					userCollection.add(new Series().CreateNewSeries(newTitle, publisherEnter.getText(), bookType.get(), Integer.parseInt(curVolumes.getText()), Integer.parseInt(maxVolumes.getText())));
+					filteredUserCollection = FXCollections.observableArrayList(userCollection);
+					collectionSetup(primaryStage);
+					updateCollectionNumbers();
+				}
+			}
+		});
+
+		VBox newSeriesPane = new VBox(inputTitleRoot, inputPublisherRoot, bookTypeRoot, volProgressRoot, submitButton);
+		newSeriesPane.setId("NewSeriesPane");
+		newSeriesPane.setStyle(collectionMasterCSS);
+
+		Scene newSeriesScene = new Scene(newSeriesPane);
+		newSeriesScene.getStylesheets().add("MenuCSS.css");
+		addNewSeriesWindow.setResizable(false);
+		addNewSeriesWindow.getIcons().add(new Image("bookshelf.png"));
+		addNewSeriesWindow.setTitle("Add New Series");
+		addNewSeriesWindow.setScene(newSeriesScene);
 	}
 
 	private void setupCollectionSettingsWindow(Stage primaryStage) throws CloneNotSupportedException {
@@ -1055,7 +1218,7 @@ public class TsundOkuGUI{
 		Scene collectionSettingsScene = new Scene(themeSettingRoot);
 		collectionSettingsScene.getStylesheets().add("MenuCSS.css");
 
-		themeSettingsWindow.setHeight(940);
+		themeSettingsWindow.setHeight(1000);
 		themeSettingsWindow.setWidth(880);
 		themeSettingsWindow.setTitle("TsundOku Theme Settings");
 		themeSettingsWindow.getIcons().add(new Image("bookshelf.png"));
@@ -1126,139 +1289,6 @@ public class TsundOkuGUI{
 			}
 		}
 		return convertedColor;
-	}
-
-	private void addNewSeriesWindow(Stage primaryStage){
-		AtomicReference<String> bookType = new AtomicReference<>("");
-
-		TextField titleEnter = new TextField();
-		titleEnter.setId("MenuTextField");
-		titleEnter.setPrefWidth(250);
-
-		Label inputTitleLabel = new Label("Enter Title (Copy Title From AniList)");
-		inputTitleLabel.setId("MenuLabel");
-		inputTitleLabel.setLabelFor(titleEnter);
-
-		VBox inputTitleRoot = new VBox();
-		inputTitleRoot.setId("SettingsLabel");
-		inputTitleRoot.getChildren().addAll(inputTitleLabel, titleEnter);
-
-		TextField publisherEnter = new TextField();
-		publisherEnter.setId("MenuTextField");
-		publisherEnter.setPrefWidth(250);
-
-		Label inputPublisherLabel = new Label("Enter Publisher");
-		inputPublisherLabel.setId("MenuLabel");
-		inputPublisherLabel.setLabelFor(publisherEnter);
-
-		VBox inputPublisherRoot = new VBox();
-		inputPublisherRoot.setId("SettingsLabel");
-		inputPublisherRoot.getChildren().addAll(inputPublisherLabel, publisherEnter);
-
-		ToggleGroup bookTypeButtonGroup = new ToggleGroup();
-		ToggleButton mangaButton = new ToggleButton("Manga");
-		ToggleButton lightNovelButton = new ToggleButton("Novel");
-
-		mangaButton.setToggleGroup(bookTypeButtonGroup);
-		mangaButton.setId("MenuButton");
-		mangaButton.setPrefSize(100, 10);
-		mangaButton.setOnMouseClicked((MouseEvent event) -> {
-			bookType.set("Manga");
-			mangaButton.setDisable(true);
-			lightNovelButton.setDisable(false);
-		});
-
-		lightNovelButton.setToggleGroup(bookTypeButtonGroup);
-		lightNovelButton.setId("MenuButton");
-		lightNovelButton.setPrefSize(100, 10);
-		lightNovelButton.setOnMouseClicked((MouseEvent event) -> {
-			bookType.set("Novel");
-			mangaButton.setDisable(false);
-			lightNovelButton.setDisable(true);
-		});
-
-		UnaryOperator<TextFormatter.Change> filter = change -> {
-			String newText = change.getControlNewText();
-			if (newText.matches("[0-9]*")) { return change; }
-			return null;
-		};
-
-		Label bookTypeLabel = new Label("Select Book Type");
-		bookTypeLabel.setId("MenuLabel");
-
-		HBox bookTypePane = new HBox(mangaButton, lightNovelButton);
-		bookTypePane.setSpacing(10);
-		bookTypePane.setAlignment(Pos.CENTER);
-
-		VBox bookTypeRoot = new VBox(bookTypeLabel, bookTypePane);
-		bookTypeRoot.setAlignment(Pos.CENTER);
-
-		TextField curVolumes = new TextField();
-		curVolumes.setPrefWidth(50);
-		curVolumes.setId("MenuTextField");
-		curVolumes.setTextFormatter(new TextFormatter<>(filter));
-		curVolumes.lengthProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue.intValue() > oldValue.intValue()) {
-				if (curVolumes.getText().length() >= 3) {
-					curVolumes.setText(curVolumes.getText().substring(0, 3));
-				}
-			}
-		});
-
-		TextField maxVolumes = new TextField();
-		maxVolumes.setPrefWidth(50);
-		maxVolumes.setId("MenuTextField");
-		maxVolumes.setTextFormatter(new TextFormatter<>(filter));
-		maxVolumes.lengthProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue.intValue() > oldValue.intValue()) {
-				if (maxVolumes.getText().length() >= 3) {
-					maxVolumes.setText(maxVolumes.getText().substring(0, 3));
-				}
-			}
-		});
-
-		Label curVolLabel = new Label("Cur Volumes");
-		curVolLabel.setId("MenuLabel");
-
-		Label maxVolLabel = new Label("Max Volumes");
-		maxVolLabel.setId("MenuLabel");
-
-		GridPane volProgressRoot = new GridPane();
-		volProgressRoot.setVgap(5);
-		volProgressRoot.setHgap(10);
-		volProgressRoot.setAlignment(Pos.CENTER);
-		volProgressRoot.add(curVolLabel, 0, 0);
-		volProgressRoot.add(curVolumes, 0 , 1);
-		volProgressRoot.add(maxVolLabel, 1, 0);
-		volProgressRoot.add(maxVolumes, 1 , 1);
-
-		Button submitButton = new Button("Add");
-
-		submitButton.setPrefSize(60, 10);
-		submitButton.setId("MenuButton");
-		submitButton.disableProperty().bind(titleEnter.textProperty().isEmpty().or(publisherEnter.textProperty().isEmpty()).or(curVolumes.textProperty().isEmpty()).or(maxVolumes.textProperty().isEmpty()).or(bookTypeButtonGroup.selectedToggleProperty().isNull()).or(curVolumes.textProperty().greaterThan(maxVolumes.textProperty())));
-		submitButton.setOnMouseClicked(event -> {
-			if (Integer.parseInt(curVolumes.getText()) <= Integer.parseInt(maxVolumes.getText())){
-				String newTitle = titleEnter.getText();
-				if (userCollection.stream().noneMatch(series -> ((series.getRomajiTitle().equalsIgnoreCase(newTitle) || series.getEnglishTitle().equalsIgnoreCase(newTitle) || series.getNativeTitle().equalsIgnoreCase(newTitle)) && series.getBookType().equals(bookType.get())))){
-					userCollection.add(new Series().CreateNewSeries(newTitle, publisherEnter.getText(), bookType.get(), Integer.parseInt(curVolumes.getText()), Integer.parseInt(maxVolumes.getText())));
-					filteredUserCollection = FXCollections.observableArrayList(userCollection);
-					collectionSetup(primaryStage);
-					updateCollectionNumbers();
-				}
-			}
-		});
-
-		VBox newSeriesPane = new VBox(inputTitleRoot, inputPublisherRoot, bookTypeRoot, volProgressRoot, submitButton);
-		newSeriesPane.setId("NewSeriesPane");
-		newSeriesPane.setStyle(collectionMasterCSS);
-
-		Scene newSeriesScene = new Scene(newSeriesPane);
-		newSeriesScene.getStylesheets().add("MenuCSS.css");
-		addNewSeriesWindow.setResizable(false);
-		addNewSeriesWindow.getIcons().add(new Image("bookshelf.png"));
-		addNewSeriesWindow.setTitle("Add New Series");
-		addNewSeriesWindow.setScene(newSeriesScene);
 	}
 
 	private void collectionSetup(Stage primaryStage){

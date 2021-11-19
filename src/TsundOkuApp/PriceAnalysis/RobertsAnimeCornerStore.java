@@ -123,13 +123,14 @@ public class RobertsAnimeCornerStore {
 			Pattern pattern = Pattern.compile("#[\\d]+");
 			Matcher titleMatch;
 			for (int x = 0; x < titleData.size(); x++){
-				currTitle = titleData.get(x).text().replaceAll(",", "");
+				currTitle = titleData.get(x).text().replaceAll(",|#", "").replaceAll("[ ]{2,}", " ");
 				titleMatch = pattern.matcher(currTitle);
 				if (titleMatch.find()){ // Replace all of the big whitespace
 					currTitle = currTitle.substring(0, titleMatch.end()).replaceAll("\\s+", " ");
 				}
 
-				dataList.add(new String[]{currTitle, priceData.get(x).text().trim(), currTitle.contains("Pre Order") ? "PO" : "IS", "RobertsAnimeCornerStore"});
+				//System.out.println(currTitle.substring(0, currTitle.indexOf(" Graphic")));
+				dataList.add(new String[]{currTitle.substring(0, currTitle.indexOf(" Graphic")), priceData.get(x).text().trim(), currTitle.contains("Pre Order") ? "PO" : "IS", "RobertsAnimeCornerStore"});
 			}
 			driver.quit();
 
@@ -154,8 +155,8 @@ public class RobertsAnimeCornerStore {
 		return dataList;
 	}
 
-//	public static void main (String[] args) throws FileNotFoundException {
-//		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
-//		GetRobertsAnimeCornerStoreData("07-Ghost", 'M');
-//	}
+	public static void main (String[] args) throws FileNotFoundException {
+		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
+		GetRobertsAnimeCornerStoreData("Overlord", 'M');
+	}
 }
