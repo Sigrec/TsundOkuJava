@@ -67,20 +67,20 @@ public class InStockTrades {
 		if (bookType == 'M'){
 			titleData.removeIf(data -> data.text().contains("Novel"));
 		}
-		for (int x = 0; x < titleData.size(); x++)
-		{
-			dataList.add(new String[]{titleData.get(x).text().replaceAll(" GN| Manga", "").replaceAll(" \\(.*?\\)", "").trim(), priceData.get(x).text().trim(), "IS", "InStockTrades"});
+
+		String curTitle;
+		for (int x = 0; x < titleData.size(); x++){
+			curTitle = titleData.get(x).text().replaceAll(" GN| Manga| TP|\\(.*?\\)", "").replace("3In1", "Omnibus").trim();
+			dataList.add(new String[]{curTitle, priceData.get(x).text().trim(), "IS", "InStockTrades"});
 		}
 
-		if (pageCheck != null)
-		{
+		if (pageCheck != null) {
 			currPageNum++;
 			GetInStockTradesData(bookTitle, bookType, currPageNum);
 		}
 		else{
 			driver.quit();
-			for (String link : inStockTradeLinks)
-			{
+			for (String link : inStockTradeLinks){
 				System.out.println(link);
 			}
 		}
@@ -105,6 +105,6 @@ public class InStockTrades {
 
 	public static void main (String[] args) throws FileNotFoundException {
 		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
-		GetInStockTradesData("Overlord", 'M', (byte) 1);
+		GetInStockTradesData("One Piece", 'M', (byte) 1);
 	}
 }

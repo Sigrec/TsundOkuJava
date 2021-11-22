@@ -6,14 +6,10 @@
 package TsundOkuApp;
 
 import java.awt.Desktop;
-import java.io.IOException;
-import java.io.File;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.*;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -384,11 +380,40 @@ public class TsundOkuGUI{
 		VBox userNameRoot = new VBox(enterUserNameLabel, changeUserNameRoot);
 		userNameRoot.setId("SettingsLabel");
 
-//		Button exportToExcelButton = new Button("Export to Excel");
-//		exportToExcelButton.setId("MenuButton");
-//		exportToExcelButton.setOnMouseClicked(event -> {
-//
-//		});
+		Button exportToExcelButton = new Button("Export to Excel");
+		exportToExcelButton.setId("MenuButton");
+		exportToExcelButton.setOnMouseClicked(event -> {
+			try {
+				exportToExcelButton.setDisable(true);
+				PrintWriter collectionAsCSV = new PrintWriter(user.getUserName() + "_Collection.csv", StandardCharsets.UTF_8);
+				BufferedWriter userCollectionAsCSV = new BufferedWriter(collectionAsCSV);
+				collectionAsCSV.write("Title,Book Type,Print Status,Publisher,Staff,Current # of Volumes,Max# of Volumes,Notes,AniList Link\n"); // Write the Header for the CSV
+				switch (user.getCurLanguage()) {
+					case "English" -> {
+						for(Series series : userCollection){
+							userCollectionAsCSV.write(series.getEnglishTitle() + "," + series.getBookType() + "," + series.getPrintStatus() + "," + series.getPublisher() + "," + series.getRomajiStaff() + "," + series.getCurVolumes() + "," + series.getMaxVolumes() + "," + series.getUserNotes() + "," + series.getLink() + "\n");
+						}
+					}
+					case "Native" -> {
+						for(Series series : userCollection){
+							userCollectionAsCSV.write(series.getNativeTitle() + "," + series.getBookType() + "," + series.getPrintStatus() + "," + series.getPublisher() + "," + series.getNativeStaff() + "," + series.getCurVolumes() + "," + series.getMaxVolumes() + "," + series.getUserNotes() + "," + series.getLink() + "\n");
+						}
+					}
+					default -> {
+						for(Series series : userCollection){
+							userCollectionAsCSV.write(series.getRomajiTitle() + "," + series.getBookType() + "," + series.getPrintStatus() + "," + series.getPublisher() + "," + series.getRomajiStaff() + "," + series.getCurVolumes() + "," + series.getMaxVolumes() + "," + series.getUserNotes() + "," + series.getLink() + "\n");
+						}
+					}
+				}
+				userCollectionAsCSV.flush();
+				userCollectionAsCSV.close();
+				collectionAsCSV.flush();
+				collectionAsCSV.close();
+				exportToExcelButton.setDisable(false);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
 
 		Button deleteCollectionButton = new Button("Delete Collection");
 		deleteCollectionButton.setId("MenuButton");
@@ -398,7 +423,7 @@ public class TsundOkuGUI{
 			collectionSetup(primaryStage);
 		});
 
-		VBox userSettingsPane = new VBox(userNameRoot, deleteCollectionButton);
+		VBox userSettingsPane = new VBox(userNameRoot, exportToExcelButton, deleteCollectionButton);
 		userSettingsPane.setSpacing(100);
 		userSettingsPane.setId("NewSeriesPane");
 		userSettingsPane.setStyle(collectionMasterCSS);

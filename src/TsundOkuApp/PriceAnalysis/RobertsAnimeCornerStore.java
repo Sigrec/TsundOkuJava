@@ -120,17 +120,18 @@ public class RobertsAnimeCornerStore {
 			List<Element> priceData = robertsLink.select("font[color^=#ffcc33]:contains($)").parallelStream().filter(price -> price.text().contains("$")).collect(Collectors.toList());
 
 			String currTitle;
-			Pattern pattern = Pattern.compile("#[\\d]+");
-			Matcher titleMatch;
 			for (int x = 0; x < titleData.size(); x++){
-				currTitle = titleData.get(x).text().replaceAll(",|#", "").replaceAll("[ ]{2,}", " ");
-				titleMatch = pattern.matcher(currTitle);
-				if (titleMatch.find()){ // Replace all of the big whitespace
-					currTitle = currTitle.substring(0, titleMatch.end()).replaceAll("\\s+", " ");
+				currTitle = titleData.get(x).text().replaceAll(",|#|Graphic Novel", "").replaceAll("[ ]{2,}", " ").replaceAll(" \\(.*?\\)", "").trim();
+				if (currTitle.contains("Omnibus")){
+					if (currTitle.contains("One Piece") && currTitle.contains("Vol 10-12")){ // Fix naming issue with one piece
+						currTitle = currTitle.substring(0, currTitle.indexOf(" Vol")) + " 4";
+					}
+					else{
+						currTitle = currTitle.substring(0, currTitle.indexOf(" Vol"));
+					}
 				}
-
 				//System.out.println(currTitle.substring(0, currTitle.indexOf(" Graphic")));
-				dataList.add(new String[]{currTitle.substring(0, currTitle.indexOf(" Graphic")), priceData.get(x).text().trim(), currTitle.contains("Pre Order") ? "PO" : "IS", "RobertsAnimeCornerStore"});
+				dataList.add(new String[]{currTitle, priceData.get(x).text().trim(), titleData.get(x).text().contains("Pre Order") ? "PO" : "IS", "RobertsAnimeCornerStore"});
 			}
 			driver.quit();
 
@@ -155,8 +156,8 @@ public class RobertsAnimeCornerStore {
 		return dataList;
 	}
 
-	public static void main (String[] args) throws FileNotFoundException {
-		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
-		GetRobertsAnimeCornerStoreData("Overlord", 'M');
-	}
+//	public static void main (String[] args) throws FileNotFoundException {
+//		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
+//		GetRobertsAnimeCornerStoreData("One Piece", 'M');
+//	}
 }

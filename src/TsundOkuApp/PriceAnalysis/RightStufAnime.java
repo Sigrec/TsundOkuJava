@@ -21,9 +21,9 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 
 import java.text.DecimalFormat;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Arrays;
 
 
 public class RightStufAnime {
@@ -49,6 +49,7 @@ public class RightStufAnime {
 	private static String getUrl(String bookTitle, char bookType, int currPageNum){
 		String url = "https://www.rightstufanime.com/category/" + checkBookType(bookType) + "?page=" + currPageNum + "&show=96&keywords=" + filterBookTitle(bookTitle);
 		rightStufLinks.add(url);
+		System.out.println(url);
 		return url;
 	}
 
@@ -147,6 +148,6 @@ public class RightStufAnime {
 
 	public static void main(String[] args) throws FileNotFoundException {
 		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
-		GetRightStufAnimeData("Overlord", 'M', true, (byte) 1);
+		GetRightStufAnimeData("One Piece", 'M', true, (byte) 1);
 	}
 }

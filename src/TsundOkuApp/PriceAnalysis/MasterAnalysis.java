@@ -4,7 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.*;
 
-import static TsundOkuApp.PriceAnalysis.BookDepository.GetAmazonAmericaData;
+import static TsundOkuApp.PriceAnalysis.BookDepository.GetBookDepositoryData;
 import static TsundOkuApp.PriceAnalysis.RobertsAnimeCornerStore.GetRobertsAnimeCornerStoreData;
 import static TsundOkuApp.PriceAnalysis.RightStufAnime.GetRightStufAnimeData;
 import static TsundOkuApp.PriceAnalysis.InStockTrades.GetInStockTradesData;
@@ -102,6 +102,13 @@ public class MasterAnalysis {
 		return finalData;
 	}
 
+	/**
+	 * Modified On: 20 November 2021
+	 *  by: Sean Njenga
+	 * Description: Creates the thread for getting data from RightStufAnime
+	 * Parameters:
+	 *      return | Thread | The thread that when executed gets data from RightStufAnime
+	 */
 	private static Thread CreateRightStufAnimeThread(){
 		return new Thread(() -> {
 			try {
@@ -112,6 +119,13 @@ public class MasterAnalysis {
 		});
 	}
 
+	/**
+	 * Modified On: 20 November 2021
+	 *  by: Sean Njenga
+	 * Description: Creates the thread for getting data from RobertsAnimeCornerStore
+	 * Parameters:
+	 *      return | Thread | The thread that when executed gets data from RobertsAnimeCornerStore
+	 */
 	private static Thread CreateRobertsAnimeCornerStoreThread(){
 		return new Thread(() -> {
 			try {
@@ -122,6 +136,13 @@ public class MasterAnalysis {
 		});
 	}
 
+	/**
+	 * Modified On: 20 November 2021
+	 *  by: Sean Njenga
+	 * Description: Creates the thread for getting data from InStockTrades
+	 * Parameters:
+	 *      return | Thread | The thread that when executed gets data from InStockTrades
+	 */
 	private static Thread CreateInStockTradesThread(){
 		return new Thread(() -> {
 			try {
@@ -132,17 +153,33 @@ public class MasterAnalysis {
 		});
 	}
 
+	/**
+	 * Modified On: 20 November 2021
+	 *  by: Sean Njenga
+	 * Description: Creates the thread for getting data from BookDepository
+	 * Parameters:
+	 *      return | Thread | The thread that when executed gets data from BookDepository
+	 */
 	private static Thread CreateBookDepositoryThread(){
 		return new Thread(() -> {
 			try {
-				DATALIST_PIPELINE.add(GetAmazonAmericaData(bookTitle, bookType, (byte) 1));
+				DATALIST_PIPELINE.add(GetBookDepositoryData(bookTitle, bookType, (byte) 1));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
 		});
 	}
 
-	public static void ComparePricing(String bookTitle, char bookType) throws InterruptedException, FileNotFoundException {
+	/**
+	 * Modified On: 20 November 2021
+	 *  by: Sean Njenga
+	 * Description: Starts the the threads from the website the user wants data from, then compares all the data
+	 *              and outputs the final data to a final.
+	 * Parameters:
+	 *      throws | InterruptedException | Thrown when a thread is interrupted
+	 *      throws | FileNotFoundException | Thrown when a file trying to be opened doesn't exist
+	 */
+	public static void ComparePricing() throws InterruptedException, FileNotFoundException {
 		final double startTime = System.currentTimeMillis();
 
 		Thread rightStufAnimeThread = CreateRightStufAnimeThread();
@@ -155,9 +192,10 @@ public class MasterAnalysis {
 		robertsAnimeCornerStoreThread.join();
 		inStockTradesThread.join();
 
-		DATALIST_PIPELINE.sort(Comparator.comparing(ArrayList::size));
 
-		// Need to add thread safety later
+		DATALIST_PIPELINE.sort(Comparator.comparing(ArrayList::size)); // Sort the list of data sets from the websites by size
+
+		// Need to add better scheduling later
 		int pos = 0; // The position of the new lists of data after comparing
 		int numListsOfData = DATALIST_PIPELINE.size();
 		int threadCount = numListsOfData % 2 == 0 ? numListsOfData : numListsOfData - 1; // Tracks the "status" of the data lists that need to be compared, essentially tracks needed thread count
@@ -212,7 +250,7 @@ public class MasterAnalysis {
 
 //		System.out.print("Are You a GotAnime Member? ->  ");
 //		bookTitle = userInput.nextLine();
-		ComparePricing(bookTitle, bookType);
+		ComparePricing();
 
 //		String x = "Overlord";
 //		String y = "Overlord";
