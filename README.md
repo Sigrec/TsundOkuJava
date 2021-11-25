@@ -16,6 +16,7 @@ If you lose or delete the UserData.dat file u will lose your entire collection, 
 ### Useful Links
 - [AniList Home](https://anilist.co/hom)
 - [Japanese Publisher Search](https://comic.k-manga.jp/)
+- [Hiatus Chart](https://www.reddit.com/r/HiatusCharts/comments/pfqlbz/all_charts/)
 
 ***Manga Streaming***
 - [✬MangaDex](https://mangadex.org/)
