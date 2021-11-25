@@ -269,6 +269,7 @@ public class TsundOkuGUI{
 				filteredUserCollection = FXCollections.observableArrayList(userCollection);
 			}
 			collectionSetup(primaryStage);
+			updateCollectionNumbers();
 		});
 
 		HBox searchPane = new HBox(titleSearch, searchButton);
