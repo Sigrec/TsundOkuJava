@@ -45,7 +45,7 @@ If you lose or delete the UserData.dat file u will lose your entire collection, 
 - [✬Kinokuniya](https://united-states.kinokuniya.com/)
 
 ***Japanese***
-- [✬Amazon.JP](https://www.amazon.co.jp/)
+- [Amazon.JP](https://www.amazon.co.jp/)
 - [Honto](https://honto.jp/)
 ***
 ### Twitter Accounts to Follow for Manga News
