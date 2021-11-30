@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -121,7 +120,7 @@ public class RobertsAnimeCornerStore {
 
 			String currTitle;
 			for (int x = 0; x < titleData.size(); x++){
-				currTitle = titleData.get(x).text().replaceAll(",|#|Graphic Novel", "").replaceAll("[ ]{2,}", " ").replaceAll(" \\(.*?\\)", "").trim();
+				currTitle = titleData.get(x).text().replaceAll(",|#|Graphic Novel", "").replaceAll("[ ]{2,}", " ").replaceAll("\\(.*?\\)", "").trim();
 				if (currTitle.contains("Omnibus")){
 					if (currTitle.contains("One Piece") && currTitle.contains("Vol 10-12")){ // Fix naming issue with one piece
 						currTitle = currTitle.substring(0, currTitle.indexOf(" Vol")) + " 4";
@@ -129,8 +128,9 @@ public class RobertsAnimeCornerStore {
 					else{
 						currTitle = currTitle.substring(0, currTitle.indexOf(" Vol"));
 					}
+					currTitle = currTitle.substring(0, currTitle.indexOf("Omnibus ") + "Omnibus ".length()) + "Vol " + currTitle.substring(currTitle.indexOf("Omnibus ") + "Omnibus ".length());
 				}
-				//System.out.println(currTitle.substring(0, currTitle.indexOf(" Graphic")));
+
 				dataList.add(new String[]{currTitle, priceData.get(x).text().trim(), titleData.get(x).text().contains("Pre Order") ? "PO" : "IS", "RobertsAnimeCornerStore"});
 			}
 			driver.quit();

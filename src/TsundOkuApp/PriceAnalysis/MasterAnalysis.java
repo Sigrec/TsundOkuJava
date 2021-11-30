@@ -13,6 +13,7 @@ public class MasterAnalysis {
 	private static final ArrayList<ArrayList<String[]>> DATALIST_PIPELINE = new ArrayList<>();
 	private static String bookTitle;
 	private static char bookType;
+	private static boolean gotAnimeMember = false;
 
 	/**
 	 * Modified On: 19 November 2021
@@ -66,17 +67,29 @@ public class MasterAnalysis {
 		String[] smallerListData;                          // The current volume data set that is being compared against from the smaller data list
 
 		for (String[] biggerListData : biggerList){
-			if (pos != smallerList.size()){ // Only need to check for a comparison if there are still volumes to compare in the "smallerList"
-				sameVolumeCheck = false; // Reset the check to determine if two volumes with the same number has been found to false
+			sameVolumeCheck = false; // Reset the check to determine if two volumes with the same number has been found to false
+			if (pos != smallerList.size()) { // Only need to check for a comparison if there are still volumes to compare in the "smallerList"
 				getListOneVolNum = Integer.parseInt(biggerListData[0].substring(bookTitle.length()).replaceFirst(".*?(\\d+).*", "$1"));
-				biggerTitleParse = biggerListData[0].substring(0, biggerListData[0].indexOf(" Vol")); // Parse the title from the bigger list
+				if (biggerListData[0].contains("Box Set")){
+					biggerTitleParse = biggerListData[0].substring(0, biggerListData[0].indexOf(" Box Set")); // Parse the title from the bigger list
+				}
+				else{
+					biggerTitleParse = biggerListData[0].substring(0, biggerListData[0].indexOf(" Vol")); // Parse the title from the bigger list
+				}
 				for (int y = pos; y < smallerList.size(); y++){ // Check every volume in the smaller list, skipping over volumes that have already been checked
 					smallerListData = smallerList.get(y);
 
 					// Check to see if the titles are the same and if not, if they are similar enough, if not go to the next volume
-					if (!smallerListData[0].substring(0, smallerListData[0].indexOf(" Vol")).equals(biggerTitleParse) &&
-							!Similar(smallerListData[0].substring(0, smallerListData[0].indexOf(" Vol")).replaceAll(" ", ""), biggerTitleParse.replaceAll(" ", ""))){
-						continue;
+					if (smallerListData[0].contains("Box Set")){
+						if (!smallerListData[0].substring(0, smallerListData[0].indexOf(" Box Set")).equals(biggerTitleParse) &&
+								!Similar(smallerListData[0].substring(0, smallerListData[0].indexOf(" Box Set")).replaceAll(" ", ""), biggerTitleParse.replaceAll(" ", ""))){
+							continue;
+						}
+					} else {
+						if (!smallerListData[0].substring(0, smallerListData[0].indexOf(" Vol")).equals(biggerTitleParse) &&
+								!Similar(smallerListData[0].substring(0, smallerListData[0].indexOf(" Vol")).replaceAll(" ", ""), biggerTitleParse.replaceAll(" ", ""))){
+							continue;
+						}
 					}
 
 					// If the vol numbers are the same and the titles are similar or the same from the if check above, add the lowest price volume to the list
@@ -112,7 +125,7 @@ public class MasterAnalysis {
 	private static Thread CreateRightStufAnimeThread(){
 		return new Thread(() -> {
 			try {
-				DATALIST_PIPELINE.add(GetRightStufAnimeData(bookTitle, bookType, false, (byte) 1));
+				DATALIST_PIPELINE.add(GetRightStufAnimeData(bookTitle, bookType, gotAnimeMember, (byte) 1));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -203,15 +216,14 @@ public class MasterAnalysis {
 		while (threadCount > 0) // While there is still 2 or more lists of data to compare prices
 		{
 			threadList = new Thread[threadCount / 2];
-			for (int curThread = 0; curThread < threadList.length; curThread++) // Create all of the threads for processing
-			{
+			for (int curThread = 0; curThread < threadList.length; curThread++) { // Create all of the threads for processing
 				int finalX = curThread;
 				int finalPos = pos;
 				threadList[curThread] = new Thread(() -> DATALIST_PIPELINE.set(finalPos, PriceComparison(DATALIST_PIPELINE.get(finalX + 1), DATALIST_PIPELINE.get(finalX))));
 				pos++;
 			}
 
-			for (Thread t : threadList){
+			for (Thread t : threadList) {
 				t.start();
 				t.join();
 			}
@@ -219,8 +231,8 @@ public class MasterAnalysis {
 			pos = 0;
 		}
 
-		if (numListsOfData % 2 != 0) // If the number of websites the user wants data from is odd do 1 more comparison
-		{
+
+		if (numListsOfData % 2 != 0) { // If the number of websites the user wants data from is odd do 1 more comparison
 			DATALIST_PIPELINE.set(0, PriceComparison(DATALIST_PIPELINE.get(numListsOfData - 1), DATALIST_PIPELINE.get(0)));
 		}
 
@@ -246,14 +258,11 @@ public class MasterAnalysis {
 		bookTitle = userInput.nextLine();
 
 		System.out.print("Are u searching for a Manga (M) or Light Novel (N): ");
-		bookType = userInput.next().charAt(0);
+		bookType = userInput.nextLine().charAt(0);
 
-//		System.out.print("Are You a GotAnime Member? ->  ");
-//		bookTitle = userInput.nextLine();
+		System.out.print("Are You a GotAnime Member Yes (Y) or No (N): ");
+		gotAnimeMember = userInput.nextLine().charAt(0) == 'Y';
+
 		ComparePricing();
-
-//		String x = "Overlord";
-//		String y = "Overlord";
-//		System.out.println(Similar(x.replaceAll(" ", ""), y.replaceAll(" ", "")));
 	}
 }

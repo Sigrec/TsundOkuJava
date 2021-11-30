@@ -60,7 +60,7 @@ public class InStockTrades {
 		Document inStockTradesLink = Jsoup.parse(driver.getPageSource());
 
 		// Get the page data from the HTML doc
-		List<Element> titleData = inStockTradesLink.select("div[class='title']").parallelStream().filter(data -> data.text().contains("Vol")).collect(Collectors.toList());
+		List<Element> titleData = inStockTradesLink.select("div[class='detail clearfix']:not(:has(.damage)) > div[class='title']").parallelStream().filter(data -> data.text().contains("Vol")).collect(Collectors.toList());
 		List<Element> priceData = inStockTradesLink.select("div[class='price']");
 		Element pageCheck = inStockTradesLink.selectFirst("a[class='btn hotaction']");
 
@@ -85,8 +85,19 @@ public class InStockTrades {
 			}
 		}
 
-		Comparator<String[]> test = Comparator.comparing(volData -> volData[0].substring(0, volData[0].indexOf("Vol")));
-		dataList.sort(test.thenComparing(volData -> Integer.parseInt(volData[0].substring(volData[0].indexOf("Vol")).replaceFirst(".*?(\\d+).*", "$1"))));
+		dataList.sort(new Comparator<String[]>() {
+			public int compare(String[] o1, String[] o2) {
+				if (o1[0].replaceAll("\\d+", "").equalsIgnoreCase(o2[0].replaceAll("\\d+", ""))) {
+					return extractInt(o1[0]) - extractInt(o2[0]);
+				}
+				return o1[0].compareTo(o2[0]);
+			}
+
+			int extractInt(String s) {
+				return Integer.parseInt(s.substring(bookTitle.length()).replaceAll(".*?(\\d+).*", "$1"));
+			}
+		});
+
 		PrintWriter inStockTradesDataFile = new PrintWriter("src/TsundOkuApp/PriceAnalysis/Data/InStockTradesData.txt");
 		if (!dataList.isEmpty())
 		{
@@ -103,8 +114,8 @@ public class InStockTrades {
 		return dataList;
 	}
 
-	public static void main (String[] args) throws FileNotFoundException {
-		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
-		GetInStockTradesData("One Piece", 'M', (byte) 1);
-	}
+//	public static void main (String[] args) throws FileNotFoundException {
+//		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
+//		GetInStockTradesData("One Piece", 'M', (byte) 1);
+//	}
 }

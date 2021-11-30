@@ -6,10 +6,14 @@
 package TsundOkuApp;
 
 import java.awt.Desktop;
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -60,12 +64,20 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.bootstrapicons.BootstrapIcons;
 import org.tbee.javafx.scene.layout.MigPane;
 
 public class TsundOkuGUI{
-
 	// Menu BG Settings Window Components
 	private SimpleStringProperty totalVolDisplayUpdate, totalToCollectUpdate;
 	private String collectionMasterCSS;
@@ -102,14 +114,12 @@ public class TsundOkuGUI{
 	private String curTheme = "";
 	private ObservableList<String> usersSavedThemes;
 
-	public TsundOkuGUI() { }
-
 	protected void setupTsundOkuGUI(Stage primaryStage) throws CloneNotSupportedException {
-		getUsersData();
+		GetUsersData();
 		filteredUserCollection = FXCollections.observableArrayList(userCollection);
 		usersSavedThemes = FXCollections.observableArrayList(user.getSavedThemes().keySet());
 		mainTheme = user.getMainTheme();
-		collectionMasterCSS = drawTheme(mainTheme);
+		collectionMasterCSS = DrawTheme(mainTheme);
 
 		content = new BorderPane();
 		content.setMaxSize(WINDOW_WIDTH - 100, WINDOW_HEIGHT - 100);
@@ -120,9 +130,9 @@ public class TsundOkuGUI{
 		userSettingsWindow.initStyle(StageStyle.UNIFIED);
 		addNewSeriesWindow.initStyle(StageStyle.UNIFIED);
 		themeSettingsWindow.initStyle(StageStyle.UNIFIED);
-		sortCollection();
-		collectionSetup(primaryStage);
-		menuSetup(content, primaryStage);
+		SortCollection();
+		CollectionSetup(primaryStage);
+		MenuSetup(content, primaryStage);
 
 		primaryStage.setMinWidth(SERIES_CARD_WIDTH + 550);
 		primaryStage.setMinHeight(SERIES_CARD_HEIGHT + NAV_HEIGHT + 75);
@@ -130,7 +140,7 @@ public class TsundOkuGUI{
 		primaryStage.getIcons().add(new Image("bookshelf.png"));
 		primaryStage.setResizable(true);
 		primaryStage.setOnCloseRequest((WindowEvent event) -> {
-			storeUserData();
+			StoresUsersData();
 			if (addNewSeriesWindow.isShowing()) { addNewSeriesWindow.close(); }
 			if (themeSettingsWindow.isShowing()) { themeSettingsWindow.close(); }
 			if (userSettingsWindow.isShowing()) { userSettingsWindow.close(); }
@@ -140,15 +150,18 @@ public class TsundOkuGUI{
 		primaryStage.show();
 	}
 
-	private void sortCollection(){
+	private void SortCollection(){
 		switch (user.getCurLanguage()) {
-			case "English" -> userCollection.sort(Series::compareByEnglishTitle);
-			case "Native" -> userCollection.sort(Series::compareByNativeTitle);
-			default -> userCollection.sort(Series::compareByRomajiTitle);
+			case "English":
+				userCollection.sort(Series::compareByEnglishTitle);
+			case "Native":
+				userCollection.sort(Series::compareByNativeTitle);
+			default:
+				userCollection.sort(Series::compareByRomajiTitle);
 		}
 	}
 
-	private void storeUserData(){
+	private void StoresUsersData(){
 		try {
 			ObjectOutputStream outputNewSeries = new ObjectOutputStream(new FileOutputStream("UserData.dat"));
 			user.setCollection(userCollection);
@@ -160,13 +173,13 @@ public class TsundOkuGUI{
 		}
 	}
 
-	private void getUsersData(){
+	private void GetUsersData(){
 		File collectionFile = new File("UserData.dat");
 		if (!collectionFile.exists()) {
 			new File("Covers").mkdir();
 			user = new Collector("Default UserName", "Romaji", TsundOkuTheme.DEFAULT_THEME, new HashMap<>(), new ArrayList<>());
 			user.addNewTheme(TsundOkuTheme.DEFAULT_THEME);
-			storeUserData();
+			StoresUsersData();
 		}
 		try {
 			ObjectInputStream getUserObject = new ObjectInputStream(new FileInputStream("UserData.dat"));
@@ -179,11 +192,11 @@ public class TsundOkuGUI{
 		}
 	}
 
-	private void menuSetup(BorderPane content, Stage primaryStage) throws CloneNotSupportedException {
-		setupUserSettingsWindow(primaryStage);
-		setupCollectionSettingsWindow(primaryStage);
-		setupPriceComparisonWindow();
-		setupAddNewSeriesWindow(primaryStage);
+	private void MenuSetup(BorderPane content, Stage primaryStage) throws CloneNotSupportedException {
+		SetupUserSettingsWindow(primaryStage);
+		SetupCollectionSettingsWindow(primaryStage);
+		SetupPriceComparisonWindow();
+		SetupAddNewSeriesWindow(primaryStage);
 		Text userName = new Text(user.getUserName());
 		userName.setId("UserName");
 
@@ -264,12 +277,12 @@ public class TsundOkuGUI{
 		searchButton.setOnAction(event -> {
 			if (!titleSearch.getText().isEmpty()){
 				String newText = titleSearch.getText();
-				filteredUserCollection = FXCollections.observableArrayList(userCollection.parallelStream().filter(series -> containsIgnoreCase(series.getRomajiTitle(), newText) | containsIgnoreCase(series.getEnglishTitle(), newText) | containsIgnoreCase(series.getNativeTitle(), newText) | containsIgnoreCase(series.getRomajiStaff(), newText) | containsIgnoreCase(series.getNativeStaff(), newText) | containsIgnoreCase(series.getPublisher(), newText) | containsIgnoreCase(series.getBookType(), newText) | containsIgnoreCase(series.getPrintStatus(), newText)).collect(Collectors.toList()));
+				filteredUserCollection = FXCollections.observableArrayList(userCollection.parallelStream().filter(series -> ContainsIgnoresCase(series.getRomajiTitle(), newText) | ContainsIgnoresCase(series.getEnglishTitle(), newText) | ContainsIgnoresCase(series.getNativeTitle(), newText) | ContainsIgnoresCase(series.getRomajiStaff(), newText) | ContainsIgnoresCase(series.getNativeStaff(), newText) | ContainsIgnoresCase(series.getPublisher(), newText) | ContainsIgnoresCase(series.getBookType(), newText) | ContainsIgnoresCase(series.getPrintStatus(), newText)).collect(Collectors.toList()));
 			} else { // Reset back to the full list when field is blank and user presses enter
 				filteredUserCollection = FXCollections.observableArrayList(userCollection);
 			}
-			collectionSetup(primaryStage);
-			updateCollectionNumbers();
+			CollectionSetup(primaryStage);
+			UpdateCollectionNumbers();
 		});
 
 		HBox searchPane = new HBox(titleSearch, searchButton);
@@ -312,9 +325,9 @@ public class TsundOkuGUI{
 		languageSelect.setValue(user.getCurLanguage());
 		languageSelect.setOnAction((event) -> {
 			user.setCurLanguage(languageSelect.getValue());
-			sortCollection();
+			SortCollection();
 			filteredUserCollection = FXCollections.observableArrayList(userCollection);
-			collectionSetup(primaryStage);
+			CollectionSetup(primaryStage);
 		});
 
 		VBox addSeriesAndLanguageLayout = new VBox(addNewSeriesButton, languageSelect);
@@ -328,7 +341,7 @@ public class TsundOkuGUI{
 		content.setTop(menuBar);
 	}
 
-	private void setupPriceComparisonWindow(){
+	private void SetupPriceComparisonWindow(){
 		VBox priceComparisonPane = new VBox();
 		priceComparisonPane.setSpacing(100);
 		priceComparisonPane.setId("NewSeriesPane");
@@ -342,12 +355,12 @@ public class TsundOkuGUI{
 		priceComparisonWindow.setScene(priceComparisonScene);
 	}
 
-	private void updateCollectionNumbers(){
+	private void UpdateCollectionNumbers(){
 		totalVolDisplayUpdate.set("Collected\n" + user.getTotalVolumes() + " Volumes");
 		totalToCollectUpdate.set("Need To Collect\n" + (maxVolumesInCollection - user.getTotalVolumes()) + " Volumes");
 	}
 
-	private void setupUserSettingsWindow(Stage primaryStage){
+	private void SetupUserSettingsWindow(Stage primaryStage){
 		TextField enterUserName = new TextField();
 		enterUserName.setId("MenuTextField");
 		enterUserName.setPrefWidth(250);
@@ -369,7 +382,7 @@ public class TsundOkuGUI{
 		saveUserNameButton.setOnMouseClicked(event -> {
 			user.setUserName(enterUserName.getText());
 			try {
-				menuSetup(content, primaryStage);
+				MenuSetup(content, primaryStage);
 			} catch (CloneNotSupportedException e) {
 				e.printStackTrace();
 			}
@@ -384,36 +397,199 @@ public class TsundOkuGUI{
 		Button exportToExcelButton = new Button("Export to Excel");
 		exportToExcelButton.setId("MenuButton");
 		exportToExcelButton.setOnMouseClicked(event -> {
+			exportToExcelButton.setDisable(true);
+
 			try {
-				exportToExcelButton.setDisable(true);
-				PrintWriter collectionAsCSV = new PrintWriter(user.getUserName() + "_Collection.csv", StandardCharsets.UTF_8);
-				BufferedWriter userCollectionAsCSV = new BufferedWriter(collectionAsCSV);
-				collectionAsCSV.write("Title,Book Type,Print Status,Publisher,Staff,Current # of Volumes,Max# of Volumes,Notes,AniList Link\n"); // Write the Header for the CSV
-				switch (user.getCurLanguage()) {
-					case "English" -> {
-						for(Series series : userCollection){
-							userCollectionAsCSV.write(series.getEnglishTitle() + "," + series.getBookType() + "," + series.getPrintStatus() + "," + series.getPublisher() + "," + series.getRomajiStaff() + "," + series.getCurVolumes() + "," + series.getMaxVolumes() + "," + series.getUserNotes() + "," + series.getLink() + "\n");
+				XSSFWorkbook workBook = new XSSFWorkbook();
+				XSSFSheet excelCollection = workBook.createSheet(user.getUserName() + "_Collection");
+
+				Row dataRow = excelCollection.createRow(0);
+				Cell titleCell, bookTypeCell, printStatusCell, staffCell, publisherCell, curVolumesCell, maxVolumesCell, userNotesCell, linkCell;
+				dataRow.createCell(0, CellType.STRING).setCellValue("Title");
+				dataRow.createCell(1, CellType.STRING).setCellValue("Book Type");
+				dataRow.createCell(2, CellType.STRING).setCellValue("Print Status");
+				dataRow.createCell(3, CellType.STRING).setCellValue("Staff");
+				dataRow.createCell(4, CellType.STRING).setCellValue("Publisher");
+				dataRow.createCell(5, CellType.STRING).setCellValue("Current # of Volumes");
+				dataRow.createCell(6, CellType.STRING).setCellValue("Max # of Volumes");
+				dataRow.createCell(7, CellType.STRING).setCellValue("Notes");
+				dataRow.createCell(8, CellType.STRING).setCellValue("AniList Link");
+
+				CellStyle numStyle = workBook.createCellStyle();
+				numStyle.setAlignment(HorizontalAlignment.CENTER);
+				numStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
+				CellStyle verticalAlign = workBook.createCellStyle();
+				verticalAlign.setVerticalAlignment(VerticalAlignment.CENTER);
+
+				CellStyle userNotesStyle = workBook.createCellStyle();
+				userNotesStyle.setWrapText(true);
+				userNotesStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
+				switch (user.getCurLanguage()){
+					case "Native" -> {
+						for (int rowNum = 1; rowNum < userCollection.size(); rowNum++){
+							Series curSeries = userCollection.get(rowNum);
+							dataRow = excelCollection.createRow(rowNum);
+
+							titleCell = dataRow.createCell(0, CellType.STRING);
+							titleCell.setCellValue(curSeries.getNativeTitle());
+							titleCell.setCellStyle(verticalAlign);
+							excelCollection.autoSizeColumn(titleCell.getColumnIndex());
+
+							bookTypeCell = dataRow.createCell(1, CellType.STRING);
+							bookTypeCell.setCellValue(curSeries.getBookType());
+							bookTypeCell.setCellStyle(numStyle);
+							excelCollection.autoSizeColumn(bookTypeCell.getColumnIndex());
+
+							printStatusCell = dataRow.createCell(2, CellType.STRING);
+							printStatusCell.setCellValue(curSeries.getPrintStatus());
+							printStatusCell.setCellStyle(numStyle);
+							excelCollection.autoSizeColumn(printStatusCell.getColumnIndex());
+
+							staffCell = dataRow.createCell(3, CellType.STRING);
+							staffCell.setCellValue(curSeries.getNativeStaff());
+							staffCell.setCellStyle(verticalAlign);
+							excelCollection.autoSizeColumn(staffCell.getColumnIndex());
+
+							publisherCell = dataRow.createCell(4, CellType.STRING);
+							publisherCell.setCellValue(curSeries.getPublisher());
+							publisherCell.setCellStyle(verticalAlign);
+							excelCollection.autoSizeColumn(publisherCell.getColumnIndex());
+
+							curVolumesCell = dataRow.createCell(5, CellType.NUMERIC);
+							curVolumesCell.setCellValue(curSeries.getCurVolumes());
+							curVolumesCell.setCellStyle(numStyle);
+							excelCollection.autoSizeColumn(curVolumesCell.getColumnIndex());
+
+							maxVolumesCell = dataRow.createCell(6, CellType.NUMERIC);
+							maxVolumesCell.setCellValue(curSeries.getMaxVolumes());
+							maxVolumesCell.setCellStyle(numStyle);
+							excelCollection.autoSizeColumn(maxVolumesCell.getColumnIndex());
+
+							userNotesCell = dataRow.createCell(7, CellType.STRING);
+							userNotesCell.setCellValue(curSeries.getUserNotes().equals("Edit Notes:") ? "" : curSeries.getUserNotes());
+							userNotesCell.setCellStyle(userNotesStyle);
+							excelCollection.autoSizeColumn(userNotesCell.getColumnIndex());
+
+							linkCell = dataRow.createCell(8, CellType.STRING);
+							linkCell.setCellValue(curSeries.getLink());
+							linkCell.setCellStyle(verticalAlign);
+							excelCollection.autoSizeColumn(linkCell.getColumnIndex());
 						}
 					}
-					case "Native" -> {
-						for(Series series : userCollection){
-							userCollectionAsCSV.write(series.getNativeTitle() + "," + series.getBookType() + "," + series.getPrintStatus() + "," + series.getPublisher() + "," + series.getNativeStaff() + "," + series.getCurVolumes() + "," + series.getMaxVolumes() + "," + series.getUserNotes() + "," + series.getLink() + "\n");
+					case "English" -> {
+						for (int rowNum = 1; rowNum < userCollection.size(); rowNum++){
+							Series curSeries = userCollection.get(rowNum);
+							dataRow = excelCollection.createRow(rowNum);
+
+							titleCell = dataRow.createCell(0, CellType.STRING);
+							titleCell.setCellValue(curSeries.getEnglishTitle());
+							titleCell.setCellStyle(verticalAlign);
+							excelCollection.autoSizeColumn(titleCell.getColumnIndex());
+
+							bookTypeCell = dataRow.createCell(1, CellType.STRING);
+							bookTypeCell.setCellValue(curSeries.getBookType());
+							bookTypeCell.setCellStyle(numStyle);
+							excelCollection.autoSizeColumn(bookTypeCell.getColumnIndex());
+
+							printStatusCell = dataRow.createCell(2, CellType.STRING);
+							printStatusCell.setCellValue(curSeries.getPrintStatus());
+							printStatusCell.setCellStyle(numStyle);
+							excelCollection.autoSizeColumn(printStatusCell.getColumnIndex());
+
+							staffCell = dataRow.createCell(3, CellType.STRING);
+							staffCell.setCellValue(curSeries.getRomajiStaff());
+							staffCell.setCellStyle(verticalAlign);
+							excelCollection.autoSizeColumn(staffCell.getColumnIndex());
+
+							publisherCell = dataRow.createCell(4, CellType.STRING);
+							publisherCell.setCellValue(curSeries.getPublisher());
+							publisherCell.setCellStyle(verticalAlign);
+							excelCollection.autoSizeColumn(publisherCell.getColumnIndex());
+
+							curVolumesCell = dataRow.createCell(5, CellType.NUMERIC);
+							curVolumesCell.setCellValue(curSeries.getCurVolumes());
+							curVolumesCell.setCellStyle(numStyle);
+							excelCollection.autoSizeColumn(curVolumesCell.getColumnIndex());
+
+							maxVolumesCell = dataRow.createCell(6, CellType.NUMERIC);
+							maxVolumesCell.setCellValue(curSeries.getMaxVolumes());
+							maxVolumesCell.setCellStyle(numStyle);
+							excelCollection.autoSizeColumn(maxVolumesCell.getColumnIndex());
+
+							userNotesCell = dataRow.createCell(7, CellType.STRING);
+							userNotesCell.setCellValue(curSeries.getUserNotes().equals("Edit Notes:") ? "" : curSeries.getUserNotes());
+							userNotesCell.setCellStyle(userNotesStyle);
+							excelCollection.autoSizeColumn(userNotesCell.getColumnIndex());
+
+							linkCell = dataRow.createCell(8, CellType.STRING);
+							linkCell.setCellValue(curSeries.getLink());
+							linkCell.setCellStyle(verticalAlign);
+							excelCollection.autoSizeColumn(linkCell.getColumnIndex());
 						}
 					}
 					default -> {
-						for(Series series : userCollection){
-							userCollectionAsCSV.write(series.getRomajiTitle() + "," + series.getBookType() + "," + series.getPrintStatus() + "," + series.getPublisher() + "," + series.getRomajiStaff() + "," + series.getCurVolumes() + "," + series.getMaxVolumes() + "," + series.getUserNotes() + "," + series.getLink() + "\n");
+						for (int rowNum = 1; rowNum < userCollection.size(); rowNum++){
+							Series curSeries = userCollection.get(rowNum);
+							dataRow = excelCollection.createRow(rowNum);
+
+							titleCell = dataRow.createCell(0, CellType.STRING);
+							titleCell.setCellValue(curSeries.getRomajiTitle());
+							titleCell.setCellStyle(verticalAlign);
+							excelCollection.autoSizeColumn(titleCell.getColumnIndex());
+
+							bookTypeCell = dataRow.createCell(1, CellType.STRING);
+							bookTypeCell.setCellValue(curSeries.getBookType());
+							bookTypeCell.setCellStyle(numStyle);
+							excelCollection.autoSizeColumn(bookTypeCell.getColumnIndex());
+
+							printStatusCell = dataRow.createCell(2, CellType.STRING);
+							printStatusCell.setCellValue(curSeries.getPrintStatus());
+							printStatusCell.setCellStyle(numStyle);
+							excelCollection.autoSizeColumn(printStatusCell.getColumnIndex());
+
+							staffCell = dataRow.createCell(3, CellType.STRING);
+							staffCell.setCellValue(curSeries.getRomajiStaff());
+							staffCell.setCellStyle(verticalAlign);
+							excelCollection.autoSizeColumn(staffCell.getColumnIndex());
+
+							publisherCell = dataRow.createCell(4, CellType.STRING);
+							publisherCell.setCellValue(curSeries.getPublisher());
+							publisherCell.setCellStyle(verticalAlign);
+							excelCollection.autoSizeColumn(publisherCell.getColumnIndex());
+
+							curVolumesCell = dataRow.createCell(5, CellType.NUMERIC);
+							curVolumesCell.setCellValue(curSeries.getCurVolumes());
+							curVolumesCell.setCellStyle(numStyle);
+							excelCollection.autoSizeColumn(curVolumesCell.getColumnIndex());
+
+							maxVolumesCell = dataRow.createCell(6, CellType.NUMERIC);
+							maxVolumesCell.setCellValue(curSeries.getMaxVolumes());
+							maxVolumesCell.setCellStyle(numStyle);
+							excelCollection.autoSizeColumn(maxVolumesCell.getColumnIndex());
+
+							userNotesCell = dataRow.createCell(7, CellType.STRING);
+							userNotesCell.setCellValue(curSeries.getUserNotes().equals("Edit Notes:") ? "" : curSeries.getUserNotes());
+							userNotesCell.setCellStyle(userNotesStyle);
+							excelCollection.autoSizeColumn(userNotesCell.getColumnIndex());
+
+							linkCell = dataRow.createCell(8, CellType.STRING);
+							linkCell.setCellValue(curSeries.getLink());
+							linkCell.setCellStyle(verticalAlign);
+							excelCollection.autoSizeColumn(linkCell.getColumnIndex());
 						}
 					}
 				}
-				userCollectionAsCSV.flush();
-				userCollectionAsCSV.close();
-				collectionAsCSV.flush();
-				collectionAsCSV.close();
-				exportToExcelButton.setDisable(false);
+
+				FileOutputStream out = new FileOutputStream(user.getUserName() + "_Collection.xlsx");
+				workBook.write(out);
+				out.flush();
+				out.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			exportToExcelButton.setDisable(false);
 		});
 
 		Button deleteCollectionButton = new Button("Delete Collection");
@@ -421,7 +597,7 @@ public class TsundOkuGUI{
 		deleteCollectionButton.setOnMouseClicked(event -> {
 			userCollection.clear();
 			filteredUserCollection = FXCollections.observableArrayList(userCollection);
-			collectionSetup(primaryStage);
+			CollectionSetup(primaryStage);
 		});
 
 		VBox userSettingsPane = new VBox(userNameRoot, exportToExcelButton, deleteCollectionButton);
@@ -438,7 +614,7 @@ public class TsundOkuGUI{
 		userSettingsWindow.setScene(userSettingsScene);
 	}
 
-	private static boolean containsIgnoreCase(String str, String searchStr){
+	private static boolean ContainsIgnoresCase(String str, String searchStr){
 		if (str == null || searchStr == null) {
 			return false;
 		}
@@ -452,7 +628,7 @@ public class TsundOkuGUI{
 		return false;
 	}
 
-	private void setupAddNewSeriesWindow(Stage primaryStage){
+	private void SetupAddNewSeriesWindow(Stage primaryStage){
 		AtomicReference<String> bookType = new AtomicReference<>("");
 
 		TextField titleEnter = new TextField();
@@ -563,12 +739,12 @@ public class TsundOkuGUI{
 		submitButton.disableProperty().bind(titleEnter.textProperty().isEmpty().or(publisherEnter.textProperty().isEmpty()).or(curVolumes.textProperty().isEmpty()).or(maxVolumes.textProperty().isEmpty()).or(bookTypeButtonGroup.selectedToggleProperty().isNull()).or(curVolumes.textProperty().greaterThan(maxVolumes.textProperty())));
 		submitButton.setOnMouseClicked(event -> {
 			if (Integer.parseInt(curVolumes.getText()) <= Integer.parseInt(maxVolumes.getText())){
-				String newTitle = titleEnter.getText();
-				if (userCollection.stream().noneMatch(series -> ((series.getRomajiTitle().equalsIgnoreCase(newTitle) || series.getEnglishTitle().equalsIgnoreCase(newTitle) || series.getNativeTitle().equalsIgnoreCase(newTitle)) && series.getBookType().equals(bookType.get())))){
+				String newTitle = titleEnter.getText().trim();
+				if (userCollection.stream().noneMatch(series -> ((series.getRomajiTitle().trim().equalsIgnoreCase(newTitle) || series.getEnglishTitle().trim().equalsIgnoreCase(newTitle) || series.getNativeTitle().trim().equalsIgnoreCase(newTitle)) && series.getBookType().equals(bookType.get())))){
 					userCollection.add(new Series().CreateNewSeries(newTitle, publisherEnter.getText(), bookType.get(), Integer.parseInt(curVolumes.getText()), Integer.parseInt(maxVolumes.getText())));
 					filteredUserCollection = FXCollections.observableArrayList(userCollection);
-					collectionSetup(primaryStage);
-					updateCollectionNumbers();
+					CollectionSetup(primaryStage);
+					UpdateCollectionNumbers();
 				}
 			}
 		});
@@ -585,15 +761,15 @@ public class TsundOkuGUI{
 		addNewSeriesWindow.setScene(newSeriesScene);
 	}
 
-	private void setupCollectionSettingsWindow(Stage primaryStage) throws CloneNotSupportedException {
+	private void SetupCollectionSettingsWindow(Stage primaryStage) throws CloneNotSupportedException {
 		finalNewTheme = (TsundOkuTheme) mainTheme.clone();
 
 		ColorPicker menuBGColor = new ColorPicker();
 		menuBGColor.setPrefWidth(181);
-		menuBGColor.setValue(convertStringToColor(mainTheme.getMenuBGColor()));
+		menuBGColor.setValue(ConvertStringToColor(mainTheme.getMenuBGColor()));
 		menuBGColor.setOnAction(event -> {
-			finalNewTheme.setMenuBGColor(formatColorCode(menuBGColor.getValue()));
-			menuBar.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setMenuBGColor(FormatColorCode(menuBGColor.getValue()));
+			menuBar.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label menuBGColorLabel = new Label("Menu BG");
@@ -605,10 +781,10 @@ public class TsundOkuGUI{
 
 		ColorPicker userNameColor = new ColorPicker();
 		userNameColor.setPrefWidth(181);
-		userNameColor.setValue(convertStringToColor(mainTheme.getUserNameColor()));
+		userNameColor.setValue(ConvertStringToColor(mainTheme.getUserNameColor()));
 		userNameColor.setOnAction(event -> {
-			finalNewTheme.setUserNameColor(formatColorCode(userNameColor.getValue()));
-			menuBar.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setUserNameColor(FormatColorCode(userNameColor.getValue()));
+			menuBar.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label userNameColorLabel = new Label("User Name");
@@ -620,10 +796,10 @@ public class TsundOkuGUI{
 
 		ColorPicker userNormalSettingsIconColor = new ColorPicker();
 		userNormalSettingsIconColor.setPrefWidth(181);
-		userNormalSettingsIconColor.setValue(convertStringToColor(mainTheme.getUserNormalSettingsIconColor()));
+		userNormalSettingsIconColor.setValue(ConvertStringToColor(mainTheme.getUserNormalSettingsIconColor()));
 		userNormalSettingsIconColor.setOnAction(event -> {
-			finalNewTheme.setUserNormalSettingsIconColor(formatColorCode(userNormalSettingsIconColor.getValue()));
-			menuBar.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setUserNormalSettingsIconColor(FormatColorCode(userNormalSettingsIconColor.getValue()));
+			menuBar.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label userNormalSettingsIconColorLabel = new Label("User Settings Icon");
@@ -635,10 +811,10 @@ public class TsundOkuGUI{
 
 		ColorPicker userHoverSettingsIconColor = new ColorPicker();
 		userHoverSettingsIconColor.setPrefWidth(181);
-		userHoverSettingsIconColor.setValue(convertStringToColor(mainTheme.getUserHoverSettingsIconColor()));
+		userHoverSettingsIconColor.setValue(ConvertStringToColor(mainTheme.getUserHoverSettingsIconColor()));
 		userHoverSettingsIconColor.setOnAction(event -> {
-			finalNewTheme.setUserHoverSettingsIconColor(formatColorCode(userHoverSettingsIconColor.getValue()));
-			menuBar.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setUserHoverSettingsIconColor(FormatColorCode(userHoverSettingsIconColor.getValue()));
+			menuBar.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label userHoverSettingsIconColorLabel = new Label("User Settings Icon (Hover)");
@@ -650,10 +826,10 @@ public class TsundOkuGUI{
 
 		ColorPicker themeNormalSettingsIconColor = new ColorPicker();
 		themeNormalSettingsIconColor.setPrefWidth(181);
-		themeNormalSettingsIconColor.setValue(convertStringToColor(mainTheme.getThemeNormalSettingsIconColor()));
+		themeNormalSettingsIconColor.setValue(ConvertStringToColor(mainTheme.getThemeNormalSettingsIconColor()));
 		themeNormalSettingsIconColor.setOnAction(event -> {
-			finalNewTheme.setThemeNormalSettingsIconColor(formatColorCode(themeNormalSettingsIconColor.getValue()));
-			menuBar.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setThemeNormalSettingsIconColor(FormatColorCode(themeNormalSettingsIconColor.getValue()));
+			menuBar.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label themeNormalSettingsIconColorLabel = new Label("Theme Settings Icon");
@@ -665,10 +841,10 @@ public class TsundOkuGUI{
 
 		ColorPicker themeHoverSettingsIconColor = new ColorPicker();
 		themeHoverSettingsIconColor.setPrefWidth(181);
-		themeHoverSettingsIconColor.setValue(convertStringToColor(mainTheme.getThemeHoverSettingsIconColor()));
+		themeHoverSettingsIconColor.setValue(ConvertStringToColor(mainTheme.getThemeHoverSettingsIconColor()));
 		themeHoverSettingsIconColor.setOnAction(event -> {
-			finalNewTheme.setThemeHoverSettingsIconColor(formatColorCode(themeHoverSettingsIconColor.getValue()));
-			menuBar.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setThemeHoverSettingsIconColor(FormatColorCode(themeHoverSettingsIconColor.getValue()));
+			menuBar.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label themeHoverSettingsIconColorLabel = new Label("Theme Settings Icon (Hover)");
@@ -680,10 +856,10 @@ public class TsundOkuGUI{
 
 		ColorPicker menuCollectionSearchBorderColor = new ColorPicker();
 		menuCollectionSearchBorderColor.setPrefWidth(181);
-		menuCollectionSearchBorderColor.setValue(convertStringToColor(mainTheme.getCollectionSearchBorderColor()));
+		menuCollectionSearchBorderColor.setValue(ConvertStringToColor(mainTheme.getCollectionSearchBorderColor()));
 		menuCollectionSearchBorderColor.setOnAction(event -> {
-			finalNewTheme.setCollectionSearchBorderColor(formatColorCode(menuCollectionSearchBorderColor.getValue()));
-			menuBar.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionSearchBorderColor(FormatColorCode(menuCollectionSearchBorderColor.getValue()));
+			menuBar.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label menuCollectionSearchBorderColorLabel = new Label("Collection Search Border");
@@ -695,10 +871,10 @@ public class TsundOkuGUI{
 
 		ColorPicker menuCollectionSearchBGColor = new ColorPicker();
 		menuCollectionSearchBGColor.setPrefWidth(181);
-		menuCollectionSearchBGColor.setValue(convertStringToColor(mainTheme.getCollectionSearchBGColor()));
+		menuCollectionSearchBGColor.setValue(ConvertStringToColor(mainTheme.getCollectionSearchBGColor()));
 		menuCollectionSearchBGColor.setOnAction(event -> {
-			finalNewTheme.setCollectionSearchBGColor(formatColorCode(menuCollectionSearchBGColor.getValue()));
-			menuBar.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionSearchBGColor(FormatColorCode(menuCollectionSearchBGColor.getValue()));
+			menuBar.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label menuCollectionSearchBGColorLabel = new Label("Collection Search BG");
@@ -710,10 +886,10 @@ public class TsundOkuGUI{
 
 		ColorPicker menuCollectionSearchTextColor = new ColorPicker();
 		menuCollectionSearchTextColor.setPrefWidth(181);
-		menuCollectionSearchTextColor.setValue(convertStringToColor(mainTheme.getCollectionSearchTextColor()));
+		menuCollectionSearchTextColor.setValue(ConvertStringToColor(mainTheme.getCollectionSearchTextColor()));
 		menuCollectionSearchTextColor.setOnAction(event -> {
-			finalNewTheme.setCollectionSearchTextColor(formatColorCode(menuCollectionSearchTextColor.getValue()));
-			menuBar.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionSearchTextColor(FormatColorCode(menuCollectionSearchTextColor.getValue()));
+			menuBar.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label menuCollectionSearchTextColorLabel = new Label("Collection Search Text");
@@ -725,10 +901,10 @@ public class TsundOkuGUI{
 
 		ColorPicker menuBottomBorderColor = new ColorPicker();
 		menuBottomBorderColor.setPrefWidth(181);
-		menuBottomBorderColor.setValue(convertStringToColor(mainTheme.getMenuBottomBorderColor()));
+		menuBottomBorderColor.setValue(ConvertStringToColor(mainTheme.getMenuBottomBorderColor()));
 		menuBottomBorderColor.setOnAction(event -> {
-			finalNewTheme.setMenuBottomBorderColor(formatColorCode(menuBottomBorderColor.getValue()));
-			menuBar.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setMenuBottomBorderColor(FormatColorCode(menuBottomBorderColor.getValue()));
+			menuBar.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label menuBottomBorderColorLabel = new Label("Divider");
@@ -740,10 +916,10 @@ public class TsundOkuGUI{
 
 		ColorPicker menuTextColor = new ColorPicker();
 		menuTextColor.setPrefWidth(181);
-		menuTextColor.setValue(convertStringToColor(mainTheme.getMenuTextColor()));
+		menuTextColor.setValue(ConvertStringToColor(mainTheme.getMenuTextColor()));
 		menuTextColor.setOnAction(event -> {
-			finalNewTheme.setMenuTextColor(formatColorCode(menuTextColor.getValue()));
-			menuBar.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setMenuTextColor(FormatColorCode(menuTextColor.getValue()));
+			menuBar.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label menuTextColorLabel = new Label("Menu Text");
@@ -755,10 +931,10 @@ public class TsundOkuGUI{
 
 		ColorPicker menuNormalButtonBGColor = new ColorPicker();
 		menuNormalButtonBGColor.setPrefWidth(181);
-		menuNormalButtonBGColor.setValue(convertStringToColor(mainTheme.getMenuNormalButtonBGColor()));
+		menuNormalButtonBGColor.setValue(ConvertStringToColor(mainTheme.getMenuNormalButtonBGColor()));
 		menuNormalButtonBGColor.setOnAction(event -> {
-			finalNewTheme.setMenuNormalButtonBGColor(formatColorCode(menuNormalButtonBGColor.getValue()));
-			menuBar.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setMenuNormalButtonBGColor(FormatColorCode(menuNormalButtonBGColor.getValue()));
+			menuBar.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label menuNormalButtonBGColorLabel = new Label("Menu Button BG");
@@ -770,10 +946,10 @@ public class TsundOkuGUI{
 
 		ColorPicker menuHoverButtonBGColor = new ColorPicker();
 		menuHoverButtonBGColor.setPrefWidth(181);
-		menuHoverButtonBGColor.setValue(convertStringToColor(mainTheme.getMenuHoverButtonBGColor()));
+		menuHoverButtonBGColor.setValue(ConvertStringToColor(mainTheme.getMenuHoverButtonBGColor()));
 		menuHoverButtonBGColor.setOnAction(event -> {
-			finalNewTheme.setMenuHoverButtonBGColor(formatColorCode(menuHoverButtonBGColor.getValue()));
-			menuBar.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setMenuHoverButtonBGColor(FormatColorCode(menuHoverButtonBGColor.getValue()));
+			menuBar.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label menuHoverButtonBGColorLabel = new Label("Menu Button BG Color (Hover)");
@@ -785,10 +961,10 @@ public class TsundOkuGUI{
 
 		ColorPicker menuNormalButtonBorderColor = new ColorPicker();
 		menuNormalButtonBorderColor.setPrefWidth(181);
-		menuNormalButtonBorderColor.setValue(convertStringToColor(mainTheme.getMenuNormalButtonBorderColor()));
+		menuNormalButtonBorderColor.setValue(ConvertStringToColor(mainTheme.getMenuNormalButtonBorderColor()));
 		menuNormalButtonBorderColor.setOnAction(event -> {
-			finalNewTheme.setMenuNormalButtonBorderColor(formatColorCode(menuNormalButtonBorderColor.getValue()));
-			menuBar.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setMenuNormalButtonBorderColor(FormatColorCode(menuNormalButtonBorderColor.getValue()));
+			menuBar.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label menuNormalButtonBorderColorLabel = new Label("Menu Button Border");
@@ -800,10 +976,10 @@ public class TsundOkuGUI{
 
 		ColorPicker menuHoverButtonBorderColor = new ColorPicker();
 		menuHoverButtonBorderColor.setPrefWidth(181);
-		menuHoverButtonBorderColor.setValue(convertStringToColor(mainTheme.getMenuHoverButtonBorderColor()));
+		menuHoverButtonBorderColor.setValue(ConvertStringToColor(mainTheme.getMenuHoverButtonBorderColor()));
 		menuHoverButtonBorderColor.setOnAction(event -> {
-			finalNewTheme.setMenuHoverButtonBorderColor(formatColorCode(menuHoverButtonBorderColor.getValue()));
-			menuBar.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setMenuHoverButtonBorderColor(FormatColorCode(menuHoverButtonBorderColor.getValue()));
+			menuBar.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label menuHoverButtonBorderColorLabel = new Label("Menu Button Border Color (Hover)");
@@ -815,10 +991,10 @@ public class TsundOkuGUI{
 
 		ColorPicker menuNormalButtonTextColor = new ColorPicker();
 		menuNormalButtonTextColor.setPrefWidth(181);
-		menuNormalButtonTextColor.setValue(convertStringToColor(mainTheme.getMenuNormalButtonTextColor()));
+		menuNormalButtonTextColor.setValue(ConvertStringToColor(mainTheme.getMenuNormalButtonTextColor()));
 		menuNormalButtonTextColor.setOnAction(event -> {
-			finalNewTheme.setMenuNormalButtonTextColor(formatColorCode(menuNormalButtonTextColor.getValue()));
-			menuBar.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setMenuNormalButtonTextColor(FormatColorCode(menuNormalButtonTextColor.getValue()));
+			menuBar.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label menuNormalButtonTextColorLabel = new Label("Menu Button Text");
@@ -830,10 +1006,10 @@ public class TsundOkuGUI{
 
 		ColorPicker menuHoverButtonTextColor = new ColorPicker();
 		menuHoverButtonTextColor.setPrefWidth(181);
-		menuHoverButtonTextColor.setValue(convertStringToColor(mainTheme.getMenuHoverButtonTextColor()));
+		menuHoverButtonTextColor.setValue(ConvertStringToColor(mainTheme.getMenuHoverButtonTextColor()));
 		menuHoverButtonTextColor.setOnAction(event -> {
-			finalNewTheme.setMenuHoverButtonTextColor(formatColorCode(menuHoverButtonTextColor.getValue()));
-			menuBar.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setMenuHoverButtonTextColor(FormatColorCode(menuHoverButtonTextColor.getValue()));
+			menuBar.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label menuHoverButtonTextColorLabel = new Label("Menu Button Text Color (Hover)");
@@ -852,10 +1028,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionBGColor = new ColorPicker();
 		collectionBGColor.setPrefWidth(181);
-		collectionBGColor.setValue(convertStringToColor(mainTheme.getCollectionBGColor()));
+		collectionBGColor.setValue(ConvertStringToColor(mainTheme.getCollectionBGColor()));
 		collectionBGColor.setOnAction(event -> {
-			finalNewTheme.setCollectionBGColor(formatColorCode(collectionBGColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionBGColor(FormatColorCode(collectionBGColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionBGColorLabel = new Label("Collection BG");
@@ -867,10 +1043,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionLinkNormalBGColor = new ColorPicker();
 		collectionLinkNormalBGColor.setPrefWidth(181);
-		collectionLinkNormalBGColor.setValue(convertStringToColor(mainTheme.getCollectionLinkNormalBGColor()));
+		collectionLinkNormalBGColor.setValue(ConvertStringToColor(mainTheme.getCollectionLinkNormalBGColor()));
 		collectionLinkNormalBGColor.setOnAction(event -> {
-			finalNewTheme.setCollectionLinkNormalBGColor(formatColorCode(collectionLinkNormalBGColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionLinkNormalBGColor(FormatColorCode(collectionLinkNormalBGColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionLinkNormalBGColorLabel = new Label("Link BG");
@@ -882,10 +1058,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionLinkHoverBGColor = new ColorPicker();
 		collectionLinkHoverBGColor.setPrefWidth(181);
-		collectionLinkHoverBGColor.setValue(convertStringToColor(mainTheme.getCollectionLinkHoverBGColor()));
+		collectionLinkHoverBGColor.setValue(ConvertStringToColor(mainTheme.getCollectionLinkHoverBGColor()));
 		collectionLinkHoverBGColor.setOnAction(event -> {
-			finalNewTheme.setCollectionLinkHoverBGColor(formatColorCode(collectionLinkHoverBGColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionLinkHoverBGColor(FormatColorCode(collectionLinkHoverBGColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionLinkHoverBGColorLabel = new Label("Link BG Color (Hover)");
@@ -897,10 +1073,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionLinkNormalTextColor = new ColorPicker();
 		collectionLinkNormalTextColor.setPrefWidth(181);
-		collectionLinkNormalTextColor.setValue(convertStringToColor(mainTheme.getCollectionLinkNormalTextColor()));
+		collectionLinkNormalTextColor.setValue(ConvertStringToColor(mainTheme.getCollectionLinkNormalTextColor()));
 		collectionLinkNormalTextColor.setOnAction(event -> {
-			finalNewTheme.setCollectionLinkNormalTextColor(formatColorCode(collectionLinkNormalTextColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionLinkNormalTextColor(FormatColorCode(collectionLinkNormalTextColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionLinkNormalTextColorLabel = new Label("Print & Book Type Text");
@@ -912,10 +1088,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionLinkHoverTextColor = new ColorPicker();
 		collectionLinkHoverTextColor.setPrefWidth(181);
-		collectionLinkHoverTextColor.setValue(convertStringToColor(mainTheme.getCollectionLinkHoverTextColor()));
+		collectionLinkHoverTextColor.setValue(ConvertStringToColor(mainTheme.getCollectionLinkHoverTextColor()));
 		collectionLinkHoverTextColor.setOnAction(event -> {
-			finalNewTheme.setCollectionLinkHoverTextColor(formatColorCode(collectionLinkHoverTextColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionLinkHoverTextColor(FormatColorCode(collectionLinkHoverTextColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionLinkHoverTextColorLabel = new Label("Print & Book Type Text (Hover)");
@@ -927,10 +1103,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionMainCardBGColor = new ColorPicker();
 		collectionMainCardBGColor.setPrefWidth(181);
-		collectionMainCardBGColor.setValue(convertStringToColor(mainTheme.getCollectionCardMainBGColor()));
+		collectionMainCardBGColor.setValue(ConvertStringToColor(mainTheme.getCollectionCardMainBGColor()));
 		collectionMainCardBGColor.setOnAction(event -> {
-			finalNewTheme.setCollectionCardMainBGColor(formatColorCode(collectionMainCardBGColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionCardMainBGColor(FormatColorCode(collectionMainCardBGColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionMainCardBGColorLabel = new Label("Series Card BG");
@@ -942,10 +1118,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionTitleColor = new ColorPicker();
 		collectionTitleColor.setPrefWidth(181);
-		collectionTitleColor.setValue(convertStringToColor(mainTheme.getCollectionTitleColor()));
+		collectionTitleColor.setValue(ConvertStringToColor(mainTheme.getCollectionTitleColor()));
 		collectionTitleColor.setOnAction(event -> {
-			finalNewTheme.setCollectionTitleColor(formatColorCode(collectionTitleColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionTitleColor(FormatColorCode(collectionTitleColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionTitleColorLabel = new Label("Series Title");
@@ -957,10 +1133,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionPublisherColor = new ColorPicker();
 		collectionPublisherColor.setPrefWidth(181);
-		collectionPublisherColor.setValue(convertStringToColor(mainTheme.getCollectionPublisherColor()));
+		collectionPublisherColor.setValue(ConvertStringToColor(mainTheme.getCollectionPublisherColor()));
 		collectionPublisherColor.setOnAction(event -> {
-			finalNewTheme.setCollectionPublisherColor(formatColorCode(collectionPublisherColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionPublisherColor(FormatColorCode(collectionPublisherColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionPublisherColorLabel = new Label("Publisher");
@@ -972,10 +1148,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionMangakaColor = new ColorPicker();
 		collectionMangakaColor.setPrefWidth(181);
-		collectionMangakaColor.setValue(convertStringToColor(mainTheme.getCollectionMangakaColor()));
+		collectionMangakaColor.setValue(ConvertStringToColor(mainTheme.getCollectionMangakaColor()));
 		collectionMangakaColor.setOnAction(event -> {
-			finalNewTheme.setCollectionMangakaColor(formatColorCode(collectionMangakaColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionMangakaColor(FormatColorCode(collectionMangakaColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionMangakaColorLabel = new Label("Mangaka");
@@ -987,10 +1163,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionDescColor = new ColorPicker();
 		collectionDescColor.setPrefWidth(181);
-		collectionDescColor.setValue(convertStringToColor(mainTheme.getCollectionDescColor()));
+		collectionDescColor.setValue(ConvertStringToColor(mainTheme.getCollectionDescColor()));
 		collectionDescColor.setOnAction(event -> {
-			finalNewTheme.setCollectionDescColor(formatColorCode(collectionDescColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionDescColor(FormatColorCode(collectionDescColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionDescColorLabel = new Label("Series Description");
@@ -1002,10 +1178,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionCardBottomBGColor = new ColorPicker();
 		collectionCardBottomBGColor.setPrefWidth(181);
-		collectionCardBottomBGColor.setValue(convertStringToColor(mainTheme.getCollectionCardBottomBGColor()));
+		collectionCardBottomBGColor.setValue(ConvertStringToColor(mainTheme.getCollectionCardBottomBGColor()));
 		collectionCardBottomBGColor.setOnAction(event -> {
-			finalNewTheme.setCollectionCardBottomBGColor(formatColorCode(collectionCardBottomBGColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionCardBottomBGColor(FormatColorCode(collectionCardBottomBGColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionCardBottomBGColorLabel = new Label("Progress BG");
@@ -1017,10 +1193,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionIconButtonColor = new ColorPicker();
 		collectionIconButtonColor.setPrefWidth(181);
-		collectionIconButtonColor.setValue(convertStringToColor(mainTheme.getCollectionIconButtonColor()));
+		collectionIconButtonColor.setValue(ConvertStringToColor(mainTheme.getCollectionIconButtonColor()));
 		collectionIconButtonColor.setOnAction(event -> {
-			finalNewTheme.setCollectionIconButtonColor(formatColorCode(collectionIconButtonColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionIconButtonColor(FormatColorCode(collectionIconButtonColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionIconButtonColorLabel = new Label("Series Card Button");
@@ -1032,10 +1208,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionNormalIconColor = new ColorPicker();
 		collectionNormalIconColor.setPrefWidth(181);
-		collectionNormalIconColor.setValue(convertStringToColor(mainTheme.getCollectionNormalIconColor()));
+		collectionNormalIconColor.setValue(ConvertStringToColor(mainTheme.getCollectionNormalIconColor()));
 		collectionNormalIconColor.setOnAction(event -> {
-			finalNewTheme.setCollectionNormalIconColor(formatColorCode(collectionNormalIconColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionNormalIconColor(FormatColorCode(collectionNormalIconColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionNormalIconColorLabel = new Label("Series Card Icon");
@@ -1047,10 +1223,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionHoverIconColor = new ColorPicker();
 		collectionHoverIconColor.setPrefWidth(181);
-		collectionHoverIconColor.setValue(convertStringToColor(mainTheme.getCollectionHoverIconColor()));
+		collectionHoverIconColor.setValue(ConvertStringToColor(mainTheme.getCollectionHoverIconColor()));
 		collectionHoverIconColor.setOnAction(event -> {
-			finalNewTheme.setCollectionHoverIconColor(formatColorCode(collectionHoverIconColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionHoverIconColor(FormatColorCode(collectionHoverIconColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionHoverIconColorLabel = new Label("Series Card Icon (Hover)");
@@ -1062,10 +1238,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionProgressBarColor = new ColorPicker();
 		collectionProgressBarColor.setPrefWidth(181);
-		collectionProgressBarColor.setValue(convertStringToColor(mainTheme.getCollectionProgressBarColor()));
+		collectionProgressBarColor.setValue(ConvertStringToColor(mainTheme.getCollectionProgressBarColor()));
 		collectionProgressBarColor.setOnAction(event -> {
-			finalNewTheme.setCollectionProgressBarColor(formatColorCode(collectionProgressBarColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionProgressBarColor(FormatColorCode(collectionProgressBarColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionProgressBarColorLabel = new Label("Progress Bar");
@@ -1077,10 +1253,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionProgressBarBorderColor = new ColorPicker();
 		collectionProgressBarBorderColor.setPrefWidth(181);
-		collectionProgressBarBorderColor.setValue(convertStringToColor(mainTheme.getCollectionProgressBarBorderColor()));
+		collectionProgressBarBorderColor.setValue(ConvertStringToColor(mainTheme.getCollectionProgressBarBorderColor()));
 		collectionProgressBarBorderColor.setOnAction(event -> {
-			finalNewTheme.setCollectionProgressBarBorderColor(formatColorCode(collectionProgressBarBorderColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionProgressBarBorderColor(FormatColorCode(collectionProgressBarBorderColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionProgressBarBorderColorLabel = new Label("Progress Bar Border");
@@ -1092,10 +1268,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionProgressBarBGColor = new ColorPicker();
 		collectionProgressBarBGColor.setPrefWidth(181);
-		collectionProgressBarBGColor.setValue(convertStringToColor(mainTheme.getCollectionProgressBarBGColor()));
+		collectionProgressBarBGColor.setValue(ConvertStringToColor(mainTheme.getCollectionProgressBarBGColor()));
 		collectionProgressBarBGColor.setOnAction(event -> {
-			finalNewTheme.setCollectionProgressBarBGColor(formatColorCode(collectionProgressBarBGColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionProgressBarBGColor(FormatColorCode(collectionProgressBarBGColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionProgressBarBGColorLabel = new Label("Progress Bar BG");
@@ -1107,10 +1283,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionNormalVolProgressTextColor = new ColorPicker();
 		collectionNormalVolProgressTextColor.setPrefWidth(181);
-		collectionNormalVolProgressTextColor.setValue(convertStringToColor(mainTheme.getCollectionNormalVolProgressTextColor()));
+		collectionNormalVolProgressTextColor.setValue(ConvertStringToColor(mainTheme.getCollectionNormalVolProgressTextColor()));
 		collectionNormalVolProgressTextColor.setOnAction(event -> {
-			finalNewTheme.setCollectionNormalVolProgressTextColor(formatColorCode(collectionNormalVolProgressTextColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionNormalVolProgressTextColor(FormatColorCode(collectionNormalVolProgressTextColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionNormalVolProgressTextColorLabel = new Label("Vol Progress Text");
@@ -1122,10 +1298,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionHoverVolProgressTextColor = new ColorPicker();
 		collectionHoverVolProgressTextColor.setPrefWidth(181);
-		collectionHoverVolProgressTextColor.setValue(convertStringToColor(mainTheme.getCollectionHoverVolProgressTextColor()));
+		collectionHoverVolProgressTextColor.setValue(ConvertStringToColor(mainTheme.getCollectionHoverVolProgressTextColor()));
 		collectionHoverVolProgressTextColor.setOnAction(event -> {
-			finalNewTheme.setCollectionHoverVolProgressTextColor(formatColorCode(collectionHoverVolProgressTextColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionHoverVolProgressTextColor(FormatColorCode(collectionHoverVolProgressTextColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionHoverVolProgressTextColorLabel = new Label("Vol Progress Text (Hover)");
@@ -1137,10 +1313,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionUserNotesBGColor = new ColorPicker();
 		collectionUserNotesBGColor.setPrefWidth(181);
-		collectionUserNotesBGColor.setValue(convertStringToColor(mainTheme.getCollectionUserNotesBGColor()));
+		collectionUserNotesBGColor.setValue(ConvertStringToColor(mainTheme.getCollectionUserNotesBGColor()));
 		collectionUserNotesBGColor.setOnAction(event -> {
-			finalNewTheme.setCollectionUserNotesBGColor(formatColorCode(collectionUserNotesBGColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionUserNotesBGColor(FormatColorCode(collectionUserNotesBGColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionUserNotesBGColorLabel = new Label("Series Notes BG");
@@ -1152,10 +1328,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionUserNotesBorderColor = new ColorPicker();
 		collectionUserNotesBorderColor.setPrefWidth(181);
-		collectionUserNotesBorderColor.setValue(convertStringToColor(mainTheme.getCollectionUserNotesBorderColor()));
+		collectionUserNotesBorderColor.setValue(ConvertStringToColor(mainTheme.getCollectionUserNotesBorderColor()));
 		collectionUserNotesBorderColor.setOnAction(event -> {
-			finalNewTheme.setCollectionUserNotesBorderColor(formatColorCode(collectionUserNotesBorderColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionUserNotesBorderColor(FormatColorCode(collectionUserNotesBorderColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionUserNotesBorderColorLabel = new Label("Series Notes Border");
@@ -1167,10 +1343,10 @@ public class TsundOkuGUI{
 
 		ColorPicker collectionUserNotesTextColor = new ColorPicker();
 		collectionUserNotesTextColor.setPrefWidth(181);
-		collectionUserNotesTextColor.setValue(convertStringToColor(mainTheme.getCollectionUserNotesTextColor()));
+		collectionUserNotesTextColor.setValue(ConvertStringToColor(mainTheme.getCollectionUserNotesTextColor()));
 		collectionUserNotesTextColor.setOnAction(event -> {
-			finalNewTheme.setCollectionUserNotesTextColor(formatColorCode(collectionUserNotesTextColor.getValue()));
-			collection.setStyle(drawTheme(finalNewTheme));
+			finalNewTheme.setCollectionUserNotesTextColor(FormatColorCode(collectionUserNotesTextColor.getValue()));
+			collection.setStyle(DrawTheme(finalNewTheme));
 		});
 
 		Label collectionUserNotesTextColorLabel = new Label("Series Notes Text");
@@ -1196,13 +1372,13 @@ public class TsundOkuGUI{
 		userCurrentTheme.setOnAction((event) -> {
 			curTheme = userCurrentTheme.getValue();
 			mainTheme = user.setNewMainTheme(userCurrentTheme.getValue());
-			collectionMasterCSS = drawTheme(mainTheme);
+			collectionMasterCSS = DrawTheme(mainTheme);
 			try {
-				menuSetup(content, primaryStage);
+				MenuSetup(content, primaryStage);
 			} catch (CloneNotSupportedException e) {
 				e.printStackTrace();
 			}
-			collectionSetup(primaryStage);
+			CollectionSetup(primaryStage);
 		});
 
 		Button deleteThemeButton = new Button("X");
@@ -1252,7 +1428,7 @@ public class TsundOkuGUI{
 		themeSettingsWindow.setOnCloseRequest(event -> userCurrentTheme.setValue(user.getMainTheme().getThemeName()));
 	}
 
-	private String drawTheme(TsundOkuTheme newTheme){
+	private String DrawTheme(TsundOkuTheme newTheme){
 		return  "-fx-menu-bg-color: " + newTheme.getMenuBGColor() +
 				"-fx-menu-username-text-color: " + newTheme.getUserNameColor() +
 				"-fx-menu-normal-user-settings-icon-color: " + newTheme.getUserNormalSettingsIconColor() +
@@ -1294,11 +1470,11 @@ public class TsundOkuGUI{
 				"-fx-collection-usernotes-text-color: " + newTheme.getCollectionUserNotesTextColor();
 	}
 
-	private String formatColorCode(Color newColor){
+	private String FormatColorCode(Color newColor){
 		return "rgba(" + (int) (newColor.getRed() * 255) + "," + (int) (newColor.getGreen() * 255) + "," + (int) (newColor.getBlue() * 255) + "," + String.format("%.2f", newColor.getOpacity()) + "); ";
 	}
 
-	private Color convertStringToColor(String color){
+	private Color ConvertStringToColor(String color){
 		Color convertedColor = null;
 		if (color.startsWith("#")){
 			convertedColor = Color.web(color.substring(0, 7));
@@ -1317,7 +1493,7 @@ public class TsundOkuGUI{
 		return convertedColor;
 	}
 
-	private void collectionSetup(Stage primaryStage){
+	private void CollectionSetup(Stage primaryStage){
 		totalVolumesCollected = 0;
 		maxVolumesInCollection = 0;
 
@@ -1342,15 +1518,15 @@ public class TsundOkuGUI{
 			MigPane seriesCard = new MigPane();
 			seriesCard.setId("SeriesCard");
 			seriesCard.setPrefSize(SERIES_CARD_WIDTH, SERIES_CARD_HEIGHT);
-			seriesCard.add(leftSideCardSetup(series), "dock west");
-			seriesCard.add(rightSideCardSetup(series, primaryStage), "dock east");
+			seriesCard.add(CreateLeftSideOfSeriesCard(series), "dock west");
+			seriesCard.add(CreateRightSideOfSeriesCard(series, primaryStage), "dock east");
 			collection.getChildren().add(seriesCard);
 		}
 		user.setTotalVolumes(totalVolumesCollected);
 		content.setCenter(collectionScroll);
 	}
 
-	private Hyperlink leftSideCardSetup(Series series){
+	private Hyperlink CreateLeftSideOfSeriesCard(Series series){
 		Rectangle coverImgScaling = new Rectangle(LEFT_SIDE_CARD_WIDTH, SERIES_CARD_HEIGHT);
 		coverImgScaling.setId("ImgScaling");
 		coverImgScaling.setArcWidth(12);
@@ -1397,7 +1573,7 @@ public class TsundOkuGUI{
 		return aniListLink;
 	}
 
-	private String getCurTitle(Series series, String curLanguage){
+	private String GetCurTitle(Series series, String curLanguage){
 		return switch (curLanguage) {
 			case "Romaji" -> series.getRomajiTitle();
 			case "English" -> series.getEnglishTitle();
@@ -1406,7 +1582,7 @@ public class TsundOkuGUI{
 		};
 	}
 
-	private String getCurMangaka(Series series, String curLanguage){
+	private String GetCurMangaka(Series series, String curLanguage){
 		return switch (curLanguage) {
 			case "English", "Romaji" -> series.getRomajiStaff();
 			case "Native" -> series.getNativeStaff();
@@ -1414,7 +1590,7 @@ public class TsundOkuGUI{
 		};
 	}
 
-	private MigPane rightSideCardSetup(Series series, Stage primaryStage){
+	private MigPane CreateRightSideOfSeriesCard(Series series, Stage primaryStage){
 		int curVolumes = series.getCurVolumes();
 		int maxVolumes = series.getMaxVolumes();
 
@@ -1424,7 +1600,7 @@ public class TsundOkuGUI{
 		publisherFlow.setPadding(new Insets(2, 5, 0, 10));
 
 		String curLanguage = user.getCurLanguage();
-		Text seriesTitle = new Text(getCurTitle(series, curLanguage));
+		Text seriesTitle = new Text(GetCurTitle(series, curLanguage));
 		seriesTitle.setWrappingWidth(RIGHT_SIDE_CARD_WIDTH - 20);
 		seriesTitle.setId("SeriesTitle");
 		seriesTitle.setOnMouseClicked(event -> {
@@ -1437,7 +1613,7 @@ public class TsundOkuGUI{
 		seriesTitleFlow.setLineSpacing(-6.5);
 		seriesTitleFlow.setPadding(new Insets(1, 5, 0, 10));
 
-		Text mangaka = new Text(getCurMangaka(series, curLanguage));
+		Text mangaka = new Text(GetCurMangaka(series, curLanguage));
 		mangaka.setWrappingWidth(RIGHT_SIDE_CARD_WIDTH);
 		mangaka.setId("Mangaka");
 		TextFlow mangakaFlow = new TextFlow(mangaka);
@@ -1475,7 +1651,7 @@ public class TsundOkuGUI{
 				progressTxt.setText(seriesCurVolumes + "/" + seriesMaxVolumes);
 				volUpdate.set((double) seriesCurVolumes / seriesMaxVolumes);
 				user.setTotalVolumes(user.getTotalVolumes() - 1);
-				updateCollectionNumbers();
+				UpdateCollectionNumbers();
 				incrementButton.setDisable(false);
 			}
 			if (series.getCurVolumes() == 0){
@@ -1494,7 +1670,7 @@ public class TsundOkuGUI{
 				progressTxt.setText(seriesCurVolumes + "/" + seriesMaxVolumes);
 				volUpdate.set((double) seriesCurVolumes / seriesMaxVolumes);
 				user.setTotalVolumes(user.getTotalVolumes() + 1);
-				updateCollectionNumbers();
+				UpdateCollectionNumbers();
 				decrementButton.setDisable(false);
 			}
 			if (series.getCurVolumes().equals(series.getMaxVolumes())){
@@ -1553,7 +1729,7 @@ public class TsundOkuGUI{
 		rightSideOfSeriesCard.add(seriesData, "north");
 		rightSideOfSeriesCard.add(rightSideBottomPane);
 
-		HBox seriesSettingsPane = seriesCardSettingsPane(series, primaryStage, progressTxt, volUpdate, decrementButton, incrementButton);
+		HBox seriesSettingsPane = CreateSeriesCardSettingPane(series, primaryStage, progressTxt, volUpdate, decrementButton, incrementButton);
 		seriesCardSettingsButton.get().setOnMouseClicked(event -> {
 			Button seriesButton = seriesCardSettingsButton.get();
 			if (seriesButton.getGraphic() == seriesSettingIcon){
@@ -1574,7 +1750,7 @@ public class TsundOkuGUI{
 		return rightSideOfSeriesCard;
 	}
 
-	private HBox seriesCardSettingsPane(Series series, Stage primaryStage, Label progressTxt, SimpleDoubleProperty volUpdate, Button decrementButton, Button incrementButton){
+	private HBox CreateSeriesCardSettingPane(Series series, Stage primaryStage, Label progressTxt, SimpleDoubleProperty volUpdate, Button decrementButton, Button incrementButton){
 		TextArea userNotes = new TextArea(series.getUserNotes());
 		userNotes.setFocusTraversable(false);
 		userNotes.setWrapText(true);
@@ -1597,9 +1773,9 @@ public class TsundOkuGUI{
 				e.printStackTrace();
 			}
 			filteredUserCollection = FXCollections.observableArrayList(userCollection);
-			collectionSetup(primaryStage);
+			CollectionSetup(primaryStage);
 			user.setTotalVolumes(user.getTotalVolumes() - series.getCurVolumes());
-			updateCollectionNumbers();
+			UpdateCollectionNumbers();
 		});
 
 		UnaryOperator<TextFormatter.Change> filter = change -> {
@@ -1650,7 +1826,7 @@ public class TsundOkuGUI{
 				series.setCurVolumes(newCurVolAmount);
 				volUpdate.set((double) newCurVolAmount / newMaxVolumeAmount); //Update progress bar
 				progressTxt.setText(newCurVolAmount + "/" + newMaxVolumeAmount);
-				updateCollectionNumbers();
+				UpdateCollectionNumbers();
 				if (newCurVolAmount == 0) {
 					decrementButton.setDisable(true);
 					incrementButton.setDisable(false);

@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Arrays;
 
-
 public class RightStufAnime {
 	private static final ArrayList<String> rightStufLinks = new ArrayList<>();
 	private static final ArrayList<String[]> dataList = new ArrayList<>();
@@ -36,12 +35,10 @@ public class RightStufAnime {
 
 	private static String checkBookType(char bookType){
 		switch (bookType) {
-			case 'M' -> {
+			case 'M':
 				return "Manga";
-			}
-			case 'N' -> {
+			case 'N':
 				return "Novels";
-			}
 		};
 		return "Error";
 	}
@@ -49,7 +46,6 @@ public class RightStufAnime {
 	private static String getUrl(String bookTitle, char bookType, int currPageNum){
 		String url = "https://www.rightstufanime.com/category/" + checkBookType(bookType) + "?page=" + currPageNum + "&show=96&keywords=" + filterBookTitle(bookTitle);
 		rightStufLinks.add(url);
-		System.out.println(url);
 		return url;
 	}
 
@@ -98,23 +94,20 @@ public class RightStufAnime {
 				priceVal = new BigDecimal(priceData.get(x).text().substring(1));
 				priceTxt = memberStatus ? priceRound.format(priceVal.subtract(priceVal.multiply(GotAnimeDiscount)).round(new MathContext(4, RoundingMode.UP))) : priceRound.format(priceVal.round(new MathContext(4, RoundingMode.UP)));
 				stockStatus = stockStatusData.get(x).text();
-				if (stockStatus.contains("In Stock"))
-				{
+				if (stockStatus.contains("In Stock")) {
 					stockStatus = "IS";
 				}
-				else if (stockStatus.contains("Out of Stock"))
-				{
+				else if (stockStatus.contains("Out of Stock")) {
 					stockStatus = "OOS";
 				}
-				else if (stockStatus.contains("Pre-Order"))
-				{
+				else if (stockStatus.contains("Pre-Order")) {
 					stockStatus = "PO";
 				}
-				else
-				{
+				else {
 					stockStatus = "OOP";
 				}
-				dataList.add(new String[]{currTitle.replaceAll("Volume", "Vol").replace(" Manga", ""), priceTxt.trim(), stockStatus, "RightStufAnime"});
+				dataList.add(new String[]{currTitle.replaceAll("Volume", "Vol").replaceAll(" Manga| Edition", ""), priceTxt.trim(), stockStatus, "RightStufAnime"});
+
 			}
 		}
 
@@ -123,8 +116,19 @@ public class RightStufAnime {
 			GetRightStufAnimeData(bookTitle, bookType, memberStatus, currPageNum);
 		} else {
 			driver.quit();
-			Comparator<String[]> test = Comparator.comparing(volData -> volData[0].substring(0, volData[0].indexOf("Vol")));
-			dataList.sort(test.thenComparing(volData -> Integer.parseInt(volData[0].substring(volData[0].indexOf("Vol")).replaceFirst(".*?(\\d+).*", "$1"))));
+
+			dataList.sort(new Comparator<String[]>() {
+				public int compare(String[] o1, String[] o2) {
+					if (o1[0].replaceAll("\\d+", "").equalsIgnoreCase(o2[0].replaceAll("\\d+", ""))) {
+						return extractInt(o1[0]) - extractInt(o2[0]);
+					}
+					return o1[0].compareTo(o2[0]);
+				}
+
+				int extractInt(String s) {
+					return Integer.parseInt(s.substring(bookTitle.length()).replaceAll(".*?(\\d+).*", "$1"));
+				}
+			});
 
 			PrintWriter rightStufDataFile = new PrintWriter("src/TsundOkuApp/PriceAnalysis/Data/RightStufAnimeData.txt");
 			if (!dataList.isEmpty()){
@@ -146,8 +150,8 @@ public class RightStufAnime {
 		return dataList;
 	}
 
-	public static void main(String[] args) throws FileNotFoundException {
-		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
-		GetRightStufAnimeData("One Piece", 'M', true, (byte) 1);
-	}
+//	public static void main(String[] args) throws FileNotFoundException {
+//		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
+//		GetRightStufAnimeData("One Piece", 'M', true, (byte) 1);
+//	}
 }

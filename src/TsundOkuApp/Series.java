@@ -57,32 +57,32 @@ public class Series implements java.io.Serializable {
 		GraphQLQuery seriesQuery;
 		seriesQuery = new GraphQLQuery("""
 				query ($title: String, $type: MediaFormat) {
-				Media(search: $title, format: $type) {
-				  countryOfOrigin
-				  title {
-				    romaji
-				    english
-				    native
-				  }
-				  staff(sort: ROLE) {
-				    edges {
-				      role
-				      node {
-				        name {
-				          full
-				          native
-				          alternative
+				  Media(search: $title, format: $type) {
+				    countryOfOrigin
+				    title {
+				      romaji
+				      english
+				      native
+				    }
+				    staff(sort: ROLE) {
+				      edges {
+				        role
+				        node {
+				          name {
+				            full
+				            native
+				            alternative
+				          }
 				        }
 				      }
 				    }
+				    description
+				    status(version: 2)
+				    siteUrl
+				    coverImage {
+				      extraLarge
+				    }
 				  }
-				  description
-				  status(version: 2)
-				  siteUrl
-				  coverImage {
-				    extraLarge
-				  }
-				}
 				}""").withVariable("title", title).withVariable("type", bookType.toUpperCase());
 
 		try {
