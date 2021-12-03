@@ -4,6 +4,8 @@
 
 package TsundOkuApp.PriceAnalysis;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -16,17 +18,14 @@ import org.openqa.selenium.edge.EdgeOptions;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class RobertsAnimeCornerStore {
 
 	private static final String[] links = new String[2];
-	private static final ArrayList<String[]> dataList = new ArrayList<>();
+	private static final ObservableList<String[]> dataList = FXCollections.observableArrayList();
 	private static final HashMap<String, String> urlMapDict = new HashMap<>() {
 		{
 			put("mangrapnovag", "^[a-bA-B\\d]");
@@ -77,7 +76,7 @@ public class RobertsAnimeCornerStore {
 		return seriesLink == null ? "DNE" : getUrl(seriesLink.attr("href"), true);
 	}
 
-	public static ArrayList<String[]> GetRobertsAnimeCornerStoreData(String bookTitle, char bookType) throws FileNotFoundException {
+	public static ObservableList<String[]> GetRobertsAnimeCornerStoreData(String bookTitle, char bookType) throws FileNotFoundException {
 		EdgeOptions edgeOptions = new EdgeOptions();
 		edgeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
 		edgeOptions.addArguments("headless");
@@ -120,7 +119,7 @@ public class RobertsAnimeCornerStore {
 
 			String currTitle;
 			for (int x = 0; x < titleData.size(); x++){
-				currTitle = titleData.get(x).text().replaceAll(",|#|Graphic Novel", "").replaceAll("[ ]{2,}", " ").replaceAll("\\(.*?\\)", "").trim();
+				currTitle = titleData.get(x).text().replaceAll(",|#|Graphic Novel| :", "").replaceAll("[ ]{2,}", " ").replaceAll("\\(.*?\\)", "").trim();
 				if (currTitle.contains("Omnibus")){
 					if (currTitle.contains("One Piece") && currTitle.contains("Vol 10-12")){ // Fix naming issue with one piece
 						currTitle = currTitle.substring(0, currTitle.indexOf(" Vol")) + " 4";
@@ -131,9 +130,22 @@ public class RobertsAnimeCornerStore {
 					currTitle = currTitle.substring(0, currTitle.indexOf("Omnibus ") + "Omnibus ".length()) + "Vol " + currTitle.substring(currTitle.indexOf("Omnibus ") + "Omnibus ".length());
 				}
 
-				dataList.add(new String[]{currTitle, priceData.get(x).text().trim(), titleData.get(x).text().contains("Pre Order") ? "PO" : "IS", "RobertsAnimeCornerStore"});
+				dataList.add(new String[]{currTitle, priceData.get(x).text().trim(), titleData.get(x).text().contains("Pre Order") ? "Pre-Order" : "In Stock", "RobertsAnimeCornerStore"});
 			}
 			driver.quit();
+
+			dataList.sort(new Comparator<String[]>() {
+				public int compare(String[] o1, String[] o2) {
+					if (o1[0].replaceAll("\\d+", "").equalsIgnoreCase(o2[0].replaceAll("\\d+", ""))) {
+						return extractInt(o1[0]) - extractInt(o2[0]);
+					}
+					return o1[0].compareTo(o2[0]);
+				}
+
+				int extractInt(String s) {
+					return Integer.parseInt(s.substring(bookTitle.length()).replaceAll(".*?(\\d+).*", "$1"));
+				}
+			});
 
 			PrintWriter robertsAnimeCornerStoreFile = new PrintWriter("src/TsundOkuApp/PriceAnalysis/Data/RobertsAnimeCornerStoreData.txt");
 			if (!dataList.isEmpty())

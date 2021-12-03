@@ -1,5 +1,7 @@
 package TsundOkuApp.PriceAnalysis;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -12,9 +14,6 @@ import org.openqa.selenium.edge.EdgeOptions;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -23,7 +22,7 @@ import java.util.List;
 // Can only do manga prob
 public class BookDepository {
 	public static ArrayList<String> bookDepositoryLinks = new ArrayList<>();
-	private static final ArrayList<String[]> dataList = new ArrayList<>();
+	private static final ObservableList<String[]> dataList = FXCollections.observableArrayList();
 
 	//https://www.bookdepository.com/search/?searchTerm=World+Trigger&searchLang=123&ageRangesTotal=0&category=2633&searchSortBy=pubdate_low_high&page=1
 	//https://www.bookdepository.com/search?searchTerm=Overlord+Light+Novel&searchLang=123&ageRangesTotal=0&searchSortBy=pubdate_low_high&page=1
@@ -33,7 +32,7 @@ public class BookDepository {
 		return url;
 	}
 
-	public static ArrayList<String[]> GetBookDepositoryData(String bookTitle, char bookType, byte currPageNum) throws FileNotFoundException {
+	public static ObservableList<String[]> GetBookDepositoryData(String bookTitle, char bookType, byte currPageNum) throws FileNotFoundException {
 		EdgeOptions edgeOptions = new EdgeOptions();
 		edgeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
 		edgeOptions.addArguments("headless");

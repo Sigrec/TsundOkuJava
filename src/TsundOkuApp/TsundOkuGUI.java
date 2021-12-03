@@ -6,12 +6,7 @@
 package TsundOkuApp;
 
 import java.awt.Desktop;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
+import java.io.*;
 
 import java.net.URI;
 import java.nio.file.Files;
@@ -24,6 +19,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import TsundOkuApp.PriceAnalysis.DataModel;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -32,18 +29,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.CacheHint;
 import javafx.scene.Scene;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.TextFormatter;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -77,6 +64,8 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.bootstrapicons.BootstrapIcons;
 import org.tbee.javafx.scene.layout.MigPane;
 
+import static TsundOkuApp.PriceAnalysis.MasterAnalysis.ComparePricing;
+
 public class TsundOkuGUI{
 	// Menu BG Settings Window Components
 	private SimpleStringProperty totalVolDisplayUpdate, totalToCollectUpdate;
@@ -103,6 +92,7 @@ public class TsundOkuGUI{
 	private static final double WINDOW_HEIGHT = Screen.getPrimary().getBounds().getHeight();
 	private static final double WINDOW_WIDTH = Screen.getPrimary().getBounds().getWidth();
 	private static final ObservableList<String> LANGUAGE_OPTIONS = FXCollections.observableArrayList("Romaji", "English", "Native");
+	private static ObservableList<DataModel> priceComparisonData = FXCollections.observableArrayList(new DataModel(new SimpleStringProperty("Overlord : The Undead King Oh! Vol 1"), new SimpleStringProperty("$9.99"), new SimpleStringProperty("In Stock"), new SimpleStringProperty("RobertsAnimeCornerStore")));
 
 	// Users Main Data
 	private int totalVolumesCollected = 0, maxVolumesInCollection = 0;
@@ -113,6 +103,7 @@ public class TsundOkuGUI{
 	private BorderPane content;
 	private String curTheme = "";
 	private ObservableList<String> usersSavedThemes;
+	private static final ObservableList<String> SELECTED_WEBSITES = FXCollections.observableArrayList();
 
 	protected void setupTsundOkuGUI(Stage primaryStage) throws CloneNotSupportedException {
 		GetUsersData();
@@ -342,14 +333,160 @@ public class TsundOkuGUI{
 	}
 
 	private void SetupPriceComparisonWindow(){
-		VBox priceComparisonPane = new VBox();
+		TextField titleEnter = new TextField();
+		titleEnter.setId("MenuTextField");
+		titleEnter.setPrefWidth(250);
+
+		Label inputTitleLabel = new Label("Enter Title");
+		inputTitleLabel.setId("MenuLabel");
+		inputTitleLabel.setLabelFor(titleEnter);
+
+		VBox inputTitleRoot = new VBox();
+		inputTitleRoot.setId("SettingsLabel");
+		inputTitleRoot.getChildren().addAll(inputTitleLabel, titleEnter);
+
+		AtomicReference<Character> bookType = new AtomicReference<>('0');
+		ToggleGroup bookTypeButtonGroup = new ToggleGroup();
+		ToggleButton mangaButton = new ToggleButton("Manga");
+		ToggleButton lightNovelButton = new ToggleButton("Novel");
+
+		mangaButton.setToggleGroup(bookTypeButtonGroup);
+		mangaButton.setId("MenuButton");
+		mangaButton.setPrefSize(100, 10);
+		mangaButton.setOnMouseClicked((MouseEvent event) -> {
+			bookType.set('M');
+			mangaButton.setDisable(true);
+			lightNovelButton.setDisable(false);
+		});
+
+		lightNovelButton.setToggleGroup(bookTypeButtonGroup);
+		lightNovelButton.setId("MenuButton");
+		lightNovelButton.setPrefSize(100, 10);
+		lightNovelButton.setOnMouseClicked((MouseEvent event) -> {
+			bookType.set('N');
+			mangaButton.setDisable(false);
+			lightNovelButton.setDisable(true);
+		});
+
+		Label bookTypeLabel = new Label("Select Book Type");
+		bookTypeLabel.setId("MenuLabel");
+
+		HBox bookTypePane = new HBox(mangaButton, lightNovelButton);
+		bookTypePane.setSpacing(10);
+		bookTypePane.setAlignment(Pos.CENTER);
+
+		VBox bookTypeRoot = new VBox(bookTypeLabel, bookTypePane);
+		bookTypeRoot.setSpacing(5);
+		bookTypeRoot.setAlignment(Pos.CENTER);
+
+		ToggleButton rightStufButton = new ToggleButton("RightStuf");
+		rightStufButton.setId("MenuToggleButton");
+		rightStufButton.setPrefSize(100, 10);
+		rightStufButton.setOnMouseClicked((MouseEvent event) -> {
+			if (rightStufButton.isSelected()){
+				SELECTED_WEBSITES.add("RS");
+			} else {
+				SELECTED_WEBSITES.remove("RS");
+			}
+			System.out.println(SELECTED_WEBSITES);
+		});
+
+
+		ToggleButton robertsAnimeCornerStoreButton = new ToggleButton("Rob");
+		robertsAnimeCornerStoreButton.setId("MenuToggleButton");
+		robertsAnimeCornerStoreButton.setPrefSize(100, 10);
+		robertsAnimeCornerStoreButton.setOnMouseClicked((MouseEvent event) -> {
+			if (robertsAnimeCornerStoreButton.isSelected()){
+				SELECTED_WEBSITES.add("R");
+			} else {
+				SELECTED_WEBSITES.remove("R");
+			}
+			System.out.println(SELECTED_WEBSITES);
+		});
+
+		ToggleButton inStockTradesButton = new ToggleButton("IST");
+		inStockTradesButton.setId("MenuToggleButton");
+		inStockTradesButton.setPrefSize(100, 10);
+		inStockTradesButton.setOnMouseClicked((MouseEvent event) -> {
+			if (inStockTradesButton.isSelected()){
+				SELECTED_WEBSITES.add("IST");
+			} else {
+				SELECTED_WEBSITES.remove("IST");
+			}
+			System.out.println(SELECTED_WEBSITES);
+		});
+
+		Label websiteLabel = new Label("Select Websites");
+		websiteLabel.setId("MenuLabel");
+
+		HBox websitePane = new HBox(rightStufButton, robertsAnimeCornerStoreButton, inStockTradesButton);
+		websitePane.setSpacing(10);
+		websitePane.setAlignment(Pos.CENTER);
+
+		VBox websiteRoot = new VBox(websiteLabel, websitePane);
+		websiteRoot.setSpacing(5);
+		websiteRoot.setAlignment(Pos.CENTER);
+
+		TableColumn<DataModel, String> itemCol = new TableColumn<>("Volume");
+		itemCol.setId("MenuTextLabel");
+		itemCol.setCellValueFactory(new PropertyValueFactory<>("title"));
+		itemCol.setSortable(false);
+
+		TableColumn<DataModel, String> priceCol = new TableColumn<>("Price ($USD)");
+		priceCol.setId("MenuTextLabel");
+		priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
+		priceCol.setPrefWidth(95);
+		priceCol.setResizable(false);
+		priceCol.setSortable(false);
+
+		TableColumn<DataModel, String> stockStatusCol = new TableColumn<>("Stock Status");
+		stockStatusCol.setId("MenuTextLabel");
+		stockStatusCol.setCellValueFactory(new PropertyValueFactory<>("stockStatus"));
+		stockStatusCol.setPrefWidth(97);
+		stockStatusCol.setResizable(false);
+		stockStatusCol.setSortable(false);
+
+		TableColumn<DataModel, String> websiteCol = new TableColumn<>("Website");
+		websiteCol.setId("MenuTextLabel");
+		websiteCol.setCellValueFactory(new PropertyValueFactory<>("website"));
+		websiteCol.setPrefWidth(160);
+		websiteCol.setResizable(false);
+		websiteCol.setSortable(false);
+
+		TableView<DataModel> table = new TableView<>();
+		table.setEditable(false);
+		table.setItems(priceComparisonData);
+		table.autosize();
+		table.setId("MenuTextLabel");
+		table.setPrefWidth(700);
+		table.autosize();
+		table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+		table.getColumns().addAll(itemCol, priceCol, stockStatusCol, websiteCol);
+
+		Button runButton = new Button("Run");
+		runButton.setPrefSize(60, 10);
+		runButton.setId("MenuButton");
+		runButton.disableProperty().bind(titleEnter.textProperty().isEmpty().or(bookTypeButtonGroup.selectedToggleProperty().isNull()).or(Bindings.isEmpty(SELECTED_WEBSITES)));
+		runButton.setOnMouseClicked(event -> {
+			runButton.setDisable(true);
+			try {
+				priceComparisonData = ComparePricing(titleEnter.getText().trim(), bookType.get(), SELECTED_WEBSITES);
+				table.setItems(priceComparisonData);
+				table.autosize();
+			} catch (InterruptedException | FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			runButton.setDisable(false);
+		});
+
+		VBox priceComparisonPane = new VBox(inputTitleRoot, bookTypeRoot, websiteRoot, table, runButton);
 		priceComparisonPane.setSpacing(100);
 		priceComparisonPane.setId("NewSeriesPane");
 		priceComparisonPane.setStyle(collectionMasterCSS);
 
 		Scene priceComparisonScene = new Scene(priceComparisonPane);
 		priceComparisonScene.getStylesheets().add("MenuCSS.css");
-		//priceComparisonWindow.setResizable(false);
+		priceComparisonWindow.setResizable(false);
 		priceComparisonWindow.getIcons().add(new Image("bookshelf.png"));
 		priceComparisonWindow.setTitle("Price Analysis");
 		priceComparisonWindow.setScene(priceComparisonScene);
@@ -732,8 +869,7 @@ public class TsundOkuGUI{
 		volProgressRoot.add(maxVolLabel, 1, 0);
 		volProgressRoot.add(maxVolumes, 1 , 1);
 
-		Button submitButton = new Button("Add");
-
+		Button submitButton = new Button("Add Series");
 		submitButton.setPrefSize(60, 10);
 		submitButton.setId("MenuButton");
 		submitButton.disableProperty().bind(titleEnter.textProperty().isEmpty().or(publisherEnter.textProperty().isEmpty()).or(curVolumes.textProperty().isEmpty()).or(maxVolumes.textProperty().isEmpty()).or(bookTypeButtonGroup.selectedToggleProperty().isNull()).or(curVolumes.textProperty().greaterThan(maxVolumes.textProperty())));

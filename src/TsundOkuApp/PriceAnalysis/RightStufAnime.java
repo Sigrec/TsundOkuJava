@@ -4,6 +4,8 @@
 
 package TsundOkuApp.PriceAnalysis;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -27,7 +29,7 @@ import java.util.Arrays;
 
 public class RightStufAnime {
 	private static final ArrayList<String> rightStufLinks = new ArrayList<>();
-	private static final ArrayList<String[]> dataList = new ArrayList<>();
+	private static final ObservableList<String[]> dataList = FXCollections.observableArrayList();
 
 	private static String filterBookTitle(String bookTitle){
 		return bookTitle.replaceAll(" ", "%20").replaceAll("&", "%26");
@@ -58,7 +60,7 @@ public class RightStufAnime {
 	 * @param currPageNum [byte], the current page number that is being traversed for data
 	 * @return [List<String[]>], the list of all the data pulled from the website
 	 */
-	public static ArrayList<String[]> GetRightStufAnimeData(String bookTitle, char bookType, boolean memberStatus, byte currPageNum) throws FileNotFoundException {
+	public static ObservableList<String[]> GetRightStufAnimeData(String bookTitle, char bookType, boolean memberStatus, byte currPageNum) throws FileNotFoundException {
 		EdgeOptions edgeOptions = new EdgeOptions();
 		edgeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
 		edgeOptions.addArguments("headless");
@@ -95,16 +97,16 @@ public class RightStufAnime {
 				priceTxt = memberStatus ? priceRound.format(priceVal.subtract(priceVal.multiply(GotAnimeDiscount)).round(new MathContext(4, RoundingMode.UP))) : priceRound.format(priceVal.round(new MathContext(4, RoundingMode.UP)));
 				stockStatus = stockStatusData.get(x).text();
 				if (stockStatus.contains("In Stock")) {
-					stockStatus = "IS";
+					stockStatus = "In Stock";
 				}
 				else if (stockStatus.contains("Out of Stock")) {
-					stockStatus = "OOS";
+					stockStatus = "Out of Stock";
 				}
 				else if (stockStatus.contains("Pre-Order")) {
-					stockStatus = "PO";
+					stockStatus = "Pre-Order";
 				}
 				else {
-					stockStatus = "OOP";
+					stockStatus = "Out of Print";
 				}
 				dataList.add(new String[]{currTitle.replaceAll("Volume", "Vol").replaceAll(" Manga| Edition", ""), priceTxt.trim(), stockStatus, "RightStufAnime"});
 

@@ -1,5 +1,7 @@
 package TsundOkuApp.PriceAnalysis;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -20,7 +22,7 @@ import java.util.stream.Collectors;
 
 public class InStockTrades {
 	public static ArrayList<String> inStockTradeLinks = new ArrayList<>();
-	private static final ArrayList<String[]> dataList = new ArrayList<>();
+	private static final ObservableList<String[]> dataList = FXCollections.observableArrayList();
 
 	//https://www.instocktrades.com/search?term=world+trigger
 	//https://www.instocktrades.com/search?pg=1&title=World+Trigger&publisher=&writer=&artist=&cover=&ps=true
@@ -37,7 +39,7 @@ public class InStockTrades {
 	 * @return
 	 * @throws FileNotFoundException
 	 */
-	public static ArrayList<String[]> GetInStockTradesData(String bookTitle, char bookType, byte currPageNum) throws FileNotFoundException {
+	public static ObservableList<String[]> GetInStockTradesData(String bookTitle, char bookType, byte currPageNum) throws FileNotFoundException {
 		EdgeOptions edgeOptions = new EdgeOptions();
 		edgeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
 		edgeOptions.addArguments("headless");
@@ -68,10 +70,8 @@ public class InStockTrades {
 			titleData.removeIf(data -> data.text().contains("Novel"));
 		}
 
-		String curTitle;
 		for (int x = 0; x < titleData.size(); x++){
-			curTitle = titleData.get(x).text().replaceAll(" GN| Manga| TP|\\(.*?\\)", "").replace("3In1", "Omnibus").trim();
-			dataList.add(new String[]{curTitle, priceData.get(x).text().trim(), "IS", "InStockTrades"});
+			dataList.add(new String[]{titleData.get(x).text().replaceAll(" GN| Manga| TP|\\(.*?\\)", "").replace("3In1", "Omnibus").replaceFirst("0.*?(\\d+).*", "$1").trim(), priceData.get(x).text().trim(), "In Stock", "InStockTrades"});
 		}
 
 		if (pageCheck != null) {

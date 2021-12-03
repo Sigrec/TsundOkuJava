@@ -33,7 +33,7 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10, 0.0, 1, 1);
 }
 
-#MenuButton {
+#MenuButton, #MenuToggleButton {
     -fx-background-color: -fx-normal-menu-button-bg-color;
     -fx-background-radius: 7;
     -fx-background-insets: 0;
@@ -48,13 +48,13 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7) , 10.0, 0.0, 1.0, 1.0);
 }
 
-#MenuButton:hover {
+#MenuButton:hover, #MenuToggleButton:hover {
     -fx-background-color: -fx-hover-menu-button-bg-color;
     -fx-border-color: -fx-hover-menu-button-border-color;
     -fx-text-fill: -fx-hover-menu-button-text-color;
 }
 
-#MenuButton:disabled {
+#MenuButton:disabled, #MenuToggleButton:selected {
     -fx-opacity: 1;
     -fx-background-color: -fx-hover-menu-button-bg-color;
     -fx-border-color: -fx-hover-menu-button-border-color;
@@ -211,4 +211,64 @@ combo-box .arrow, .combo-box .arrow-button {
 
 #SettingsLabel {
     -fx-spacing: 3;
+}
+
+.table-view{
+   -fx-background-color: transparent;
+   -fx-border-color: -fx-normal-menu-button-border-color;
+   -fx-border-radius: 8px 8px 8px 8px;
+   -fx-border-width: 2;
+}
+
+.table-view .column-header-background .filler, .table-view .corner, .table-view .column-header {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header-background{
+    -fx-background-color: -fx-normal-menu-button-bg-color;
+    -fx-border-color: -fx-normal-menu-button-border-color;
+    -fx-border-width: 0 0 2 0;
+    -fx-text-background-color: -fx-normal-menu-button-text-color;
+    -fx-background-radius: 7px 7px 0px 0px;
+    -fx-font-size: 15;
+    -fx-font-family: 'Segoe UI';
+    -fx-alignment: center-left;
+}
+
+.table-view .table-cell{
+    -fx-border-color: transparent;
+    -fx-font-size: 13;
+    -fx-font-family: 'Segoe UI';
+    -fx-alignment: center;
+}
+
+.table-row-cell: odd {
+    -fx-background-color: -fx-hover-menu-button-bg-color;
+    -fx-text-background-color: -fx-hover-menu-button-text-color;
+}
+.table-row-cell: even{
+    -fx-background-color: -fx-normal-menu-button-bg-color;
+    -fx-text-background-color: -fx-normal-menu-button-text-color;
+}
+
+.table-view .virtual-flow .scroll-bar:vertical,
+.table-view .virtual-flow .scroll-bar:vertical .track,
+.table-view .virtual-flow .scroll-bar:vertical .track-background,
+.table-view .virtual-flow .scroll-bar:horizontal,
+.table-view .virtual-flow .scroll-bar:horizontal .track,
+.table-view .virtual-flow .scroll-bar:horizontal .track-background {
+    -fx-background-color: -fx-normal-menu-button-bg-color;
+}
+
+.table-view .virtual-flow .scroll-bar .increment-button,
+.table-view .virtual-flow .scroll-bar .decrement-button {
+    -fx-opacity: 0;
+    -fx-padding: 2;
+}
+
+.table-view .virtual-flow .scroll-bar:vertical .thumb{
+    -fx-background-color:  -fx-normal-menu-button-border-color;
+}
+.table-view .virtual-flow .scroll-bar:horizontal .thumb {
+    -fx-background-color:  -fx-normal-menu-button-border-color;
 }
