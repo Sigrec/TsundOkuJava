@@ -2,13 +2,13 @@ package TsundOkuApp.PriceAnalysis;
 
 import javafx.beans.property.SimpleStringProperty;
 
-public class DataModel {
+public class PriceComparisonDataModel {
 	SimpleStringProperty title;
 	SimpleStringProperty price;
 	SimpleStringProperty stockStatus;
 	SimpleStringProperty website;
 
-	public DataModel(SimpleStringProperty title, SimpleStringProperty price, SimpleStringProperty stockStatus, SimpleStringProperty website) {
+	public PriceComparisonDataModel(SimpleStringProperty title, SimpleStringProperty price, SimpleStringProperty stockStatus, SimpleStringProperty website) {
 		this.title = title;
 		this.price = price;
 		this.stockStatus = stockStatus;

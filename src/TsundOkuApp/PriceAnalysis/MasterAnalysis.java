@@ -15,7 +15,7 @@ import static TsundOkuApp.PriceAnalysis.InStockTrades.GetInStockTradesData;
 
 public class MasterAnalysis {
 	private static final ArrayList<ObservableList<String[]>> DATALIST_PIPELINE = new ArrayList<>();
-	private static final ObservableList<DataModel> COMPARED_DATA = FXCollections.observableArrayList();
+	private static final ObservableList<PriceComparisonDataModel> COMPARED_DATA = FXCollections.observableArrayList();
 	private static final ArrayList<Thread> WEBSITE_THREADS = new ArrayList<>();
 	private static boolean gotAnimeMember = false;
 
@@ -191,7 +191,7 @@ public class MasterAnalysis {
 	 *      throws | InterruptedException | Thrown when a thread is interrupted
 	 *      throws | FileNotFoundException | Thrown when a file trying to be opened doesn't exist
 	 */
-	public static ObservableList<DataModel> ComparePricing(String bookTitle, char bookType, ObservableList<String> websiteList) throws InterruptedException, FileNotFoundException {
+	public static ObservableList<PriceComparisonDataModel> ComparePricing(String bookTitle, char bookType, ObservableList<String> websiteList) throws InterruptedException, FileNotFoundException {
 		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
 		final double startTime = System.currentTimeMillis();
 
@@ -252,7 +252,7 @@ public class MasterAnalysis {
 		masterDataFile.close();
 
 		for (String[] dataSet : DATALIST_PIPELINE.get(0)){
-			COMPARED_DATA.add(new DataModel(new SimpleStringProperty(dataSet[0]), new SimpleStringProperty(dataSet[1]), new SimpleStringProperty(dataSet[2]), new SimpleStringProperty(dataSet[3])));
+			COMPARED_DATA.add(new PriceComparisonDataModel(new SimpleStringProperty(dataSet[0]), new SimpleStringProperty(dataSet[1]), new SimpleStringProperty(dataSet[2]), new SimpleStringProperty(dataSet[3])));
 		}
 		DATALIST_PIPELINE.clear();
 

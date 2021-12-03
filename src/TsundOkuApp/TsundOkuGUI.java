@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-import TsundOkuApp.PriceAnalysis.DataModel;
+import TsundOkuApp.PriceAnalysis.PriceComparisonDataModel;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -92,7 +92,7 @@ public class TsundOkuGUI{
 	private static final double WINDOW_HEIGHT = Screen.getPrimary().getBounds().getHeight();
 	private static final double WINDOW_WIDTH = Screen.getPrimary().getBounds().getWidth();
 	private static final ObservableList<String> LANGUAGE_OPTIONS = FXCollections.observableArrayList("Romaji", "English", "Native");
-	private static ObservableList<DataModel> priceComparisonData = FXCollections.observableArrayList(new DataModel(new SimpleStringProperty("Overlord : The Undead King Oh! Vol 1"), new SimpleStringProperty("$9.99"), new SimpleStringProperty("In Stock"), new SimpleStringProperty("RobertsAnimeCornerStore")));
+	private static ObservableList<PriceComparisonDataModel> priceComparisonData = FXCollections.observableArrayList(new PriceComparisonDataModel(new SimpleStringProperty("Overlord : The Undead King Oh! Vol 1"), new SimpleStringProperty("$9.99"), new SimpleStringProperty("In Stock"), new SimpleStringProperty("RobertsAnimeCornerStore")));
 
 	// Users Main Data
 	private int totalVolumesCollected = 0, maxVolumesInCollection = 0;
@@ -427,33 +427,33 @@ public class TsundOkuGUI{
 		websiteRoot.setSpacing(5);
 		websiteRoot.setAlignment(Pos.CENTER);
 
-		TableColumn<DataModel, String> itemCol = new TableColumn<>("Volume");
+		TableColumn<PriceComparisonDataModel, String> itemCol = new TableColumn<>("Volume");
 		itemCol.setId("MenuTextLabel");
 		itemCol.setCellValueFactory(new PropertyValueFactory<>("title"));
 		itemCol.setSortable(false);
 
-		TableColumn<DataModel, String> priceCol = new TableColumn<>("Price ($USD)");
+		TableColumn<PriceComparisonDataModel, String> priceCol = new TableColumn<>("Price ($USD)");
 		priceCol.setId("MenuTextLabel");
 		priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
 		priceCol.setPrefWidth(95);
 		priceCol.setResizable(false);
 		priceCol.setSortable(false);
 
-		TableColumn<DataModel, String> stockStatusCol = new TableColumn<>("Stock Status");
+		TableColumn<PriceComparisonDataModel, String> stockStatusCol = new TableColumn<>("Stock Status");
 		stockStatusCol.setId("MenuTextLabel");
 		stockStatusCol.setCellValueFactory(new PropertyValueFactory<>("stockStatus"));
 		stockStatusCol.setPrefWidth(97);
 		stockStatusCol.setResizable(false);
 		stockStatusCol.setSortable(false);
 
-		TableColumn<DataModel, String> websiteCol = new TableColumn<>("Website");
+		TableColumn<PriceComparisonDataModel, String> websiteCol = new TableColumn<>("Website");
 		websiteCol.setId("MenuTextLabel");
 		websiteCol.setCellValueFactory(new PropertyValueFactory<>("website"));
 		websiteCol.setPrefWidth(160);
 		websiteCol.setResizable(false);
 		websiteCol.setSortable(false);
 
-		TableView<DataModel> table = new TableView<>();
+		TableView<PriceComparisonDataModel> table = new TableView<>();
 		table.setEditable(false);
 		table.setItems(priceComparisonData);
 		table.autosize();
