@@ -5,7 +5,6 @@ import java.io.PrintWriter;
 import java.util.*;
 
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import static TsundOkuApp.PriceAnalysis.BookDepository.GetBookDepositoryData;
@@ -14,9 +13,9 @@ import static TsundOkuApp.PriceAnalysis.RightStufAnime.GetRightStufAnimeData;
 import static TsundOkuApp.PriceAnalysis.InStockTrades.GetInStockTradesData;
 
 public class MasterAnalysis {
-	private static final ArrayList<ObservableList<String[]>> DATALIST_PIPELINE = new ArrayList<>();
-	private static final ObservableList<PriceComparisonDataModel> COMPARED_DATA = FXCollections.observableArrayList();
+	private static final ArrayList<ArrayList<String[]>> DATALIST_PIPELINE = new ArrayList<>();
 	private static final ArrayList<Thread> WEBSITE_THREADS = new ArrayList<>();
+	private static final ArrayList<PriceComparisonDataModel> COMPARED_DATA = new ArrayList<>();
 	private static boolean gotAnimeMember = false;
 
 	/**
@@ -68,8 +67,8 @@ public class MasterAnalysis {
 	 *      smallerList | String[] | The smaller list of data sets between the two websites
 	 *      return | ArrayList<String[]> | The final list of data containing all available lowest price volumes between the two websites
 	 */
-	private static ObservableList<String[]> PriceComparison(ObservableList<String[]> biggerList, ObservableList<String[]> smallerList, String bookTitle){
-		ObservableList<String[]> finalData = FXCollections.observableArrayList(); // The final list of data containing all available volumes for the series from the website with the lowest price
+	private static ArrayList<String[]> PriceComparison(ArrayList<String[]> biggerList, ArrayList<String[]> smallerList, String bookTitle){
+		ArrayList<String[]> finalData = new ArrayList<>(); // The final list of data containing all available volumes for the series from the website with the lowest price
 		boolean sameVolumeCheck;                            // Determines whether a match has been found where the 2 volumes are the same to compare prices for
 		int pos = 0;                                       // The position of the next volume and then proceeding volumes to check if there is a volume to compare
 		int getListOneVolNum;                              // The current vol number from the website with the bigger list of volumes that is being checked
@@ -191,7 +190,8 @@ public class MasterAnalysis {
 	 *      throws | InterruptedException | Thrown when a thread is interrupted
 	 *      throws | FileNotFoundException | Thrown when a file trying to be opened doesn't exist
 	 */
-	public static ObservableList<PriceComparisonDataModel> ComparePricing(String bookTitle, char bookType, ObservableList<String> websiteList) throws InterruptedException, FileNotFoundException {
+	public static ArrayList<PriceComparisonDataModel> ComparePricing(String bookTitle, char bookType, ObservableList<String> websiteList) throws InterruptedException, FileNotFoundException {
+		COMPARED_DATA.clear();
 		System.setProperty("webdriver.edge.driver", "resources/DriverExecutables/msedgedriver.exe");
 		final double startTime = System.currentTimeMillis();
 
@@ -209,6 +209,7 @@ public class MasterAnalysis {
 		for (Thread webThread : WEBSITE_THREADS){
 			webThread.join();
 		}
+		WEBSITE_THREADS.clear();
 
 		DATALIST_PIPELINE.removeIf(List::isEmpty);
 		DATALIST_PIPELINE.sort(Comparator.comparing(List::size)); // Sort the list of data sets from the websites by size
@@ -236,8 +237,7 @@ public class MasterAnalysis {
 			pos = 0;
 		}
 
-
-		if (numListsOfData % 2 != 0) { // If the number of websites the user wants data from is odd do 1 more comparison
+		if (numListsOfData % 2 != 0 && numListsOfData > 1) { // If the number of websites the user wants data from is odd do 1 more comparison
 			DATALIST_PIPELINE.set(0, PriceComparison(DATALIST_PIPELINE.get(numListsOfData - 1), DATALIST_PIPELINE.get(0), bookTitle));
 		}
 
@@ -245,16 +245,19 @@ public class MasterAnalysis {
 		System.out.println("Time in Seconds: " + ((endTime - startTime) / (double) 1000));
 
 		PrintWriter masterDataFile = new PrintWriter("src/TsundOkuApp/PriceAnalysis/Data/MasterData.txt");
-		for (String[] data : DATALIST_PIPELINE.get(0)){
-			masterDataFile.println(Arrays.toString(data));
+		if (!DATALIST_PIPELINE.get(0).isEmpty()){
+			for (String[] data : DATALIST_PIPELINE.get(0)){
+				masterDataFile.println(Arrays.toString(data));
+				COMPARED_DATA.add(new PriceComparisonDataModel(new SimpleStringProperty(data[0]), new SimpleStringProperty(data[1]), new SimpleStringProperty(data[2]), new SimpleStringProperty(data[3])));
+				System.out.println(Arrays.toString(data));
+			}
+			masterDataFile.flush();
+			masterDataFile.close();
 		}
-		masterDataFile.flush();
-		masterDataFile.close();
 
-		for (String[] dataSet : DATALIST_PIPELINE.get(0)){
-			COMPARED_DATA.add(new PriceComparisonDataModel(new SimpleStringProperty(dataSet[0]), new SimpleStringProperty(dataSet[1]), new SimpleStringProperty(dataSet[2]), new SimpleStringProperty(dataSet[3])));
+		for (int x = 0; x < DATALIST_PIPELINE.size(); x++){
+			DATALIST_PIPELINE.get(x).clear();
 		}
-		DATALIST_PIPELINE.clear();
 
 		return COMPARED_DATA;
 	}

@@ -93,6 +93,7 @@ public class TsundOkuGUI{
 	private static final double WINDOW_WIDTH = Screen.getPrimary().getBounds().getWidth();
 	private static final ObservableList<String> LANGUAGE_OPTIONS = FXCollections.observableArrayList("Romaji", "English", "Native");
 	private static ObservableList<PriceComparisonDataModel> priceComparisonData = FXCollections.observableArrayList(new PriceComparisonDataModel(new SimpleStringProperty("Overlord : The Undead King Oh! Vol 1"), new SimpleStringProperty("$9.99"), new SimpleStringProperty("In Stock"), new SimpleStringProperty("RobertsAnimeCornerStore")));
+	private static ArrayList<PriceComparisonDataModel> test = new ArrayList<>();
 
 	// Users Main Data
 	private int totalVolumesCollected = 0, maxVolumesInCollection = 0;
@@ -388,7 +389,6 @@ public class TsundOkuGUI{
 			} else {
 				SELECTED_WEBSITES.remove("RS");
 			}
-			System.out.println(SELECTED_WEBSITES);
 		});
 
 
@@ -401,7 +401,6 @@ public class TsundOkuGUI{
 			} else {
 				SELECTED_WEBSITES.remove("R");
 			}
-			System.out.println(SELECTED_WEBSITES);
 		});
 
 		ToggleButton inStockTradesButton = new ToggleButton("IST");
@@ -413,7 +412,6 @@ public class TsundOkuGUI{
 			} else {
 				SELECTED_WEBSITES.remove("IST");
 			}
-			System.out.println(SELECTED_WEBSITES);
 		});
 
 		Label websiteLabel = new Label("Select Websites");
@@ -468,15 +466,16 @@ public class TsundOkuGUI{
 		runButton.setId("MenuButton");
 		runButton.disableProperty().bind(titleEnter.textProperty().isEmpty().or(bookTypeButtonGroup.selectedToggleProperty().isNull()).or(Bindings.isEmpty(SELECTED_WEBSITES)));
 		runButton.setOnMouseClicked(event -> {
-			runButton.setDisable(true);
 			try {
-				priceComparisonData = ComparePricing(titleEnter.getText().trim(), bookType.get(), SELECTED_WEBSITES);
-				table.setItems(priceComparisonData);
-				table.autosize();
+				test.clear();
+				table.getItems().clear();
+				test = ComparePricing(titleEnter.getText().trim(), bookType.get(), SELECTED_WEBSITES);
+				table.setItems(FXCollections.observableArrayList(test));
+				titleEnter.clear();
+				//table.autosize();
 			} catch (InterruptedException | FileNotFoundException e) {
 				e.printStackTrace();
 			}
-			runButton.setDisable(false);
 		});
 
 		VBox priceComparisonPane = new VBox(inputTitleRoot, bookTypeRoot, websiteRoot, table, runButton);
@@ -881,6 +880,10 @@ public class TsundOkuGUI{
 					filteredUserCollection = FXCollections.observableArrayList(userCollection);
 					CollectionSetup(primaryStage);
 					UpdateCollectionNumbers();
+					titleEnter.clear();
+					publisherEnter.clear();
+					maxVolumes.clear();
+					curVolumes.clear();
 				}
 			}
 		});

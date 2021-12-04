@@ -4,8 +4,6 @@
 
 package TsundOkuApp.PriceAnalysis;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -28,8 +26,8 @@ import java.util.Comparator;
 import java.util.Arrays;
 
 public class RightStufAnime {
-	private static final ArrayList<String> rightStufLinks = new ArrayList<>();
-	private static final ObservableList<String[]> dataList = FXCollections.observableArrayList();
+	private static final ArrayList<String> RIGHT_STUF_ANIME_LINK = new ArrayList<>();
+	private static final ArrayList<String[]> DATA_LIST = new ArrayList<>();
 
 	private static String filterBookTitle(String bookTitle){
 		return bookTitle.replaceAll(" ", "%20").replaceAll("&", "%26");
@@ -47,7 +45,7 @@ public class RightStufAnime {
 
 	private static String getUrl(String bookTitle, char bookType, int currPageNum){
 		String url = "https://www.rightstufanime.com/category/" + checkBookType(bookType) + "?page=" + currPageNum + "&show=96&keywords=" + filterBookTitle(bookTitle);
-		rightStufLinks.add(url);
+		RIGHT_STUF_ANIME_LINK.add(url);
 		return url;
 	}
 
@@ -60,7 +58,7 @@ public class RightStufAnime {
 	 * @param currPageNum [byte], the current page number that is being traversed for data
 	 * @return [List<String[]>], the list of all the data pulled from the website
 	 */
-	public static ObservableList<String[]> GetRightStufAnimeData(String bookTitle, char bookType, boolean memberStatus, byte currPageNum) throws FileNotFoundException {
+	public static ArrayList<String[]> GetRightStufAnimeData(String bookTitle, char bookType, boolean memberStatus, byte currPageNum) throws FileNotFoundException {
 		EdgeOptions edgeOptions = new EdgeOptions();
 		edgeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
 		edgeOptions.addArguments("headless");
@@ -108,7 +106,7 @@ public class RightStufAnime {
 				else {
 					stockStatus = "Out of Print";
 				}
-				dataList.add(new String[]{currTitle.replaceAll("Volume", "Vol").replaceAll(" Manga| Edition", ""), priceTxt.trim(), stockStatus, "RightStufAnime"});
+				DATA_LIST.add(new String[]{currTitle.replaceAll("Volume", "Vol").replaceAll(" Manga| Edition", ""), priceTxt.trim(), stockStatus, "RightStufAnime"});
 
 			}
 		}
@@ -119,7 +117,7 @@ public class RightStufAnime {
 		} else {
 			driver.quit();
 
-			dataList.sort(new Comparator<String[]>() {
+			DATA_LIST.sort(new Comparator<String[]>() {
 				public int compare(String[] o1, String[] o2) {
 					if (o1[0].replaceAll("\\d+", "").equalsIgnoreCase(o2[0].replaceAll("\\d+", ""))) {
 						return extractInt(o1[0]) - extractInt(o2[0]);
@@ -133,8 +131,8 @@ public class RightStufAnime {
 			});
 
 			PrintWriter rightStufDataFile = new PrintWriter("src/TsundOkuApp/PriceAnalysis/Data/RightStufAnimeData.txt");
-			if (!dataList.isEmpty()){
-				for (String[] volumeData : dataList){
+			if (!DATA_LIST.isEmpty()){
+				for (String[] volumeData : DATA_LIST){
 					rightStufDataFile.println(Arrays.toString(volumeData));
 				}
 			}
@@ -145,11 +143,13 @@ public class RightStufAnime {
 			rightStufDataFile.flush();
 			rightStufDataFile.close();
 
-			for (String link : rightStufLinks) {
+			for (String link : RIGHT_STUF_ANIME_LINK) {
 				System.out.println(link);
 			}
+			RIGHT_STUF_ANIME_LINK.clear();
 		}
-		return dataList;
+
+		return DATA_LIST;
 	}
 
 //	public static void main(String[] args) throws FileNotFoundException {

@@ -1,7 +1,5 @@
 package TsundOkuApp.PriceAnalysis;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -21,14 +19,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class InStockTrades {
-	public static ArrayList<String> inStockTradeLinks = new ArrayList<>();
-	private static final ObservableList<String[]> dataList = FXCollections.observableArrayList();
+	public static final ArrayList<String> IN_STOCK_TRADES_LINK = new ArrayList<>(1);
+	private static final ArrayList<String[]> DATA_LIST = new ArrayList<>();
 
 	//https://www.instocktrades.com/search?term=world+trigger
 	//https://www.instocktrades.com/search?pg=1&title=World+Trigger&publisher=&writer=&artist=&cover=&ps=true
 	private static String GetUrl(byte currPageNum, String bookTitle, char bookType){
 		String url = "https://www.instocktrades.com/search?pg=" + currPageNum +"&title=" + (bookType == 'N' ? bookTitle.replace(' ', '+') + "+Novel" : bookTitle.replace(' ', '+')) + "&publisher=&writer=&artist=&cover=&ps=true";
-		inStockTradeLinks.add(url);
+		IN_STOCK_TRADES_LINK.add(url);
 		return url;
 	}
 
@@ -39,7 +37,7 @@ public class InStockTrades {
 	 * @return
 	 * @throws FileNotFoundException
 	 */
-	public static ObservableList<String[]> GetInStockTradesData(String bookTitle, char bookType, byte currPageNum) throws FileNotFoundException {
+	public static ArrayList<String[]> GetInStockTradesData(String bookTitle, char bookType, byte currPageNum) throws FileNotFoundException {
 		EdgeOptions edgeOptions = new EdgeOptions();
 		edgeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
 		edgeOptions.addArguments("headless");
@@ -71,7 +69,7 @@ public class InStockTrades {
 		}
 
 		for (int x = 0; x < titleData.size(); x++){
-			dataList.add(new String[]{titleData.get(x).text().replaceAll(" GN| Manga| TP|\\(.*?\\)", "").replace("3In1", "Omnibus").replaceFirst("0.*?(\\d+).*", "$1").trim(), priceData.get(x).text().trim(), "In Stock", "InStockTrades"});
+			DATA_LIST.add(new String[]{titleData.get(x).text().replaceAll(" GN| Manga| TP|\\(.*?\\)", "").replace("3In1", "Omnibus").replaceFirst("0.*?(\\d+).*", "$1").trim(), priceData.get(x).text().trim(), "In Stock", "InStockTrades"});
 		}
 
 		if (pageCheck != null) {
@@ -80,12 +78,13 @@ public class InStockTrades {
 		}
 		else{
 			driver.quit();
-			for (String link : inStockTradeLinks){
+			for (String link : IN_STOCK_TRADES_LINK){
 				System.out.println(link);
 			}
+			IN_STOCK_TRADES_LINK.clear();
 		}
 
-		dataList.sort(new Comparator<String[]>() {
+		DATA_LIST.sort(new Comparator<String[]>() {
 			public int compare(String[] o1, String[] o2) {
 				if (o1[0].replaceAll("\\d+", "").equalsIgnoreCase(o2[0].replaceAll("\\d+", ""))) {
 					return extractInt(o1[0]) - extractInt(o2[0]);
@@ -99,9 +98,9 @@ public class InStockTrades {
 		});
 
 		PrintWriter inStockTradesDataFile = new PrintWriter("src/TsundOkuApp/PriceAnalysis/Data/InStockTradesData.txt");
-		if (!dataList.isEmpty())
+		if (!DATA_LIST.isEmpty())
 		{
-			for (String[] data : dataList){
+			for (String[] data : DATA_LIST){
 				inStockTradesDataFile.println(Arrays.toString(data));
 			}
 		}
@@ -111,7 +110,8 @@ public class InStockTrades {
 		}
 		inStockTradesDataFile.flush();
 		inStockTradesDataFile.close();
-		return dataList;
+
+		return DATA_LIST;
 	}
 
 //	public static void main (String[] args) throws FileNotFoundException {

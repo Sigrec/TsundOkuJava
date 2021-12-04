@@ -22,7 +22,7 @@ import java.util.List;
 // Can only do manga prob
 public class BookDepository {
 	public static ArrayList<String> bookDepositoryLinks = new ArrayList<>();
-	private static final ObservableList<String[]> dataList = FXCollections.observableArrayList();
+	private static final ArrayList<String[]> DATA_LIST = new ArrayList<>();
 
 	//https://www.bookdepository.com/search/?searchTerm=World+Trigger&searchLang=123&ageRangesTotal=0&category=2633&searchSortBy=pubdate_low_high&page=1
 	//https://www.bookdepository.com/search?searchTerm=Overlord+Light+Novel&searchLang=123&ageRangesTotal=0&searchSortBy=pubdate_low_high&page=1
@@ -32,7 +32,7 @@ public class BookDepository {
 		return url;
 	}
 
-	public static ObservableList<String[]> GetBookDepositoryData(String bookTitle, char bookType, byte currPageNum) throws FileNotFoundException {
+	public static ArrayList<String[]> GetBookDepositoryData(String bookTitle, char bookType, byte currPageNum) throws FileNotFoundException {
 		EdgeOptions edgeOptions = new EdgeOptions();
 		edgeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
 		edgeOptions.addArguments("headless");
@@ -73,7 +73,7 @@ public class BookDepository {
 			else if (stockStatus.contains("Pre-order")) {
 				stockStatus = "PO";
 			}
-			dataList.add(new String[]{curTitle.replaceAll("Volume", "Vol").replace(" Manga", ""), priceData.get(x).text().substring(3), "BookDepository"});
+			DATA_LIST.add(new String[]{curTitle.replaceAll("Volume", "Vol").replace(" Manga", ""), priceData.get(x).text().substring(3), "BookDepository"});
 		}
 
 		if (pageCheck != null) {
@@ -82,11 +82,11 @@ public class BookDepository {
 		} else {
 			driver.quit();
 			Comparator<String[]> test = Comparator.comparing(volData -> volData[0].substring(0, volData[0].indexOf("Vol")));
-			dataList.sort(test.thenComparing(volData -> Integer.parseInt(volData[0].substring(volData[0].indexOf("Vol")).replaceFirst(".*?(\\d+).*", "$1"))));
+			DATA_LIST.sort(test.thenComparing(volData -> Integer.parseInt(volData[0].substring(volData[0].indexOf("Vol")).replaceFirst(".*?(\\d+).*", "$1"))));
 
 			PrintWriter rightStufDataFile = new PrintWriter("src/TsundOkuApp/PriceAnalysis/Data/RightStufAnimeData.txt");
-			if (!dataList.isEmpty()){
-				for (String[] volumeData : dataList){
+			if (!DATA_LIST.isEmpty()){
+				for (String[] volumeData : DATA_LIST){
 					rightStufDataFile.println(Arrays.toString(volumeData));
 				}
 			}
@@ -101,7 +101,7 @@ public class BookDepository {
 				System.out.println(link);
 			}
 		}
-		return dataList;
+		return DATA_LIST;
 	}
 
 		public static void main (String[] args) throws FileNotFoundException {

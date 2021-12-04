@@ -4,8 +4,6 @@
 
 package TsundOkuApp.PriceAnalysis;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -24,9 +22,9 @@ import java.util.stream.Collectors;
 
 public class RobertsAnimeCornerStore {
 
-	private static final String[] links = new String[2];
-	private static final ObservableList<String[]> dataList = FXCollections.observableArrayList();
-	private static final HashMap<String, String> urlMapDict = new HashMap<>() {
+	private static final ArrayList<String> ROBERTS_ANIME_CORNER_STORE_LINK = new ArrayList<>(1);
+	private static final ArrayList<String[]> DATA_LIST = new ArrayList<>();
+	private static final HashMap<String, String> URL_MAP_DICT = new HashMap<>() {
 		{
 			put("mangrapnovag", "^[a-bA-B\\d]");
 			put("mangrapnovhp", "^[c-dC-D]");
@@ -43,18 +41,18 @@ public class RobertsAnimeCornerStore {
 	private static String getUrl(String curLink, boolean pageExists){
 		String url = "Empty";
 		if (!pageExists){ // Gets the starting page based on first letter
-			for (String urlMatch : urlMapDict.keySet()){
-				if (Pattern.compile(urlMapDict.get(urlMatch)).matcher(curLink).find()){
+			for (String urlMatch : URL_MAP_DICT.keySet()){
+				if (Pattern.compile(URL_MAP_DICT.get(urlMatch)).matcher(curLink).find()){
 					url = "https://www.animecornerstore.com/" + urlMatch + ".html";
-					links[0] = url;
+					//ROBERTS_ANIME_CORNER_STORE_LINK.add(0, url);
 					break;
 				}
 			}
-			links[0] = url;
+			//ROBERTS_ANIME_CORNER_STORE_LINK.add(0, url);
 		}
 		else{ //Gets the actual page that houses the data that will be scraped from
 			url = "https://www.animecornerstore.com/" + curLink;
-			links[1] = url;
+			ROBERTS_ANIME_CORNER_STORE_LINK.add(0, url);
 		}
 		return url;
 	}
@@ -76,7 +74,7 @@ public class RobertsAnimeCornerStore {
 		return seriesLink == null ? "DNE" : getUrl(seriesLink.attr("href"), true);
 	}
 
-	public static ObservableList<String[]> GetRobertsAnimeCornerStoreData(String bookTitle, char bookType) throws FileNotFoundException {
+	public static ArrayList<String[]> GetRobertsAnimeCornerStoreData(String bookTitle, char bookType) throws FileNotFoundException {
 		EdgeOptions edgeOptions = new EdgeOptions();
 		edgeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
 		edgeOptions.addArguments("headless");
@@ -130,11 +128,11 @@ public class RobertsAnimeCornerStore {
 					currTitle = currTitle.substring(0, currTitle.indexOf("Omnibus ") + "Omnibus ".length()) + "Vol " + currTitle.substring(currTitle.indexOf("Omnibus ") + "Omnibus ".length());
 				}
 
-				dataList.add(new String[]{currTitle, priceData.get(x).text().trim(), titleData.get(x).text().contains("Pre Order") ? "Pre-Order" : "In Stock", "RobertsAnimeCornerStore"});
+				DATA_LIST.add(new String[]{currTitle, priceData.get(x).text().trim(), titleData.get(x).text().contains("Pre Order") ? "Pre-Order" : "In Stock", "RobertsAnimeCornerStore"});
 			}
 			driver.quit();
 
-			dataList.sort(new Comparator<String[]>() {
+			DATA_LIST.sort(new Comparator<String[]>() {
 				public int compare(String[] o1, String[] o2) {
 					if (o1[0].replaceAll("\\d+", "").equalsIgnoreCase(o2[0].replaceAll("\\d+", ""))) {
 						return extractInt(o1[0]) - extractInt(o2[0]);
@@ -148,9 +146,9 @@ public class RobertsAnimeCornerStore {
 			});
 
 			PrintWriter robertsAnimeCornerStoreFile = new PrintWriter("src/TsundOkuApp/PriceAnalysis/Data/RobertsAnimeCornerStoreData.txt");
-			if (!dataList.isEmpty())
+			if (!DATA_LIST.isEmpty())
 			{
-				for (String[] volumeData : dataList){
+				for (String[] volumeData : DATA_LIST){
 					robertsAnimeCornerStoreFile.println(Arrays.toString(volumeData));
 				}
 			}
@@ -161,11 +159,13 @@ public class RobertsAnimeCornerStore {
 			robertsAnimeCornerStoreFile.flush();
 			robertsAnimeCornerStoreFile.close();
 
-			for (String link : links){
+			for (String link : ROBERTS_ANIME_CORNER_STORE_LINK){
 				System.out.println(link);
 			}
+			ROBERTS_ANIME_CORNER_STORE_LINK.clear();
 		}
-		return dataList;
+
+		return DATA_LIST;
 	}
 
 //	public static void main (String[] args) throws FileNotFoundException {
