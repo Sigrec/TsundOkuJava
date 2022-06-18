@@ -69,10 +69,10 @@ If you lose or delete the UserData.dat file u will lose your entire collection, 
 4. *Search in Windows "Edit the environment Variables" and run -> Click "Environment Variables" at the bottom right*
 
 
-5. *At the top left under "User variables for {your machine name}" click new and type in "JAVA_HOME" for the "Variable Name" and paste the path from step 3 that points to your jdk folder for "Variable Value" -> then hit "OK"*
+5. *At the top left under "User variables for {your machine name}" & "System Variables" click new and type in "JAVA_HOME" for the "Variable Name" and paste the path from step 3 that points to your jdk folder for "Variable Value" -> then hit "OK"*
 
 
-6. *Under the same section "User variables for {your machine name}" find the variable name "path", click on it then press "Edit..", then at the top right click "New" and enter into the field "%JAVA_HOME%\bin" -> then click "OK" on every window until it exits*
+6. *Under the same section "User variables for {your machine name}" & "System Variables" find the variable name "path", click on it then press "Edit..", then at the top right click "New" and enter into the field "%JAVA_HOME%\bin" -> then click "OK" on every window until it exits*
 
 
 7. *To ensure it works open your terminal or powershell and type "echo %JAVA_HOME%" to ensure it is grabbing the path correctly, it should print the path to the console window that copied from 3. Then type in "java -version" and it should print out the version, runtime environment, and Server VM on 3 seperate lines. If both of those worked then everything is set up correctly*
