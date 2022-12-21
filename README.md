@@ -1,3 +1,6 @@
+#DEPRECIATED NOT WORKING ON THIS ANYMORE
+# INSTEAD GO HERE [Tsundoku V2](https://github.com/Sigrec/TsundokuApp/blob/main/README.md)
+
 # [Tsundoku](https://en.wikipedia.org/wiki/Tsundoku) (Desktop Manga & Light Novel Collection App) [Follow Me on AL](https://anilist.co/user/Preminence/)
 ***
 >[**Download** Current Supported Version = V1.6.5](https://www.dropbox.com/sh/hxrirgtqa11lf5i/AAAMiOudi64grgileU0yDQiia?dl=0)
